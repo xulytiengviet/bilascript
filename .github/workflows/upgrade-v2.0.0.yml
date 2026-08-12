@@ -1,0 +1,122 @@
+name: Upgrade BilaScript v2.0.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - tools/upgrade_v2.py
+      - .github/workflows/upgrade-v2.0.0.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    name: Apply, build, test and commit BilaScript v2.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: Babylscript1_7R2_BRANCH
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install Apache Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Apply v2 engine, grammar and tooling
+        run: python tools/upgrade_v2.py
+
+      - name: Verify v2 source wiring
+        run: |
+          grep -F 'bila_strict' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'bila_js' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'c != '\''':'\''' src/org/mozilla/javascript/BabylTokenizer.java
+          grep -F 'createBilaStrictTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
+          grep -F 'createBilaJsTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
+          grep -F 'VERSION = "2.0.0"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          test -s spec/BilaScript-2.0.ebnf
+          test -s spec/bila-vocabulary-v2.json
+          test -s tools/bilac_v2.py
+
+      - name: Build legacy-compatible Java runtime
+        run: |
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+
+      - name: Test all three Bila profiles
+        run: |
+          java -jar build/babylscriptrun.jar examples/v2/hello.bila.js | tee build/v2-default.txt
+          grep -F 'Xin chaol BilaScript' build/v2-default.txt
+          grep -F 'Dof zail: 2' build/v2-default.txt
+
+          java -jar build/babylscriptrun.jar examples/v2/strict.bila.js | tee build/v2-strict.txt
+          grep -F '3' build/v2-strict.txt
+
+          java -jar build/babylscriptrun.jar examples/v2/js-compat.bila.js | tee build/v2-js.txt
+          grep -F '30' build/v2-js.txt
+
+      - name: Verify strict mode rejects English canonical keywords
+        run: |
+          cat > build/strict-invalid.bila.js <<'EOF'
+          ---bila:strict---
+          function bad() { return 1; }
+          EOF
+          if java -jar build/babylscriptrun.jar build/strict-invalid.bila.js; then
+            echo 'strict mode unexpectedly accepted English canonical keyword'
+            exit 1
+          fi
+
+      - name: Test Babyl2JS with v2 profile
+        run: |
+          java -jar build/babyl2js.jar examples/v2/strict.bila.js build/v2-strict.js
+          java -jar build/babyl2js.jar -html examples/v2/hello.bila.js build/v2-default.html
+          test -s build/v2-strict.js
+          test -s build/v2-default.html
+          grep -F 'bila:strict' build/v2-strict.js
+
+      - name: Test bilac v2 JavaScript bridge
+        run: |
+          python -m py_compile tools/bilac_v2.py
+          python tools/bilac_v2.py from-js examples/v2/source.js build/source.canonical.bila.js
+          grep -F -- '---bila---' build/source.canonical.bila.js
+          grep -F 'haml_sob max' build/source.canonical.bila.js
+          grep -F 'neub (a > b)' build/source.canonical.bila.js
+          grep -F 'bilb ds = moix Magz' build/source.canonical.bila.js
+          grep -F 'ds.dof_zail' build/source.canonical.bila.js
+          python tools/bilac_v2.py to-js build/source.canonical.bila.js build/source.roundtrip.js
+          node build/source.roundtrip.js | tee build/node-output.txt
+          grep -F '3 2' build/node-output.txt
+          python tools/bilac_v2.py check examples/v2/strict.bila.js --strict
+          if python tools/bilac_v2.py check build/strict-invalid.bila.js --strict; then
+            echo 'bilac strict checker unexpectedly accepted English keywords'
+            exit 1
+          fi
+
+      - name: Commit verified v2 implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md babylrunner src spec docs examples tools/bilac_v2.py
+          git status --short
+          git commit -m 'feat: BilaScript v2.0 JavaScript-compatible CVNSS4.0 grammar'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
