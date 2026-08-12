@@ -1,6 +1,6 @@
 # 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
 
-> **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng yêu thích CVNSS4.0.**
+> **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**
 
 ![Java](https://img.shields.io/badge/Java-Rhino%201.7R2-orange?logo=openjdk)
 ![ECMAScript](https://img.shields.io/badge/ECMAScript-Multilingual-blue)
@@ -12,20 +12,15 @@
 
 JavaScript truyền thống sử dụng các từ khóa tiếng Anh như `function`, `if`, `else`, `while`, `return`, `new`...
 
-**BilaScript đưa cơ chế đa ngôn ngữ của Babylscript sang CVNSS4.0**, cho phép lập trình viên viết các từ khóa và nhiều tên API JavaScript bằng bộ từ vựng CVNSS4.0 trong mã nguồn thực tế.
+**BilaScript đưa cơ chế JavaScript đa ngôn ngữ của Babylscript sang CVNSS4.0.** Thay vì chỉ dịch tài liệu hoặc thay chuỗi trước khi chạy, BilaScript nạp một bảng từ khóa/API CVNSS4.0 vào hệ thống tokenizer của Babylscript. Các token này sau đó được ánh xạ về token ECMAScript và được Rhino phân tích/thực thi.
 
-Mục tiêu của dự án là:
+Mục tiêu của dự án là cho phép lập trình viên thử nghiệm mã JavaScript không phải tiếng Anh trong các ứng dụng thực tế, qua đó đưa JavaScript đến gần hơn với cộng đồng quan tâm CVNSS4.0.
 
-- đưa JavaScript/ECMAScript đến gần hơn với nhóm người dùng yêu thích CVNSS4.0;
-- chứng minh một ngôn ngữ lập trình có thể giữ nguyên mô hình thực thi ECMAScript nhưng thay lớp từ khóa/ngôn ngữ bề mặt;
-- hỗ trợ học tập, thử nghiệm ngôn ngữ, nghiên cứu xử lý tiếng Việt và CVNSS4.0;
-- vẫn cho phép kết hợp mã JavaScript tiếng Anh với các khối mã CVNSS4.0.
-
-BilaScript **không tạo ra một ECMAScript chuẩn mới**. Phần cú pháp lõi và mô hình thực thi vẫn dựa trên JavaScript/Rhino; BilaScript thay đổi lớp nhận diện từ khóa và tên đối tượng thông qua kiến trúc đa ngôn ngữ của Babylscript.
+BilaScript **không tuyên bố tạo ra một tiêu chuẩn ECMAScript mới**. Semantics cốt lõi vẫn là JavaScript/Rhino; BilaScript thay lớp ngôn ngữ bề mặt — từ khóa, tên đối tượng, thuộc tính và phương thức.
 
 ---
 
-## 🧬 Dòng kế thừa
+## 🧬 Dòng kế thừa kỹ thuật
 
 ```text
 Mozilla Rhino 1.7R2
@@ -33,8 +28,10 @@ Mozilla Rhino 1.7R2
         ▼
    Babylscript
         │
-        │  cơ chế JavaScript đa ngôn ngữ
-        │  BabylTokenizer / BabylGenericTokenizer
+        │  JavaScript đa ngôn ngữ
+        │  BabylTokenizer
+        │  BabylGenericTokenizer
+        │  CustomTokenizer
         ▼
  BilaScript CVNSS4.0
         │
@@ -43,57 +40,58 @@ Mozilla Rhino 1.7R2
         ▼
  JavaScript / ECMAScript
         │
-        ├── chạy trực tiếp bằng Rhino Interpreter
-        └── dịch sang JavaScript bằng Babyl2JS
+        ├── Runner → Rhino Interpreter
+        └── Babyl2JS → JavaScript/HTML
 ```
 
-**Rhino → Babylscript → BilaScript** là quan hệ kế thừa kỹ thuật của dự án.
+**Rhino → Babylscript → BilaScript** là quan hệ kế thừa của dự án.
 
 ---
 
 ## ⚙️ CVNSS4.0 thực sự đi qua `BabylGenericTokenizer`
 
-BilaScript không chỉ thay chữ trong README.
-
-Luồng xử lý của bản CVNSS4.0:
+Luồng thực thi:
 
 ```text
-Tệp UTF-8
-   │
-   ▼
----cvss---
-   │
-   ▼
-BilaScript Runner
-   │
-   ├── nạp Cvnss40.keywordMap()
-   ├── nạp Cvnss40.objectMap()
-   └── ánh xạ ---cvss--- → kênh custom-language của Babylscript
-   │
-   ▼
-CustomTokenizer
-   │
-   └── extends BabylGenericTokenizer
-              │
-              ▼
-      keywordLookup / Token
-              │
-              ▼
-        Rhino Parser
-              │
-              ▼
-       Rhino Interpreter
+Tệp BilaScript UTF-8
+        │
+        ▼
+    ---cvss---
+        │
+        ▼
+   BilaScript Runner
+        │
+        ├── Cvnss40.keywordMap()
+        ├── Cvnss40.objectMap()
+        └── CVNSS4.0 → custom-language channel
+        │
+        ▼
+   CustomTokenizer
+        │
+        └── extends BabylGenericTokenizer
+                    │
+                    ▼
+             keywordLookup
+                    │
+                    ▼
+              ECMAScript Token
+                    │
+                    ▼
+               Rhino Parser
+                    │
+                    ▼
+            Rhino Interpreter
 ```
 
-Babylscript đã có sẵn `CustomTokenizer`, và lớp này **kế thừa trực tiếp `BabylGenericTokenizer`**. BilaScript tận dụng chính cơ chế đó để nạp bảng CVNSS4.0 thay vì viết một bộ phân tích JavaScript hoàn toàn mới.
+Babylscript vốn có `CustomTokenizer`, và lớp này kế thừa trực tiếp `BabylGenericTokenizer`. BilaScript tận dụng đúng cơ chế đó để tạo lớp CVNSS4.0; không viết một parser JavaScript khác và không dùng search/replace làm cơ chế thực thi chính.
 
-Ở giao diện mã nguồn, BilaScript dùng:
+### Chỉ thị ngôn ngữ công khai
 
 ```text
 ---cvss---
 ```
 
-và chấp nhận thêm các bí danh:
+Các bí danh cũng được chấp nhận:
 
 ```text
 ---cvnss---
@@ -101,13 +99,13 @@ và chấp nhận thêm các bí danh:
 ---cvnss4---
 ```
 
-Bên trong runner, các chỉ thị này được đưa về kênh custom-language `---test---` vốn có của Babylscript. Đây chỉ là chi tiết tương thích nội bộ; người viết BilaScript sử dụng `---cvss---`.
+Để tương thích tối đa với mã Babylscript gốc, Runner và Babyl2JS chuẩn hóa các chỉ thị trên vào custom-language channel nội bộ của Babylscript. Chi tiết này không thay đổi cú pháp người dùng: mã BilaScript nên dùng `---cvss---`.
 
 ---
 
 ## 🚀 Ví dụ BilaScript CVNSS4.0
 
-JavaScript thông thường:
+JavaScript:
 
 ```javascript
 function chao(ten) {
@@ -137,9 +135,17 @@ haml_sob chao(ten) {
 var danh_sach = moix Magz("BilaScript", "CVNSS4.0");
 ```
 
-Một số ánh xạ tiêu biểu:
+Tệp chạy mẫu có sẵn tại:
 
-| JavaScript | CVNSS4.0 trong bảng | Token dùng trong mã |
+```text
+babylrunner/sample.cvss.js
+```
+
+---
+
+## 🔤 Một số ánh xạ chính
+
+| JavaScript | Babylscript CVNSS4.0 Translation | Token BilaScript |
 |---|---|---|
 | `function` | `haml sob` | `haml_sob` |
 | `if` | `neub` | `neub` |
@@ -160,46 +166,48 @@ Một số ánh xạ tiêu biểu:
 | `Object` | `Suh_vatf` | `Suh_vatf` |
 | `Date` | `Wayl` | `Wayl` |
 | `Math` | `mony Tolj` | `mony_Tolj` |
+| `alert` | `baoj dogf` | `baoj_dogf` |
 
-### Vì sao cụm nhiều từ dùng `_`?
+### Vì sao dùng `_`?
 
-Tokenizer của JavaScript cần đọc một từ khóa như **một identifier/token duy nhất**. Vì vậy BilaScript giữ nguyên nội dung của bảng dịch nhưng chuẩn hóa khoảng trắng:
+Bảng translation chứa nhiều cụm có khoảng trắng. JavaScript tokenizer phải đọc từ khóa/tên API như một identifier duy nhất, vì vậy BilaScript chỉ chuẩn hóa khoảng trắng thành `_`:
 
 ```text
-haml sob      → haml_sob
-trov ved      → trov_ved
-trogp ki      → trogp_ki
-voy jaj trir  → voy_jaj_trir
+haml sob       → haml_sob
+trov ved       → trov_ved
+trogp ki       → trogp_ki
+voy jaj trir   → voy_jaj_trir
+mony Tolj      → mony_Tolj
 ```
 
-Đây là chuẩn hóa cú pháp để chạy được, không phải thay đổi quy tắc CVNSS4.0.
+Đây là quy ước cú pháp để parser đọc được một token; dữ liệu gốc vẫn được giữ để audit.
 
 ---
 
-## 📚 Nguồn bảng dịch CVNSS4.0
+## 📚 Babylscript CVNSS4.0 Translation
 
-Bảng lõi được tạo từ **Babylscript CVNSS4.0 Translation**, gồm:
+Nguồn ánh xạ của BilaScript được xây từ bảng **Babylscript CVNSS4.0 Translation** của dự án, gồm:
 
 - 61 từ khóa/từ dành riêng;
-- tên đối tượng JavaScript;
-- tên phương thức và thuộc tính chuẩn;
+- các đối tượng JavaScript chuẩn;
+- thuộc tính và phương thức;
 - ghi chú ngữ nghĩa đi kèm bảng dịch.
 
-Mã Java tương ứng nằm tại:
+Mã nguồn bảng chạy:
 
 ```text
 src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
 ```
 
-Tài liệu đối chiếu đầy đủ:
+Bảng đối chiếu đầy đủ:
 
 ```text
 docs/CVNSS40_TRANSLATION.md
 ```
 
-### Chính sách va chạm từ khóa
+### Chính sách va chạm parser
 
-Bảng nguồn có hai nhóm alias trùng:
+Bảng nguồn có hai alias trùng:
 
 ```text
 throw   → nemj
@@ -209,29 +217,24 @@ finally → cujb cugl
 final   → cujb cugl
 ```
 
-Nếu nạp nguyên trạng vào `keywordLookup`, alias xuất hiện sau có thể ghi đè alias trước.
-
-BilaScript áp dụng chính sách parser-safe:
+Nạp nguyên trạng vào một `Map<String, token>` có thể khiến alias sau ghi đè alias trước. BilaScript giữ `RAW_KEYWORDS` nguyên bản để truy nguyên, nhưng bảng chạy áp dụng:
 
 ```text
 throw   → nemj
 throws  → throws
-
 finally → cujb_cugl
 final   → final
 ```
 
-`throws` và `final` là từ dành riêng trong codebase Rhino/Babylscript này, còn `throw` và `finally` là từ khóa thực thi; vì vậy ưu tiên này giữ cho chương trình ECMAScript hoạt động đúng.
-
-Bảng gốc vẫn được giữ trong `RAW_KEYWORDS` để có thể kiểm tra và truy nguyên.
+Mục đích là ưu tiên các từ khóa ECMAScript đang thực thi (`throw`, `finally`) trong khi vẫn không làm mất dữ liệu translation gốc.
 
 ---
 
-## 🧪 Đối chiếu với CVNSS4.0 Converter Audit-Safe
+## 🧪 CVNSS4.0 Converter Audit-Safe
 
-BilaScript sử dụng bảng translation của Babylscript làm nguồn từ khóa. Bộ **CVNSS4.0 Converter 5.0.0 Audit-Safe** được dùng như lớp tham chiếu để kiểm tra cách biểu diễn CVNSS4.0.
+BilaScript sử dụng **Babylscript CVNSS4.0 Translation** làm nguồn từ khóa/API. Bộ **CVNSS4.0 Converter 5.0.0 Audit-Safe** được dùng như lớp tham chiếu để kiểm tra cách biểu diễn chữ CVNSS4.0.
 
-Ví dụ:
+Ví dụ đã đối chiếu:
 
 ```text
 hàm số   → haml sob
@@ -240,35 +243,44 @@ khác     → kac
 trở về   → trov ved
 mới      → moix
 mảng     → magz
+Xin chào → Xin chaol
 ```
 
-Converter 5.0 cũng công khai cơ chế audit cho các ánh xạ nhiều-một, giữ tập ứng viên đảo và áp dụng chính sách canonical xác định thay vì âm thầm ghi đè kết quả.
+Converter và tokenizer có vai trò khác nhau:
 
-> Lưu ý: converter và tokenizer giải quyết hai bài toán khác nhau. Converter chuyển đổi văn bản CQN ↔ CVNSS4.0; tokenizer BilaScript nhận các token CVNSS4.0 đã định nghĩa và biến chúng thành token ECMAScript.
+```text
+CQN/Vietnamese ── converter ──► CVNSS4.0 text
+                                  │
+                                  ▼
+                         BilaScript tokenizer
+                                  │
+                                  ▼
+                           ECMAScript token
+```
 
 ---
 
-## ▶️ Biên dịch và chạy
+## ▶️ Build và chạy trực tiếp
 
 ### Yêu cầu
 
-- Java/JDK tương thích với codebase Rhino 1.7R2;
+- Java/JDK phù hợp với codebase Rhino 1.7R2;
 - Apache Ant;
-- mã nguồn UTF-8.
+- tệp nguồn UTF-8.
 
-### Biên dịch runner
+### Biên dịch Runner
 
 ```bash
 ant babylscriptrun
 ```
 
-### Chạy ví dụ CVNSS4.0
+### Chạy ví dụ
 
 ```bash
 java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
 ```
 
-Runner hỗ trợ nhiều tệp:
+Runner hỗ trợ nhiều tệp theo thứ tự:
 
 ```bash
 java -jar build/babylscriptrun.jar thu_vien.js chuong_trinh.cvss.js
@@ -276,21 +288,46 @@ java -jar build/babylscriptrun.jar thu_vien.js chuong_trinh.cvss.js
 
 ---
 
-## 🔄 Babylscript → JavaScript
+## 🔄 Biên dịch BilaScript CVNSS4.0 → JavaScript
 
-Codebase gốc còn có công cụ Babyl2JS:
+BilaScript đã nối CVNSS4.0 vào công cụ **Babyl2JS** của Babylscript.
+
+Biên dịch compiler:
 
 ```bash
 ant babyl2js
 ```
 
-Ví dụ:
+Dịch tệp CVNSS4.0 sang JavaScript:
 
 ```bash
-java -jar build/babyl2js.jar -html babylrunner/sample.babyl2js.js output.html
+java -jar build/babyl2js.jar babylrunner/sample.cvss.js output.js
 ```
 
-Mục tiêu tiếp theo của BilaScript là bảo đảm toàn bộ đường dịch Babyl2JS nhận trực tiếp alias công khai `---cvss---` giống runner.
+Xuất trực tiếp thành HTML:
+
+```bash
+java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js output.html
+```
+
+Babyl2JS thực hiện ba việc trước khi gọi `compileStringToJS`:
+
+```text
+1. đăng ký Cvnss40.keywordMap()
+2. đăng ký Cvnss40.objectMap() vào TranslatedNameBindings
+3. chuẩn hóa ---cvss--- vào custom-language channel
+```
+
+Sau đó `ParserToJS` tiếp tục tạo JavaScript theo cơ chế Babylscript. Khi có runtime header, các tên toàn cục được phát sinh dưới dạng lookup theo ngôn ngữ, vì vậy các alias như `Magz → Array`, `Wayl → Date`, `mony_Tolj → Math` có thể được đăng ký vào cùng hệ thống translation.
+
+Tùy chọn:
+
+```text
+-html       bọc JavaScript đầu ra trong HTML
+-noheaders  không chèn Babylscript runtime header
+```
+
+Với `-noheaders`, ứng dụng phải tự cung cấp Babylscript runtime tương ứng như hành vi vốn có của trình dịch gốc.
 
 ---
 
@@ -299,69 +336,63 @@ Mục tiêu tiếp theo của BilaScript là bảo đảm toàn bộ đường d
 | Thành phần | Vai trò |
 |---|---|
 | `src/org/mozilla/javascript/BabylTokenizer.java` | lexer/tokenizer nền của Babylscript |
-| `src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java` | ánh xạ từ khóa ngôn ngữ → token ECMAScript |
+| `src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java` | ánh xạ từ khóa theo ngôn ngữ → token ECMAScript |
 | `src/org/mozilla/javascript/babylscript/CustomTokenizer.java` | tokenizer custom kế thừa `BabylGenericTokenizer` |
 | `src/org/mozilla/javascript/babylscript/CustomTokenizerConfig.java` | cấu hình bảng từ khóa custom |
 | `src/org/mozilla/javascript/babylscript/gen/Cvnss40.java` | bảng CVNSS4.0 của BilaScript |
-| `babylrunner/Runner.java` | nạp CVNSS4.0 và chạy mã |
-| `babylrunner/sample.cvss.js` | ví dụ BilaScript CVNSS4.0 |
+| `babylrunner/Runner.java` | chạy BilaScript CVNSS4.0 bằng Rhino Interpreter |
+| `babylrunner/Babyl2JS.java` | biên dịch BilaScript CVNSS4.0 sang JavaScript/HTML |
+| `babylrunner/sample.cvss.js` | ví dụ mã BilaScript |
 | `docs/CVNSS40_TRANSLATION.md` | bảng đối chiếu và chính sách parser-safe |
 
 ---
 
-## ⚠️ Giới hạn của nền Rhino/Babylscript
+## ⚠️ Giới hạn kỹ thuật kế thừa
 
-BilaScript kế thừa codebase lịch sử của Babylscript/Rhino 1.7R2.
-
-Các thay đổi đa ngôn ngữ tập trung vào interpreter. Vì vậy khi chạy BilaScript phải tắt optimizer:
+BilaScript dựa trên codebase lịch sử Rhino 1.7R2/Babylscript. Các thay đổi Babylscript tập trung vào interpreter; optimizer/bytecode compiler không tương thích đầy đủ, vì vậy Runner dùng:
 
 ```java
 Context cx = Context.enter();
 cx.setOptimizationLevel(-1);
 ```
 
-Một số tính năng không thuần ECMAScript hoặc các phần cũ như E4X, destructuring và một số đường optimizer/bytecode compiler có thể không tương thích đầy đủ với cơ chế Babylscript.
+Một số phần cũ hoặc không thuần ECMAScript như E4X, destructuring và các đường tối ưu hóa có thể không hoạt động đầy đủ với lớp đa ngôn ngữ.
 
-BilaScript nên được xem là:
-
-> **một nền tảng JavaScript/ECMAScript đa ngôn ngữ phục vụ thử nghiệm CVNSS4.0, giáo dục và nghiên cứu**, không phải một engine thay thế cho JavaScript hiện đại.
+BilaScript nên được xem là **nền tảng JavaScript/ECMAScript đa ngôn ngữ phục vụ CVNSS4.0, giáo dục, thử nghiệm và nghiên cứu**, không phải một engine thay thế V8 hay JavaScript hiện đại.
 
 ---
 
 ## 🔐 Nguyên tắc thiết kế
 
-1. **Giữ nguyên lõi ECMAScript** — không tự sáng tạo semantics mới nếu không cần thiết.
-2. **CVNSS4.0 là lớp ngôn ngữ bề mặt** — keyword/API alias được ánh xạ về token và đối tượng JavaScript.
-3. **Có thể kiểm tra** — bảng gốc và bảng parser-safe được tách rõ.
-4. **Không âm thầm xử lý va chạm** — các alias trùng phải có chính sách rõ ràng.
+1. **Giữ semantics ECMAScript** — chỉ thay lớp ngôn ngữ bề mặt khi có thể.
+2. **Dùng tokenizer thật** — CVNSS4.0 đi qua `BabylGenericTokenizer`, không chỉ search/replace.
+3. **Có thể truy nguyên** — giữ dữ liệu gốc và tách chính sách parser-safe.
+4. **Không che giấu va chạm** — collision phải được ghi rõ.
 5. **UTF-8 xuyên suốt**.
-6. **Tương thích Babylscript** — tận dụng kiến trúc gốc thay vì viết lại parser từ đầu.
-7. **Có thể trộn ngôn ngữ** — mã CVNSS4.0 và mã JavaScript tiếng Anh có thể cùng tồn tại theo language block.
+6. **Ít xâm lấn mã Rhino/Babylscript** — ưu tiên extension point có sẵn.
+7. **Runner và compiler dùng cùng bảng translation**.
+8. **Có thể trộn language block** — giữ khả năng đa ngôn ngữ vốn có của Babylscript.
 
 ---
 
-## 📜 Giấy phép và nguồn gốc
+## 📜 Giấy phép và ghi nhận
 
-BilaScript phát triển trên mã nguồn Babylscript, mà Babylscript được xây dựng bằng cách sửa đổi Mozilla Rhino 1.7R2.
+BilaScript phát triển trên Babylscript; Babylscript là một sửa đổi của Mozilla Rhino 1.7R2. Các tệp kế thừa tiếp tục tuân theo license header và `LICENSE.txt` của mã nguồn gốc, chủ yếu theo mô hình MPL 1.1 / GPL 2.0 trong repository này.
 
-Các tệp Rhino/Babylscript tiếp tục tuân theo thông báo giấy phép đi kèm mã nguồn gốc, chủ yếu theo mô hình **MPL 1.1 / GPL 2.0** trong repository này.
+Không xóa thông báo bản quyền hoặc giấy phép của Rhino/Babylscript.
 
-Không xóa các license header và thông báo bản quyền của mã nguồn kế thừa.
-
-### Ghi nhận
+### Nguồn gốc
 
 - **Mozilla Rhino** — JavaScript engine viết bằng Java;
-- **Babylscript** — lớp JavaScript đa ngôn ngữ trên Rhino;
-- **CVNSS4.0 Translation** — bảng ngôn ngữ dùng để tạo lớp từ khóa BilaScript;
-- **BilaScript** — biến thể hướng CVNSS4.0 và cộng đồng yêu thích CVNSS4.0.
+- **Babylscript** — JavaScript đa ngôn ngữ trên Rhino;
+- **Babylscript CVNSS4.0 Translation** — bảng ngôn ngữ dùng cho lớp CVNSS4.0;
+- **BilaScript** — biến thể JavaScript/ECMAScript hướng tới cộng đồng CVNSS4.0.
 
 ---
 
 ## 💙 Triết lý BilaScript
 
-> **JavaScript vẫn là JavaScript. Người dùng chỉ cần được phép tiếp cận nó bằng một lớp ngôn ngữ quen thuộc hơn.**
-
-BilaScript không cố tách cộng đồng CVNSS4.0 khỏi hệ sinh thái JavaScript. Mục tiêu là tạo một cây cầu:
+> **JavaScript vẫn là JavaScript; BilaScript mở thêm một cách viết JavaScript bằng CVNSS4.0.**
 
 ```text
 CVNSS4.0
@@ -375,4 +406,4 @@ ECMAScript / JavaScript
 Mozilla Rhino
 ```
 
-Bằng cách cho phép lập trình viên sử dụng mã JavaScript không phải tiếng Anh trong các ứng dụng thực tế, BilaScript hướng đến việc đưa JavaScript đến với nhiều người dùng hơn — đặc biệt là cộng đồng nghiên cứu, học tập và yêu thích CVNSS4.0.
+Bằng cách cho phép lập trình viên sử dụng mã JavaScript không phải tiếng Anh trong các ứng dụng thực tế, BilaScript hướng đến việc đưa JavaScript đến với nhiều người dùng hơn — đặc biệt là nhóm học tập, nghiên cứu và yêu thích CVNSS4.0.
