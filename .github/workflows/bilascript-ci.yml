@@ -1,4 +1,4 @@
-name: BilaScript CVNSS4.0 CI
+name: BilaScript v1.2.0 Native CI
 
 on:
   push:
@@ -40,33 +40,42 @@ jobs:
       - name: Build BilaScript runner
         run: ant babylscriptrun
 
-      - name: Run CVNSS4.0 smoke test
+      - name: Run native ---bila--- smoke test
         run: |
-          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/runner-output.txt
+          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/runner-output.txt
           grep -F "Xin chaol BilaScript" build/runner-output.txt
           grep -F "Xin chaol CVNSS4.0" build/runner-output.txt
+          grep -F "Dof zail: 3" build/runner-output.txt
+
+      - name: Verify legacy ---cvss--- compatibility
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/legacy-output.txt
+          grep -F "Xin chaol BilaScript" build/legacy-output.txt
+          grep -F "Xin chaol CVNSS4.0" build/legacy-output.txt
 
       - name: Build Babyl2JS compiler
         run: ant babyl2js
 
-      - name: Translate CVNSS4.0 to JavaScript and HTML
+      - name: Translate native BilaScript to JavaScript and HTML
         run: |
-          java -jar build/babyl2js.jar babylrunner/sample.cvss.js build/sample.cvss.compiled.js
-          java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js build/sample.cvss.html
-          test -s build/sample.cvss.compiled.js
-          test -s build/sample.cvss.html
-          grep -F "function" build/sample.cvss.compiled.js
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/sample.bila.compiled.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/sample.bila.html
+          test -s build/sample.bila.compiled.js
+          test -s build/sample.bila.html
+          grep -F "'bila'" build/sample.bila.compiled.js
+          grep -F "dof_zail" build/sample.bila.compiled.js
 
       - name: Upload Linux build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: bilascript-linux-jdk8
+          name: bilascript-v1.2.0-linux-jdk8
           path: |
             build/babylscriptrun.jar
             build/babyl2js.jar
             build/runner-output.txt
-            build/sample.cvss.compiled.js
-            build/sample.cvss.html
+            build/legacy-output.txt
+            build/sample.bila.compiled.js
+            build/sample.bila.html
 
   windows-jdk8:
     name: Windows / JDK 8 / Ant
@@ -96,35 +105,47 @@ jobs:
         shell: powershell
         run: ant babylscriptrun
 
-      - name: Run CVNSS4.0 smoke test
+      - name: Run native ---bila--- smoke test
         shell: powershell
         run: |
-          $output = java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
+          $output = java -jar build/babylscriptrun.jar babylrunner/sample.bila.js
           $output | Tee-Object -FilePath build/runner-output-windows.txt
           if (-not ($output -match 'Xin chaol BilaScript')) { throw 'Missing BilaScript smoke-test output' }
           if (-not ($output -match 'Xin chaol CVNSS4.0')) { throw 'Missing CVNSS4.0 smoke-test output' }
+          if (-not ($output -match 'Dof zail: 3')) { throw 'Native translated Array.length failed' }
+
+      - name: Verify legacy ---cvss--- compatibility
+        shell: powershell
+        run: |
+          $legacy = java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
+          $legacy | Tee-Object -FilePath build/legacy-output-windows.txt
+          if (-not ($legacy -match 'Xin chaol BilaScript')) { throw 'Legacy BilaScript source failed' }
+          if (-not ($legacy -match 'Xin chaol CVNSS4.0')) { throw 'Legacy CVNSS4.0 source failed' }
 
       - name: Build Babyl2JS compiler
         shell: powershell
         run: ant babyl2js
 
-      - name: Translate CVNSS4.0 to JavaScript and HTML
+      - name: Translate native BilaScript to JavaScript and HTML
         shell: powershell
         run: |
-          java -jar build/babyl2js.jar babylrunner/sample.cvss.js build/sample.cvss.compiled.js
-          java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js build/sample.cvss.html
-          if (-not (Test-Path build/sample.cvss.compiled.js)) { throw 'Missing compiled JavaScript' }
-          if (-not (Test-Path build/sample.cvss.html)) { throw 'Missing HTML output' }
-          if ((Get-Item build/sample.cvss.compiled.js).Length -eq 0) { throw 'Compiled JavaScript is empty' }
-          if ((Get-Item build/sample.cvss.html).Length -eq 0) { throw 'HTML output is empty' }
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/sample.bila.compiled.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/sample.bila.html
+          if (-not (Test-Path build/sample.bila.compiled.js)) { throw 'Missing compiled JavaScript' }
+          if (-not (Test-Path build/sample.bila.html)) { throw 'Missing HTML output' }
+          if ((Get-Item build/sample.bila.compiled.js).Length -eq 0) { throw 'Compiled JavaScript is empty' }
+          if ((Get-Item build/sample.bila.html).Length -eq 0) { throw 'HTML output is empty' }
+          if (-not (Select-String -Path build/sample.bila.compiled.js -SimpleMatch "'bila'")) { throw 'Native bila namespace missing' }
+          if (-not (Select-String -Path build/sample.bila.compiled.js -SimpleMatch 'dof_zail')) { throw 'Translated property missing' }
 
       - name: Upload Windows build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: bilascript-windows-jdk8
+          name: bilascript-v1.2.0-windows-jdk8
           path: |
             build/babylscriptrun.jar
             build/babyl2js.jar
             build/runner-output-windows.txt
-            build/sample.cvss.compiled.js
-            build/sample.cvss.html
+            build/legacy-output-windows.txt
+            build/sample.bila.compiled.js
+            build/sample.bila.html
