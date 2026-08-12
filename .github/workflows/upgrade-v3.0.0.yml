@@ -5,6 +5,7 @@ on:
     branches: [Babylscript1_7R2_BRANCH]
     paths:
       - tools/upgrade_v3.py
+      - tools/upgrade_v3_patch.py
       - .github/workflows/upgrade-v3.0.0.yml
   workflow_dispatch:
 
@@ -32,7 +33,9 @@ jobs:
           node-version: '24'
 
       - name: Generate BilaScript v3
-        run: python tools/upgrade_v3.py
+        run: |
+          python tools/upgrade_v3.py
+          python tools/upgrade_v3_patch.py
 
       - name: Verify generated architecture
         run: |
@@ -46,6 +49,7 @@ jobs:
           grep -F 'Bila Parser' index.html
           grep -F 'MIT License' v3/LICENSE
           grep -F 'Long Ngo' v3/LICENSE
+          grep -F 'MAPPED_ENGLISH' v3/src/lexer.js
 
       - name: Run v3 test suite
         working-directory: v3
