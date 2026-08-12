@@ -1,7 +1,27 @@
 # 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
 
+
+## 🧠 BilaScript v3.0.0 — Native CVNSS4.0 Frontend
+
+V3 thay đổi ranh giới kiến trúc: **BilaScript sở hữu lexer, parser, AST và semantic diagnostics; JavaScript trở thành backend sinh mã**. Core mới nằm trong `v3/`, phát triển bởi **Long Ngo**, dựa trên **CVNSS4.0**, cấp phép **MIT**. Di sản Rhino/Babylscript bên ngoài `v3/` giữ license upstream.
+
+```text
+*.bila → Bila Lexer → Bila Parser → Bila AST → Semantic → JS Codegen → Browser / Node / Bun
+```
+
+- Chạy test: `cd v3 && npm test`
+- CLI: `node v3/bin/bila.js run v3/examples/hello.bila`
+- Website/Playground: https://xulytiengviet.github.io/bilascript/
+- Kiến trúc: `docs/BILASCRIPT_v3.0.0.md`
+- Đánh giá khoa học: `docs/SCIENTIFIC_EVALUATION_v3.0.0.md`
+- MIT cho v3 Core: `LICENSE-v3-MIT`
+
+> Phạm vi v3.0 là **core JavaScript-compatible subset**, chưa tuyên bố full ESNext/Test262 conformance.
+
+---
+
 [![BilaScript v1.2.0 Native CI](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml)
-[![Release v2.0.0](https://img.shields.io/badge/release-v2.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v2.0.0)
+[![Release v3.0.0](https://img.shields.io/badge/release-v2.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v3.0.0)
 
 > **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**
 
