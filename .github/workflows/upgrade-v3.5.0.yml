@@ -1,0 +1,85 @@
+name: Upgrade BilaScript v3.5.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - tools/upgrade_v35.py
+      - .github/workflows/upgrade-v3.5.0.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    name: Generate, verify and commit BilaScript v3.5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: Babylscript1_7R2_BRANCH
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Generate v3.5 source, docs and Pascal site
+        run: python tools/upgrade_v35.py
+
+      - name: Verify architecture files
+        run: |
+          test -s v3/src/normalize.js
+          test -s v3/src/source-map.js
+          test -s v3/src/performance.js
+          test -s docs/BILASCRIPT_v3.5.0.md
+          test -s docs/SCIENTIFIC_EVALUATION_v3.5.0.md
+          grep -F 'KW_IF' v3/src/vocabulary.js
+          grep -F 'BILA-S310' v3/src/normalize.js
+          grep -F 'ZERO-COST FRONTEND' index.html
+          grep -F 'LỊCH SỬ NÂNG CẤP' index.html
+          grep -F -- '--yellow:#ffd43b' index.html
+
+      - name: Run v3.5 test suite
+        working-directory: v3
+        run: npm test
+
+      - name: CLI check and source-map smoke test
+        run: |
+          node v3/bin/bila.js check v3/examples/hello.bila
+          node v3/bin/bila.js compile v3/examples/hello.bila -o /tmp/hello.js --map
+          test -s /tmp/hello.js.map
+          grep -F 'sourceMappingURL=hello.js.map' /tmp/hello.js
+          node /tmp/hello.js | tee /tmp/out.txt
+          grep -F 'BilaScript v3.5.0' /tmp/out.txt
+          grep -F '30' /tmp/out.txt
+          ! grep -E 'BilaRuntime|BilaArray|__bila' /tmp/hello.js
+
+      - name: Browser-module smoke test
+        run: |
+          node --input-type=module <<'NODE'
+          import {compile,lex} from './v3/src/compiler.js';
+          const src='---bila:strict---\nbilb ds=[1,2]; ds.dayq(3); bilb n=ds?.dof_zail ?? 0;';
+          const r=compile(src,{sourceMap:true,sourceName:'smoke.bila'});
+          if (!r.code.includes('ds.push(3)')) throw new Error('receiver-safe Array alias failed');
+          if (!r.code.includes('ds?.length')) throw new Error('optional chaining lowering failed');
+          if (!r.performance.zeroCost) throw new Error('zero-cost contract failed');
+          if (lex(src).tokens.some(t => t.raw === 'bilb' && t.value !== 'KW_VAR')) throw new Error('semantic token identity failed');
+          console.log('v3.5 browser-safe module smoke OK');
+          NODE
+
+      - name: Commit verified v3.5 implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md index.html v3 docs/BILASCRIPT_v3.5.0.md docs/SCIENTIFIC_EVALUATION_v3.5.0.md
+          git status --short
+          git commit -m 'feat: BilaScript v3.5 zero-cost CVNSS4.0 frontend'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
