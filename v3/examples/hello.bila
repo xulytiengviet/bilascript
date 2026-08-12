@@ -4,11 +4,12 @@ haml_sob tong(a, b) {
     trov_ved a + b;
 }
 
-bilb ds = moix Magz(10, 20, 30);
+bilb ds = [10, 20, 30];
 ds.dayq(40);
+bilb gia_tri = ds?.dof_zail ?? 0;
 
-neub (ds.dof_zail > 0) {
-    console.log("BilaScript v3.0.0");
+neub (gia_tri > 0) {
+    console.log("BilaScript v3.5.0");
     console.log(tong(ds[0], ds[1]));
-    console.log("Độ dài:", ds.dof_zail);
+    console.log(gia_tri);
 }

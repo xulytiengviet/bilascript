@@ -1,7 +1,7 @@
 {
   "name": "@bilascript/core",
-  "version": "3.0.0",
-  "description": "BilaScript v3 native CVNSS4.0 frontend with JavaScript backend",
+  "version": "3.5.0",
+  "description": "BilaScript v3.5 zero-cost CVNSS4.0 frontend with JavaScript runtime backend",
   "type": "module",
   "bin": { "bila": "./bin/bila.js" },
   "scripts": {

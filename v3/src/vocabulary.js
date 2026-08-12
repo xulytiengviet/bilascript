@@ -1,77 +1,95 @@
-/** BilaScript v3 canonical vocabulary. MIT License. Copyright (c) 2026 Long Ngo. */
-export const KEYWORDS = Object.freeze({
-  haml_sob: "function",
-  bilb: "var",
-  neub: "if",
-  kac: "else",
-  vil: "for",
-  trogp_ki: "while",
-  trov_ved: "return",
-  moix: "new",
-  voy_jaj_trir: "null",
-  thatf: "true",
-  sai: "false",
-  thuv: "try",
-  chupr_layb: "catch",
-  nemj: "throw",
-  cujb_cugl: "finally",
-  laml: "do",
-  zugk: "break",
-  tifb_tucr: "continue"
+/** BilaScript v3.5 canonical vocabulary. MIT License. Copyright (c) 2026 Long Ngo. */
+export const VERSION = "3.5.0";
+
+export const KEYWORD_SPECS = Object.freeze({
+  haml_sob: { id: "KW_FUNCTION", js: "function" },
+  bilb: { id: "KW_VAR", js: "var" },
+  neub: { id: "KW_IF", js: "if" },
+  kac: { id: "KW_ELSE", js: "else" },
+  vil: { id: "KW_FOR", js: "for" },
+  trogp_ki: { id: "KW_WHILE", js: "while" },
+  trov_ved: { id: "KW_RETURN", js: "return" },
+  moix: { id: "KW_NEW", js: "new" },
+  voy_jaj_trir: { id: "KW_NULL", js: "null" },
+  thatf: { id: "KW_TRUE", js: "true" },
+  sai: { id: "KW_FALSE", js: "false" },
+  thuv: { id: "KW_TRY", js: "try" },
+  chupr_layb: { id: "KW_CATCH", js: "catch" },
+  nemj: { id: "KW_THROW", js: "throw" },
+  cujb_cugl: { id: "KW_FINALLY", js: "finally" },
+  laml: { id: "KW_DO", js: "do" },
+  zugk: { id: "KW_BREAK", js: "break" },
+  tifb_tucr: { id: "KW_CONTINUE", js: "continue" }
 });
 
-export const ENGLISH_KEYWORDS = new Set([
-  "function", "var", "if", "else", "for", "while", "return", "new",
-  "null", "true", "false", "try", "catch", "throw", "finally", "do",
-  "break", "continue", "typeof", "void", "delete", "in", "instanceof"
-]);
-
-export const MAPPED_ENGLISH = new Set(Object.values(KEYWORDS));
-
-export const GLOBALS = Object.freeze({
-  Magz: "Array",
-  Suh_vatf: "Object",
-  Haml_sob: "Function",
-  Wayl: "Date",
-  mony_Tolj: "Math",
-  Chujg: "String",
-  Sob: "Number",
-  Lalf_lij: "Boolean"
+export const JS_PASSTHROUGH = Object.freeze({
+  typeof: { id: "KW_TYPEOF", js: "typeof" },
+  void: { id: "KW_VOID", js: "void" },
+  delete: { id: "KW_DELETE", js: "delete" },
+  in: { id: "KW_IN", js: "in" },
+  instanceof: { id: "KW_INSTANCEOF", js: "instanceof" },
+  this: { id: "KW_THIS", js: "this" }
 });
 
-export const MEMBERS = Object.freeze({
-  dof_zail: "length",
-  dayq: "push",
-  layb_cujb: "pop",
-  sapx_xepb: "sort",
-  daoz_wush: "reverse",
-  ahj_xar: "map",
-  locr: "filter",
-  cho_moig: "forEach",
-  motf_vail: "some",
-  takj: "split",
-  chujg_con: "substring",
-  kopx: "match",
-  timl_civb: "search",
-  thay_theb: "replace",
-  denb_chujg: "toString",
-  goir: "call",
-  ap_zugr: "apply",
-  waug_nhily: "random",
-  laml_tronl: "round",
-  cano_bacf_hai: "sqrt",
-  jaj_trir_tydf_doib: "abs",
-  trand: "ceil",
-  sanl: "floor",
-  lys_thuak: "pow"
-});
+export const JS_TO_KEYWORD = Object.freeze(Object.fromEntries(
+  Object.entries(KEYWORD_SPECS).map(([canonical, spec]) => [spec.js, { ...spec, canonical }])
+));
 
-export function keywordOf(word, mode = "bila") {
-  if (Object.prototype.hasOwnProperty.call(KEYWORDS, word)) return KEYWORDS[word];
-  if (mode === "strict") {
-    if (ENGLISH_KEYWORDS.has(word) && !MAPPED_ENGLISH.has(word)) return word;
-    return null;
+export const KEYWORD_JS = Object.freeze(Object.fromEntries([
+  ...Object.values(KEYWORD_SPECS).map(spec => [spec.id, spec.js]),
+  ...Object.values(JS_PASSTHROUGH).map(spec => [spec.id, spec.js])
+]));
+
+export const MAPPED_ENGLISH = new Set(Object.values(KEYWORD_SPECS).map(x => x.js));
+
+export function resolveKeyword(word, mode = "bila") {
+  if (Object.prototype.hasOwnProperty.call(KEYWORD_SPECS, word)) {
+    const spec = KEYWORD_SPECS[word];
+    return { ...spec, canonical: word, surface: "bila" };
   }
-  if (ENGLISH_KEYWORDS.has(word)) return word;
+  if (Object.prototype.hasOwnProperty.call(JS_PASSTHROUGH, word)) {
+    return { ...JS_PASSTHROUGH[word], canonical: null, surface: "javascript-required" };
+  }
+  if (mode !== "strict" && Object.prototype.hasOwnProperty.call(JS_TO_KEYWORD, word)) {
+    return { ...JS_TO_KEYWORD[word], surface: "javascript-compat" };
+  }
   return null;
 }
+
+export const GLOBAL_SPECS = Object.freeze({
+  Magz: { js: "Array", type: "array" },
+  Suh_vatf: { js: "Object", type: "object" },
+  Haml_sob: { js: "Function", type: "function" },
+  Wayl: { js: "Date", type: "date" },
+  mony_Tolj: { js: "Math", type: "math" },
+  Chujg: { js: "String", type: "string-constructor" },
+  Sob: { js: "Number", type: "number-constructor" },
+  Lalf_lij: { js: "Boolean", type: "boolean-constructor" }
+});
+
+export const MEMBER_SPECS = Object.freeze({
+  dof_zail: { js: "length", receivers: ["array", "string"] },
+  dayq: { js: "push", receivers: ["array"] },
+  layb_cujb: { js: "pop", receivers: ["array"] },
+  sapx_xepb: { js: "sort", receivers: ["array"] },
+  daoz_wush: { js: "reverse", receivers: ["array"] },
+  ahj_xar: { js: "map", receivers: ["array"] },
+  locr: { js: "filter", receivers: ["array"] },
+  cho_moig: { js: "forEach", receivers: ["array"] },
+  motf_vail: { js: "some", receivers: ["array"] },
+  takj: { js: "split", receivers: ["string"] },
+  chujg_con: { js: "substring", receivers: ["string"] },
+  kopx: { js: "match", receivers: ["string"] },
+  timl_civb: { js: "search", receivers: ["string"] },
+  thay_theb: { js: "replace", receivers: ["string"] },
+  denb_chujg: { js: "toString", receivers: ["array", "string", "number", "object", "date", "boolean"] },
+  goir: { js: "call", receivers: ["function"] },
+  ap_zugr: { js: "apply", receivers: ["function"] },
+  waug_nhily: { js: "random", receivers: ["math"] },
+  laml_tronl: { js: "round", receivers: ["math"] },
+  cano_bacf_hai: { js: "sqrt", receivers: ["math"] },
+  jaj_trir_tydf_doib: { js: "abs", receivers: ["math"] },
+  trand: { js: "ceil", receivers: ["math"] },
+  sanl: { js: "floor", receivers: ["math"] },
+  lys_thuak: { js: "pow", receivers: ["math"] }
+});

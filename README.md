@@ -1,36 +1,52 @@
-# 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
+# 🇻🇳 BilaScript — CVNSS4.0 Frontend / JavaScript Backend
 
+## 🟨 BilaScript v3.5.0 — Zero-cost CVNSS4.0 Frontend
 
-## 🧠 BilaScript v3.0.0 — Native CVNSS4.0 Frontend
+> **BilaScript không thay thế JavaScript runtime; BilaScript làm chủ cách con người viết chương trình, còn JavaScript đảm nhiệm việc chạy chương trình.**
 
-V3 thay đổi ranh giới kiến trúc: **BilaScript sở hữu lexer, parser, AST và semantic diagnostics; JavaScript trở thành backend sinh mã**. Core mới nằm trong `v3/`, phát triển bởi **Long Ngo**, dựa trên **CVNSS4.0**, cấp phép **MIT**. Di sản Rhino/Babylscript bên ngoài `v3/` giữ license upstream.
+V3.5 giữ nguyên số, ký hiệu, dấu câu và toán tử JavaScript; CVNSS4.0 là surface vocabulary. Lexer chuyển spelling thành semantic IDs (`KW_IF`, `KW_RETURN`, ...), parser tạo Bila AST, normalizer xử lý built-in alias theo receiver type, rồi codegen sinh JavaScript trực tiếp.
 
 ```text
-*.bila → Bila Lexer → Bila Parser → Bila AST → Semantic → JS Codegen → Browser / Node / Bun
+*.bila → Bila Lexer (CVNSS4.0 → KW_*) → Bila Parser → Bila AST → Semantic → Normalize → JS Codegen + Source Map → JavaScript Runtime
 ```
 
-- Chạy test: `cd v3 && npm test`
-- CLI: `node v3/bin/bila.js run v3/examples/hello.bila`
-- Website/Playground: https://xulytiengviet.github.io/bilascript/
-- Kiến trúc: `docs/BILASCRIPT_v3.0.0.md`
-- Đánh giá khoa học: `docs/SCIENTIFIC_EVALUATION_v3.0.0.md`
-- MIT cho v3 Core: `LICENSE-v3-MIT`
+- **Zero runtime translation:** không chèn Bila runtime translator/wrapper cho construct 1:1.
+- **Receiver-safe mapping:** chỉ đổi `dayq → push`, `dof_zail → length` khi receiver được suy luận đúng loại; unknown API được giữ nguyên và cảnh báo.
+- **Semantic token identity:** AST không phụ thuộc spelling JavaScript hay CVNSS4.0.
+- **Source locations + source maps:** CLI `--map`.
+- **Structural syntax giữ nguyên:** `=>`, `?.`, `??`, `...`, toán tử và numeric literal.
+- **Unicode identifiers:** tên biến người dùng được giữ nguyên.
+- **Pascal-inspired GitHub Pages:** nền xanh đậm, trắng/vàng, tối giản, có tab **Lịch sử**.
 
-> Phạm vi v3.0 là **core JavaScript-compatible subset**, chưa tuyên bố full ESNext/Test262 conformance.
+[![BilaScript v3.5 CI](https://github.com/xulytiengviet/bilascript/actions/workflows/v35-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/v35-ci.yml)
+[![Release v3.5.0](https://img.shields.io/badge/release-v3.5.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v3.5.0)
+![Frontend](https://img.shields.io/badge/frontend-Bila%20owned-0b63ce)
+![Backend](https://img.shields.io/badge/backend-JavaScript-f7df1e)
+![License](https://img.shields.io/badge/v3%20Core-MIT-success)
+
+### Lịch sử kiến trúc
+
+| Phiên bản | Cải tiến chính |
+|---|---|
+| v1.0.0 | CVNSS4.0 vocabulary trên Babylscript/Rhino. |
+| v1.2.0 | Native `bila` language mode trong tokenizer. |
+| v2.0.0 | Ba profile + JavaScript-compatible grammar/spec/tooling. |
+| v3.0.0 | Native Bila Lexer/Parser/AST/Semantic + JS backend. |
+| **v3.5.0** | **Semantic IDs, receiver-safe aliases, source maps, zero-cost contract, modern structural operators, Pascal-inspired site.** |
+
+Tài liệu: `docs/BILASCRIPT_v3.5.0.md` · đánh giá: `docs/SCIENTIFIC_EVALUATION_v3.5.0.md` · performance contract: `v3/PERFORMANCE_CONTRACT.md` · website: https://xulytiengviet.github.io/bilascript/
+
+### Giấy phép
+
+**BilaScript v3 Core (`v3/`) — MIT License — Copyright © 2026 Long Ngo — phát triển dựa trên CVNSS4.0.** Các file lịch sử Rhino/Babylscript bên ngoài `v3/` giữ license upstream tương ứng.
 
 ---
 
-[![BilaScript v3 Native Frontend CI](https://github.com/xulytiengviet/bilascript/actions/workflows/v3-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/v3-ci.yml)
-[![Release v3.0.0](https://img.shields.io/badge/release-v3.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v3.0.0)
+## 🧠 BilaScript v3.0.0 — Native CVNSS4.0 Frontend (lịch sử)
 
-> **BilaScript v3 là frontend ngôn ngữ lập trình CVNSS4.0 có compiler riêng; JavaScript là backend thực thi đầu tiên. Dòng v1–v2 từ Rhino/Babylscript được giữ như lớp lịch sử và tương thích.**
+V3.0 là mốc tách frontend khỏi Rhino/Babylscript: BilaScript bắt đầu sở hữu lexer, parser, AST và semantic diagnostics; JavaScript trở thành backend sinh mã. V3.5 kế thừa và làm cứng ranh giới này bằng semantic IDs, normalizer và zero-cost performance contract.
 
-![Frontend](https://img.shields.io/badge/Frontend-Bila%20Lexer%20%2B%20Parser%20%2B%20AST-0b63ce)
-![Backend](https://img.shields.io/badge/Backend-JavaScript-f7df1e)
-![CVNSS4.0](https://img.shields.io/badge/CVNSS4.0-Canonical-0b63ce)
-![License v3](https://img.shields.io/badge/v3%20Core-MIT-success)
-![Legacy](https://img.shields.io/badge/Legacy-Upstream%20licenses-lightgrey)
-
+---
 
 ## 🚀 BilaScript v2.0.0 — JavaScript-compatible CVNSS4.0 Grammar
 
