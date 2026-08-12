@@ -1,6 +1,5 @@
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -8,35 +7,80 @@ import java.io.StringWriter;
 import java.util.Locale;
 
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.babylscript.CustomTokenizerConfig;
+import org.mozilla.javascript.babylscript.TranslatedNameBindings;
+import org.mozilla.javascript.babylscript.gen.Cvnss40;
 
 
-
-public class Babyl2JS 
+/**
+ * BilaScript CVNSS4.0 -> JavaScript translator.
+ *
+ * The original Babyl2JS compiler is retained, but BilaScript registers the
+ * CVNSS4.0 keyword/object table in Babylscript's custom-language channel.
+ * CustomTokenizer extends BabylGenericTokenizer, so the source still travels
+ * through Babylscript's multilingual token pipeline rather than through a
+ * text-only search/replace pass.
+ */
+public class Babyl2JS
 {
     public Babyl2JS()
     {
+        registerCvnssTranslations();
     }
-    
-    public String translateCode(String code, String filename, boolean useHeaders) 
+
+    private static CustomTokenizerConfig createCvnssTokenizerConfig()
     {
-       Context cx = Context.enter();
-       cx.setLocale(Locale.ENGLISH);
-       cx.setOptimizationLevel(-1);
-       String result = "";
-       try {
-           result = cx.compileStringToJS(code, filename, 0, useHeaders);
-       } finally {
-          Context.exit();
-       }
-       return result;
+        CustomTokenizerConfig config = new CustomTokenizerConfig();
+        config.keywords.putAll(Cvnss40.keywordMap());
+        return config;
+    }
+
+    /**
+     * ParserToJS builds its JavaScript runtime header from
+     * TranslatedNameBindings.langResourceMap. Registering CVNSS4.0 here before
+     * the first compile allows generated JavaScript to resolve aliases such as
+     * Magz -> Array, Wayl -> Date and mony_Tolj -> Math.
+     */
+    private static void registerCvnssTranslations()
+    {
+        TranslatedNameBindings.keywordResourceMap.put("test", Cvnss40.keywordMap());
+        TranslatedNameBindings.langResourceMap.put("test", Cvnss40.objectMap());
+    }
+
+    private static String normalizeCvnssDirectives(String code)
+    {
+        if (code == null) return "";
+
+        return code
+            .replaceAll("(?m)^(\\s*)---cvss---(\\s*)$", "$1---test---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss---(\\s*)$", "$1---test---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss40---(\\s*)$", "$1---test---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss4---(\\s*)$", "$1---test---$2");
+    }
+
+    public String translateCode(String code, String filename, boolean useHeaders)
+    {
+        registerCvnssTranslations();
+
+        Context cx = Context.enter();
+        cx.setLocale(Locale.ENGLISH);
+        cx.setOptimizationLevel(-1);
+        cx.setCustomTokenizerConfig(createCvnssTokenizerConfig());
+        String result = "";
+        try {
+            String source = normalizeCvnssDirectives(code);
+            result = cx.compileStringToJS(source, filename, 0, useHeaders);
+        } finally {
+            Context.exit();
+        }
+        return result;
     }
 
     public void translateFile(String inFile, String outFile, boolean useHeaders, boolean useHTML) throws IOException
     {
         FileInputStream f = new FileInputStream(inFile);
         InputStreamReader reader = new InputStreamReader(f, "UTF-8");
-        
+
         StringWriter str = new StringWriter();
         char [] buf = new char[1024];
         int numRead = reader.read(buf);
@@ -45,12 +89,12 @@ public class Babyl2JS
             str.write(buf, 0, numRead);
             numRead = reader.read(buf);
         }
-        
+
         reader.close();
         f.close();
-        
+
         String js = translateCode(str.toString(), inFile, useHeaders);
-        
+
         if (useHTML)
         {
             js = "<!DOCTYPE html>"
@@ -59,36 +103,25 @@ public class Babyl2JS
                     + "</head>"
                     + "<script>" + js + "</script>";
         }
-        
+
         FileOutputStream outStream = new FileOutputStream(outFile);
         OutputStreamWriter out = new OutputStreamWriter(outStream, "UTF-8");
         out.write(js);
         out.close();
         outStream.close();
     }
-    
+
     static void outputMessage()
     {
         System.out.println(
-                "   java -jar babyl2js.jar [-noheaders] [-html] input-Babylscript-file output-JS-file\n" +
-                "Translates a Babylscript program into regular \n" +
-                "JavaScript code that can be run in a browser. \n " +
-                "Specify the name of the file to be translated \n" +
-                "as the first argument. The translated JavaScript \n" +
-                "code will be stored in the file specified by the \n" +
-                "second argument. The input file should be a text \n" +
-                "file in UTF-8 format. The translator takes an \n" +
-                "optional argument \"-noheaders\" which tells \n" +
-                "the translator not to put Babylscript header\n" +
-                "code in the file (the header code only needs to\n" +
-                "be included in the first JavaScript file of a \n" +
-                "program). It also takes an argument \"-html\"\n" +
-                "which tells the translator to put <script>..</script>\n" +
-                "tags around the output so that the resulting\n" +
-                "output can be run directly in a browser.");
+                "   java -jar babyl2js.jar [-noheaders] [-html] input-BilaScript-file output-JS-file\n" +
+                "Chuyen BilaScript/Babylscript CVNSS4.0 thanh JavaScript thong thuong.\n" +
+                "Tep dau vao phai o UTF-8. Dung ---cvss--- cho khoi CVNSS4.0.\n" +
+                "-noheaders: khong chen Babylscript runtime header.\n" +
+                "-html: boc JavaScript dau ra trong mot tep HTML co the mo truc tiep.\n");
     }
-    
-    public static void main(String[] args) throws IOException 
+
+    public static void main(String[] args) throws IOException
     {
         boolean noHeaders = false;
         boolean useHTML = false;
@@ -110,15 +143,14 @@ public class Babyl2JS
                 return;
             }
         }
-        
+
         if (outFile == null)
         {
             outputMessage();
             return;
         }
-        
+
         Babyl2JS translator = new Babyl2JS();
         translator.translateFile(inFile, outFile, !noHeaders, useHTML);
     }
-
 }
