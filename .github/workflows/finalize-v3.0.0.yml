@@ -31,15 +31,20 @@ jobs:
         run: |
           grep -F 'BilaScript v3 Native Frontend CI' README.md
           grep -F 'release-v3.0.0-blue' README.md
-          grep -F 'v3 Core-MIT' README.md
+          grep -F 'v3%20Core-MIT' README.md
           grep -F 'JavaScript là backend thực thi đầu tiên' README.md
       - name: Commit final README
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add README.md
-          git commit -m 'docs: finalize BilaScript v3 architecture and licensing'
-          git push origin HEAD:Babylscript1_7R2_BRANCH
+          git status --short
+          if git diff --cached --quiet; then
+            echo 'README already finalized'
+          else
+            git commit -m 'docs: finalize BilaScript v3 architecture and licensing'
+            git push origin HEAD:Babylscript1_7R2_BRANCH
+          fi
       - name: Move v3.0.0 tag to final commit
         run: |
           git tag -f v3.0.0 HEAD
