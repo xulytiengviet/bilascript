@@ -1,0 +1,101 @@
+name: Publish BilaScript v3.0.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - '.github/workflows/release-v3.0.0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test, package and publish v3.0.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: Babylscript1_7R2_BRANCH
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Verify native frontend
+        working-directory: v3
+        run: npm test
+
+      - name: Verify CLI and generated JavaScript
+        run: |
+          node v3/bin/bila.js check v3/examples/hello.bila
+          node v3/bin/bila.js compile v3/examples/hello.bila -o /tmp/hello.js
+          node /tmp/hello.js | tee /tmp/output.txt
+          grep -F 'BilaScript v3.0.0' /tmp/output.txt
+          grep -F '30' /tmp/output.txt
+
+      - name: Prepare release assets
+        run: |
+          rm -rf release-v3 && mkdir -p release-v3/core release-v3/site
+          cp -R v3/. release-v3/core/
+          rm -f release-v3/core/examples/hello.js release-v3/core/example-output.txt
+          cp index.html LICENSE-v3-MIT README.md release-v3/site/
+          mkdir -p release-v3/site/docs
+          cp docs/BILASCRIPT_v3.0.0.md docs/SCIENTIFIC_EVALUATION_v3.0.0.md release-v3/site/docs/
+          (cd release-v3/core && zip -qr ../BilaScript-v3.0.0-Core.zip .)
+          (cd release-v3/site && zip -qr ../BilaScript-v3.0.0-Site-and-Paper.zip .)
+          cd release-v3
+          sha256sum BilaScript-v3.0.0-Core.zip BilaScript-v3.0.0-Site-and-Paper.zip > SHA256SUMS.txt
+
+      - name: Create release notes
+        run: |
+          cat > release-v3/RELEASE_NOTES.md <<'EOF'
+          # BilaScript v3.0.0 — Native CVNSS4.0 Frontend / JavaScript Backend
+
+          BilaScript v3 thay đổi kiến trúc cốt lõi: phần mã mới trong `v3/` sở hữu **lexer, parser, AST, semantic diagnostics và JavaScript code generator**. JavaScript trở thành backend thực thi đầu tiên thay vì là nơi định nghĩa frontend Bila.
+
+          ## Core pipeline
+          `*.bila → Bila Lexer → Bila Parser → Bila AST → Semantic Analyzer → JavaScript Codegen → Browser / Node / Bun`
+
+          ## Đã triển khai
+          - Native lexer với `---bila---`, `---bila:strict---`, `---bila:js---`.
+          - Strict mode cấm English spelling khi đã có canonical CVNSS4.0; English gốc chỉ được giữ cho token chưa có mapping.
+          - Recursive-descent + precedence parser.
+          - Backend-neutral Bila AST.
+          - Semantic diagnostics cho return/break/continue context và duplicate params.
+          - JavaScript backend với mapping built-in/member CVNSS4.0.
+          - CLI: `compile`, `run`, `ast`, `check`.
+          - Browser-compatible compiler modules dùng trực tiếp trong GitHub Pages playground.
+          - Bài đánh giá kỹ thuật theo cấu trúc nghiên cứu, nêu rõ ưu/nhược và threats to validity.
+
+          ## Phạm vi trung thực
+          V3.0 là **JavaScript-compatible core subset**, chưa tuyên bố full ECMAScript/Test262 conformance. Class/module/arrow/template/destructuring/async-await/source maps/LSP là roadmap tiếp theo.
+
+          ## License & credit
+          **BilaScript v3 Core (`v3/`) — MIT License — Copyright © 2026 Long Ngo — phát triển dựa trên CVNSS4.0.**
+
+          Các file lịch sử Rhino/Babylscript ngoài `v3/` giữ license upstream; MIT v3 không tự động relicensing legacy code.
+          EOF
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v3.0.0 \
+            release-v3/BilaScript-v3.0.0-Core.zip \
+            release-v3/BilaScript-v3.0.0-Site-and-Paper.zip \
+            release-v3/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" \
+            --title 'BilaScript v3.0.0 — Native CVNSS4.0 Frontend' \
+            --notes-file release-v3/RELEASE_NOTES.md
+
+      - name: Verify uploaded checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir verify && cd verify
+          gh release download v3.0.0 --repo "$GITHUB_REPOSITORY" --pattern 'BilaScript-v3.0.0-*.zip' --pattern 'SHA256SUMS.txt'
+          sha256sum -c SHA256SUMS.txt
