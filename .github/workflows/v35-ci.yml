@@ -1,0 +1,73 @@
+name: BilaScript v3.5 CI
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'v3/**'
+      - 'index.html'
+      - 'README.md'
+      - 'docs/BILASCRIPT_v3.5.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v3.5.0.md'
+      - '.github/workflows/v35-ci.yml'
+  pull_request:
+    paths:
+      - 'v3/**'
+      - 'index.html'
+      - 'README.md'
+      - 'docs/BILASCRIPT_v3.5.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v3.5.0.md'
+      - '.github/workflows/v35-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  native-frontend:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [24]
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / Node ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Test v3.5 core
+        working-directory: v3
+        run: npm test
+
+      - name: Check CLI
+        run: node v3/bin/bila.js check v3/examples/hello.bila
+
+      - name: Compile zero-cost JavaScript
+        run: node v3/bin/bila.js compile v3/examples/hello.bila -o generated-v35.js --map
+
+      - name: Execute generated JavaScript
+        run: node generated-v35.js
+
+      - name: Audit no runtime translator
+        shell: bash
+        run: |
+          if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' generated-v35.js; then
+            echo 'Unexpected Bila runtime helper detected'
+            exit 1
+          fi
+
+      - name: Verify semantic IDs and receiver-safe aliasing
+        shell: bash
+        run: |
+          grep -F 'KW_IF' v3/src/vocabulary.js
+          grep -F 'BILA-S310' v3/src/normalize.js
+          grep -F 'source map' v3/PERFORMANCE_CONTRACT.md
+
+      - name: Verify Pascal-inspired website and history
+        shell: bash
+        run: |
+          grep -F 'LỊCH SỬ NÂNG CẤP' index.html
+          grep -F -- '--bg:#001b33' index.html
+          grep -F -- '--yellow:#ffd43b' index.html
+          grep -F 'Consolas' index.html
+          grep -F 'v3.5.0' index.html
