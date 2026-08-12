@@ -1,0 +1,126 @@
+name: Finalize BilaScript v1.2.0
+
+on:
+  push:
+    branches:
+      - Babylscript1_7R2_BRANCH
+    paths:
+      - '.github/workflows/finalize-v1.2.0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    name: Fix README, verify and retag v1.2.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Install Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Normalize README to native Bila architecture
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('README.md')
+          s = p.read_text(encoding='utf-8')
+
+          s = s.replace('[![BilaScript CVNSS4.0 CI]', '[![BilaScript v1.2.0 Native CI]', 1)
+
+          start = s.index('## ⚙️ CVNSS4.0 thực sự đi qua `BabylGenericTokenizer`')
+          end = s.index('### Chỉ thị ngôn ngữ native', start)
+          native = '''## ⚙️ CVNSS4.0 là language mode native trong engine\n\nLuồng thực thi v1.2.0:\n\n```text\nTệp BilaScript UTF-8 (*.bila.js)\n        │\n        ▼\n    ---bila---\n        │\n        ▼\n TokenStream.LanguageMode.bila\n        │\n        ▼\nBabylGenericTokenizer.createBilaTokenizer()\n        │\n        ├── Cvnss40.keywordMap()\n        └── English keyword fallback (khi cần)\n        │\n        ▼\n   ECMAScript Token\n        │\n        ▼\n   Rhino Parser\n        │\n        ├── Runner → Rhino Interpreter\n        └── Babyl2JS → ParserToJS\n                         │\n                         ▼\n            TranslatedNameBindings["bila"]\n                         │\n                         ▼\n                  JavaScript / HTML\n```\n\nTừ v1.2.0, BilaScript không còn mượn custom channel `test`. `bila` là một `LanguageMode` thực sự trong `TokenStream`; tokenizer native nạp bảng CVNSS4.0 và `TranslatedNameBindings` đăng ký namespace `bila` cho built-in object, property và method. ECMAScript keyword gốc vẫn là fallback có chủ đích để giữ tương thích và xử lý các mục không thể chuyển duy nhất/an toàn.\n\n'''
+          s = s[:start] + native + s[end:]
+
+          s = s.replace('''Các bí danh cũng được chấp nhận:\n\n```text\n---cvnss---\n---cvnss40---\n---cvnss4---\n```''', '''Các bí danh tương thích ngược cũng được chấp nhận:\n\n```text\n---cvss---\n---cvnss---\n---cvnss40---\n---cvnss4---\n```''', 1)
+
+          old_para = 'Để tương thích tối đa với mã Babylscript gốc, Runner và Babyl2JS chuẩn hóa các chỉ thị trên vào custom-language channel nội bộ của Babylscript. Chi tiết này không thay đổi cú pháp người dùng: mã BilaScript v1.2+ nên dùng `---bila---`.'
+          new_para = 'Tất cả alias trên được lexer ánh xạ trực tiếp về `TokenStream.LanguageMode.bila`; chỉ thị chuẩn cho mã mới từ v1.2.0 là `---bila---`.'
+          s = s.replace(old_para, new_para, 1)
+
+          ex_start = s.index('## 🚀 Ví dụ BilaScript CVNSS4.0')
+          ex_end = s.index('## 🔤 Một số ánh xạ chính', ex_start)
+          ex = s[ex_start:ex_end]
+          ex = ex.replace('---cvss---', '---bila---', 1)
+          ex = ex.replace('var danh_sach = moix Magz', 'bilb danh_sach = moix Magz', 1)
+          s = s[:ex_start] + ex + s[ex_end:]
+
+          s = s.replace('java -jar build/babylscriptrun.jar thu_vien.js chuong_trinh.cvss.js',
+                        'java -jar build/babylscriptrun.jar thu_vien.js chuong_trinh.bila.js', 1)
+
+          old_steps = '''Babyl2JS thực hiện ba việc trước khi gọi `compileStringToJS`:\n\n```text\n1. đăng ký Cvnss40.keywordMap()\n2. đăng ký Cvnss40.objectMap() vào TranslatedNameBindings\n3. chuẩn hóa ---cvss--- vào custom-language channel\n```'''
+          new_steps = '''Babyl2JS v1.2.0 đi qua cùng native language mode với Runner:\n\n```text\n1. ---bila--- → TokenStream.LanguageMode.bila\n2. createBilaTokenizer() → Cvnss40.keywordMap()\n3. TranslatedNameBindings["bila"] → Cvnss40.objectMap()\n4. ParserToJS / compileStringToJS → JavaScript hoặc HTML\n```'''
+          s = s.replace(old_steps, new_steps, 1)
+
+          s = s.replace('| `src/org/mozilla/javascript/BabylTokenizer.java` | lexer/tokenizer nền của Babylscript |',
+                        '| `src/org/mozilla/javascript/TokenStream.java` | khai báo `LanguageMode.bila` và chuyển native language mode |\n| `src/org/mozilla/javascript/BabylTokenizer.java` | lexer nhận `---bila---` và các alias tương thích |', 1)
+          s = s.replace('| `src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java` | ánh xạ từ khóa theo ngôn ngữ → token ECMAScript |',
+                        '| `src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java` | `createBilaTokenizer()` ánh xạ CVNSS4.0 → token ECMAScript |', 1)
+          s = s.replace('| `src/org/mozilla/javascript/babylscript/CustomTokenizer.java` | tokenizer custom kế thừa `BabylGenericTokenizer` |\n| `src/org/mozilla/javascript/babylscript/CustomTokenizerConfig.java` | cấu hình bảng từ khóa custom |',
+                        '| `src/org/mozilla/javascript/babylscript/TranslatedNameBindings.java` | namespace `bila` cho object/property/method |', 1)
+          s = s.replace('6. **Ít xâm lấn mã Rhino/Babylscript** — ưu tiên extension point có sẵn.',
+                        '6. **Can thiệp có kiểm soát vào engine** — thêm native mode nhưng giữ semantics/parser Rhino.', 1)
+
+          p.write_text(s, encoding='utf-8', newline='\n')
+          PY
+
+      - name: Assert README has no stale v1.0 architecture
+        run: |
+          grep -F -- '---bila---' README.md
+          grep -F 'TokenStream.LanguageMode.bila' README.md
+          grep -F 'createBilaTokenizer()' README.md
+          grep -F 'TranslatedNameBindings["bila"]' README.md
+          grep -F 'bilb danh_sach = moix Magz' README.md
+          if grep -Fq 'chuong_trinh.cvss.js' README.md; then exit 1; fi
+          if grep -Fq 'chuẩn hóa ---cvss--- vào custom-language channel' README.md; then exit 1; fi
+          if grep -Fq 'Runner và Babyl2JS chuẩn hóa các chỉ thị trên vào custom-language channel' README.md; then exit 1; fi
+
+      - name: Build and test final source tree
+        run: |
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/final-output.txt
+          grep -F 'Dof zail: 3' build/final-output.txt
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/final.js
+          grep -F "'bila'" build/final.js
+          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | grep -F 'Xin chaol BilaScript'
+
+      - name: Commit finalized README
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m 'docs: align README with native BilaScript v1.2.0 architecture'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Move v1.2.0 tag to finalized commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FINAL_SHA='${{ steps.commit.outputs.sha }}'
+          git tag -f v1.2.0 "$FINAL_SHA"
+          git push --force origin refs/tags/v1.2.0
+          echo "v1.2.0 -> $FINAL_SHA"
+
+      - name: Verify release still exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.2.0 --json tagName,name,url,isDraft,isPrerelease
