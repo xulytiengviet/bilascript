@@ -49,7 +49,7 @@ jobs:
         run: |
           grep -F 'bila_strict' src/org/mozilla/javascript/TokenStream.java
           grep -F 'bila_js' src/org/mozilla/javascript/TokenStream.java
-          grep -F 'c != '\''':'\''' src/org/mozilla/javascript/BabylTokenizer.java
+          grep -F "c != ':'" src/org/mozilla/javascript/BabylTokenizer.java
           grep -F 'createBilaStrictTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
           grep -F 'createBilaJsTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
           grep -F 'VERSION = "2.0.0"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
