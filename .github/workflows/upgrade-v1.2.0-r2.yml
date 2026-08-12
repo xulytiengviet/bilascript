@@ -1,0 +1,126 @@
+name: Upgrade BilaScript v1.2.0 Native R2
+
+on:
+  push:
+    branches:
+      - Babylscript1_7R2_BRANCH
+    paths:
+      - '.github/workflows/upgrade-v1.2.0-r2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    name: Apply, build, smoke-test and commit
+    runs-on: ubuntu-latest
+    outputs:
+      upgraded_sha: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Install Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+      - name: Validate upgrade scripts
+        run: |
+          python3 -m py_compile scripts/upgrade_v1_2.py
+          python3 -m py_compile scripts/upgrade_v1_2_compat.py
+      - name: Apply native BilaScript v1.2.0
+        run: |
+          python3 scripts/upgrade_v1_2.py
+          python3 scripts/upgrade_v1_2_compat.py
+      - name: Verify deep native wiring
+        run: |
+          grep -F 'bila,' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'languageModeCodes.put("bila"' src/org/mozilla/javascript/BabylTokenizer.java
+          grep -F 'createBilaTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
+          grep -F 'keywordLookup.putAll(englishKeywordLookup)' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
+          grep -F 'LanguageMode.bila' src/org/mozilla/javascript/babylscript/TranslatedNameBindings.java
+          grep -F 'LANGUAGE_CODE = "bila"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          grep -F 'map.put("var", "bilb")' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+      - name: Build both JARs
+        run: |
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+      - name: Test canonical ---bila--- source
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/native-output.txt
+          grep -F 'Xin chaol BilaScript' build/native-output.txt
+          grep -F 'Xin chaol CVNSS4.0' build/native-output.txt
+          grep -F 'Dof zail: 3' build/native-output.txt
+      - name: Test Babyl2JS native namespace
+        run: |
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/native.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/native.html
+          test -s build/native.js
+          test -s build/native.html
+          grep -F 'bila' build/native.js
+      - name: Test v1.0.0 legacy source
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/legacy-output.txt
+          grep -F 'Xin chaol BilaScript' build/legacy-output.txt
+          grep -F 'Xin chaol CVNSS4.0' build/legacy-output.txt
+      - name: Commit verified v1.2.0 source
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md .github/workflows/bilascript-ci.yml babylrunner/Runner.java babylrunner/Babyl2JS.java babylrunner/sample.bila.js docs/BILASCRIPT_LANGUAGE_v1.2.0.md src/org/mozilla/javascript/TokenStream.java src/org/mozilla/javascript/BabylTokenizer.java src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java src/org/mozilla/javascript/babylscript/TranslatedNameBindings.java src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          git commit -m 'feat: BilaScript v1.2.0 native CVNSS4.0 language mode'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  verify:
+    name: ${{ matrix.os }} / JDK 8 / v1.2.0
+    needs: upgrade
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.upgrade.outputs.upgraded_sha }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Install Ant Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+      - name: Install Ant Windows
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: choco install ant --no-progress -y
+      - name: Linux verification
+        if: runner.os == 'Linux'
+        run: |
+          ant babylscriptrun
+          ant babyl2js
+          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/out.txt
+          grep -F 'Dof zail: 3' build/out.txt
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/out.js
+          grep -F 'bila' build/out.js
+      - name: Windows verification
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          ant babylscriptrun
+          ant babyl2js
+          $out = java -jar build/babylscriptrun.jar babylrunner/sample.bila.js
+          $out | Tee-Object -FilePath build/out.txt
+          if (-not ($out -match 'Dof zail: 3')) { throw 'Native CVNSS4.0 object translation failed' }
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/out.js
+          if (-not (Select-String -Path build/out.js -SimpleMatch 'bila')) { throw 'Native bila compiler namespace missing' }
