@@ -1,0 +1,126 @@
+name: Publish BilaScript v3.5.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - '.github/workflows/release-v3.5.0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test, package and publish v3.5.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: Babylscript1_7R2_BRANCH
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Verify v3.5 core
+        working-directory: v3
+        run: npm test
+
+      - name: Verify clean JavaScript and source map
+        run: |
+          node v3/bin/bila.js check v3/examples/hello.bila
+          node v3/bin/bila.js compile v3/examples/hello.bila -o hello-v35.js --map
+          test -s hello-v35.js.map
+          node hello-v35.js | tee output.txt
+          grep -F 'BilaScript v3.5.0' output.txt
+          grep -F '30' output.txt
+          if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' hello-v35.js; then exit 1; fi
+
+      - name: Verify Pascal site and history
+        run: |
+          grep -F 'BILASCRIPT_3.5' index.html
+          grep -F 'LỊCH SỬ NÂNG CẤP' index.html
+          grep -F -- '--bg:#001b33' index.html
+          grep -F -- '--yellow:#ffd43b' index.html
+          grep -F 'Receiver-safe alias' index.html
+
+      - name: Prepare release assets
+        run: |
+          rm -rf release-stage release-assets
+          mkdir -p release-stage/BilaScript-v3.5.0 release-assets
+          cp -r v3 release-stage/BilaScript-v3.5.0/core
+          mkdir -p release-stage/BilaScript-v3.5.0/docs
+          cp docs/BILASCRIPT_v3.5.0.md docs/SCIENTIFIC_EVALUATION_v3.5.0.md release-stage/BilaScript-v3.5.0/docs/
+          cp README.md LICENSE-v3-MIT release-stage/BilaScript-v3.5.0/
+          (cd release-stage && zip -qr ../release-assets/BilaScript-v3.5.0-Core.zip BilaScript-v3.5.0)
+
+          mkdir -p release-stage/site
+          cp index.html release-stage/site/
+          cp docs/BILASCRIPT_v3.5.0.md docs/SCIENTIFIC_EVALUATION_v3.5.0.md release-stage/site/
+          cp v3/HISTORY.md v3/PERFORMANCE_CONTRACT.md release-stage/site/
+          (cd release-stage/site && zip -qr ../../release-assets/BilaScript-v3.5.0-Site-and-Paper.zip .)
+
+          (cd release-assets && sha256sum BilaScript-v3.5.0-Core.zip BilaScript-v3.5.0-Site-and-Paper.zip > SHA256SUMS.txt)
+          cat release-assets/SHA256SUMS.txt
+
+      - name: Create release notes
+        run: |
+          cat > RELEASE_NOTES.md <<'EOF'
+          # BilaScript v3.5.0 — Zero-cost CVNSS4.0 Frontend
+
+          **BilaScript không thay thế JavaScript runtime; BilaScript làm chủ cách con người viết chương trình, còn JavaScript đảm nhiệm việc chạy chương trình.**
+
+          ## Kiến trúc v3.5
+          `*.bila → Bila Lexer (CVNSS4.0 → KW_*) → Bila Parser → Bila AST → Semantic → Normalize → JavaScript Codegen + Source Map → JavaScript Runtime`
+
+          ## Cải tiến chính
+          - Backend-neutral semantic keyword IDs (`KW_IF`, `KW_RETURN`, `KW_FUNCTION`, ...).
+          - Số, literal, ký hiệu, dấu câu và toán tử giữ nguyên theo JavaScript.
+          - Zero runtime translation: không chèn Bila runtime translator/wrapper cho mapping 1:1.
+          - Receiver-safe aliasing: built-in member chỉ được đổi khi normalizer suy luận receiver phù hợp; unknown user/npm API được giữ nguyên và cảnh báo.
+          - Token/AST source span + Source Map v3.
+          - Unicode user identifiers.
+          - Structural JavaScript syntax được giữ: arrow `=>`, optional chaining `?.`, nullish `??`, spread `...`.
+          - CLI `compile/run/ast/tokens/check`, hỗ trợ `--map` và normalized AST.
+          - GitHub Pages đổi sang Pascal-inspired theme: xanh đậm, chữ trắng/vàng, monospace, tối giản; thêm mục **Lịch sử nâng cấp** từ v1.0.0 → v3.5.0.
+
+          ## Performance contract
+          V3.5 không tuyên bố nhanh hơn JavaScript. Mục tiêu là chương trình chạy với hiệu năng của **JavaScript được sinh ra**, không có lớp dịch CVNSS4.0 trong runtime path.
+
+          ## Phạm vi trung thực
+          V3.5 chưa tuyên bố full ECMAScript/Test262 conformance. Template interpolation `${...}`, module/class/async-await/destructuring đầy đủ, LSP và static type system vẫn là roadmap.
+
+          ## License & credit
+          **BilaScript v3 Core (`v3/`) — MIT License — Copyright © 2026 Long Ngo — phát triển dựa trên CVNSS4.0.**
+
+          Legacy Rhino/Babylscript ngoài `v3/` tiếp tục giữ giấy phép upstream tương ứng.
+          EOF
+
+      - name: Publish tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v3.5.0 >/dev/null 2>&1; then
+            gh release delete v3.5.0 --yes --cleanup-tag
+          fi
+          git tag -f v3.5.0 "$GITHUB_SHA"
+          git push --force origin refs/tags/v3.5.0
+          gh release create v3.5.0 \
+            release-assets/BilaScript-v3.5.0-Core.zip \
+            release-assets/BilaScript-v3.5.0-Site-and-Paper.zip \
+            release-assets/SHA256SUMS.txt \
+            --title 'BilaScript v3.5.0 — Zero-cost CVNSS4.0 Frontend' \
+            --notes-file RELEASE_NOTES.md
+
+      - name: Verify uploaded assets and checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf release-verify && mkdir release-verify
+          cd release-verify
+          gh release download v3.5.0 --repo "$GITHUB_REPOSITORY" --pattern 'BilaScript-v3.5.0-*.zip' --pattern 'SHA256SUMS.txt'
+          sha256sum -c SHA256SUMS.txt
