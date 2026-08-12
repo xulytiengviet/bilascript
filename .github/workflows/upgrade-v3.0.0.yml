@@ -1,0 +1,78 @@
+name: Upgrade BilaScript v3.0.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - tools/upgrade_v3.py
+      - .github/workflows/upgrade-v3.0.0.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    name: Generate, test and commit BilaScript v3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: Babylscript1_7R2_BRANCH
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Generate BilaScript v3
+        run: python tools/upgrade_v3.py
+
+      - name: Verify generated architecture
+        run: |
+          test -s v3/src/lexer.js
+          test -s v3/src/parser.js
+          test -s v3/src/semantic.js
+          test -s v3/src/codegen-js.js
+          test -s v3/src/compiler.js
+          test -s index.html
+          grep -F 'Native CVNSS4.0 Frontend' README.md
+          grep -F 'Bila Parser' index.html
+          grep -F 'MIT License' v3/LICENSE
+          grep -F 'Long Ngo' v3/LICENSE
+
+      - name: Run v3 test suite
+        working-directory: v3
+        run: npm test
+
+      - name: Compile and run example
+        run: |
+          node v3/bin/bila.js check v3/examples/hello.bila
+          node v3/bin/bila.js compile v3/examples/hello.bila -o v3/examples/hello.js
+          node v3/examples/hello.js | tee v3/example-output.txt
+          grep -F 'BilaScript v3.0.0' v3/example-output.txt
+          grep -F '30' v3/example-output.txt
+
+      - name: Browser-module import smoke test
+        run: |
+          node --input-type=module <<'NODE'
+          import {compile} from './v3/src/compiler.js';
+          const r=compile('---bila:strict---\nhaml_sob f(a){ trov_ved a + 1; } console.log(f(4));');
+          if (!r.code.includes('function f')) throw new Error('browser-compatible compiler import failed');
+          console.log('browser module OK');
+          NODE
+
+      - name: Commit verified v3 implementation
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md LICENSE-v3-MIT index.html docs/BILASCRIPT_v3.0.0.md docs/SCIENTIFIC_EVALUATION_v3.0.0.md v3
+          git status --short
+          git commit -m 'feat: BilaScript v3 native CVNSS4.0 frontend with JavaScript backend'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
