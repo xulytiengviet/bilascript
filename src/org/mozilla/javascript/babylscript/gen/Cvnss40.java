@@ -19,7 +19,9 @@ import java.util.Map;
  */
 public final class Cvnss40
 {
-    public static final String LANGUAGE_CODE = "cvss";
+    public static final String VERSION = "1.2.0";
+    public static final String LANGUAGE_CODE = "bila";
+    public static final String LEGACY_LANGUAGE_CODE = "cvss";
 
     private Cvnss40() {}
 
@@ -296,6 +298,28 @@ public final class Cvnss40
     public static Map<String, String> keywordMap()
     {
         Map<String, String> map = arrayToMap(RAW_KEYWORDS);
+
+        // BilaScript v1.2.0 semantic CVNSS4.0 overrides.  RAW_KEYWORDS stays
+        // unchanged for audit/back-reference to the original workbook.
+        map.put("var", "bilb");                 // biến
+        map.put("int", "sob_wyly");             // số nguyên
+        map.put("char", "cij_tuh");             // ký tự
+        map.put("enum", "lidf_cey");             // liệt kê
+        map.put("long", "sob_zail");             // số dài
+        map.put("float", "sob_thuch");           // số thực
+        map.put("double", "sob_thuch_cep");      // số thực kép
+        map.put("boolean", "lalf_lij");          // luận lý
+        map.put("public", "cogy_kai");           // công khai
+        map.put("private", "rizy_tuo");          // riêng tư
+        map.put("extends", "mov_rogf");           // mở rộng
+        map.put("volatile", "kaz_bilb");         // khả biến
+        map.put("implements", "thuch_thi");      // thực thi
+        map.put("import", "nhapf");              // nhập
+        map.put("export", "xadb");               // xuất
+        map.put("package", "goij");              // gói
+
+        // These two source aliases collide in the supplied table.  Keeping the
+        // inactive Java-reserved forms in English preserves ECMAScript parsing.
         map.put("throws", "throws");
         map.put("final", "final");
         return map;
@@ -303,7 +327,89 @@ public final class Cvnss40
 
     public static Map<String, String> objectMap()
     {
-        return arrayToMap(OBJECTS);
+        Map<String, String> map = arrayToMap(OBJECTS);
+
+        // Safe semantic aliases generated/checked against the CVNSS4.0
+        // audit-safe converter. Existing workbook aliases remain the fallback.
+        map.put("callee", "haml_dush_goir");
+        map.put("length", "dof_zail");
+        map.put("arity", "sob_tham_sob");
+        map.put("constructor", "bof_taor");
+        map.put("toString", "denb_chujg");
+        map.put("toSource", "denb_wuld");
+        map.put("apply", "ap_zugr");
+        map.put("call", "goir");
+        map.put("toLocaleString", "denb_chujg_vugl");
+        map.put("hasOwnProperty", "coj_thusf_tihj_rizy");
+        map.put("propertyIsEnumerable", "thusf_tihj_coj_theq_lidf_cey");
+        map.put("isPrototypeOf", "lal_wyly_maug_cuaz");
+        map.put("__defineGetter__", "__dihr_wias_bof_layb__");
+        map.put("__defineSetter__", "__dihr_wias_bof_dath__");
+        map.put("__lookupGetter__", "__tra_bof_layb__");
+        map.put("__lookupSetter__", "__tra_bof_dath__");
+        map.put("ConversionError", "Loig_chylq_doiq");
+        map.put("EvalError", "Loig_dahj_jaj");
+        map.put("RangeError", "Loig_famr_vi");
+        map.put("ReferenceError", "Loig_tham_chiwb");
+        map.put("TypeError", "Loig_ciwq");
+        map.put("URIError", "Loig_URI");
+        map.put("JavaException", "Loig_Java");
+        map.put("isFinite", "huuw_hanr");
+        map.put("isNaN", "kogy_faiz_sob");
+        map.put("parseFloat", "fany_tikj_sob_thuch");
+        map.put("parseInt", "fany_tikj_sob_wyly");
+        map.put("join", "noib");
+        map.put("sort", "sapx_xepb");
+        map.put("pop", "layb_cujb");
+        map.put("shift", "zikr");
+        map.put("unshift", "boz_zikr");
+        map.put("concat", "gep");
+        map.put("slice", "catx_lat");
+        map.put("indexOf", "chiz_mucr_cuaz");
+        map.put("lastIndexOf", "chiz_mucr_cujb_cuaz");
+        map.put("map", "ahj_xar");
+        map.put("some", "motf_vail");
+        map.put("fromCharCode", "tuk_mas_cij_tuh");
+        map.put("charAt", "cij_tuh_tair");
+        map.put("charCodeAt", "mas_cij_tuh_tair");
+        map.put("split", "takj");
+        map.put("toLowerCase", "denb_chuw_thuzk");
+        map.put("toUpperCase", "denb_chuw_hoa");
+        map.put("equalsIgnoreCase", "bagk_nhau_boz_qa_hoa_thuzk");
+        map.put("localeCompare", "so_sahj_vugl");
+        map.put("MAX_VALUE", "jaj_trir_lonx_nhatb");
+        map.put("MIN_VALUE", "jaj_trir_nhoz_nhatb");
+        map.put("toFixed", "denb_cob_dihr");
+        map.put("toExponential", "denb_sob_mus");
+        map.put("toPrecision", "denb_dof_chihj_xac");
+        map.put("now", "thoik_jan_hilf_tair");
+        map.put("getYear", "layb_namo");
+        map.put("getFullYear", "layb_namo_dayd_duz");
+        map.put("getMonth", "layb_thagj");
+        map.put("getDate", "layb_wayl");
+        map.put("getDay", "layb_thux");
+        map.put("getHours", "layb_jok");
+        map.put("getMinutes", "layb_fut");
+        map.put("getSeconds", "layb_jayy");
+        map.put("getMilliseconds", "layb_mili_jayy");
+        map.put("getTimezoneOffset", "dof_lekf_muij_jok");
+        map.put("setMilliseconds", "dath_mili_jayy");
+        map.put("setSeconds", "dath_jayy");
+        map.put("setMinutes", "dath_fut");
+        map.put("setHours", "dath_jok");
+        map.put("setMonth", "dath_thagj");
+        map.put("setFullYear", "dath_namo_dayd_duz");
+        map.put("abs", "jaj_trir_tydf_doib");
+        map.put("ceil", "trand");
+        map.put("floor", "sanl");
+        map.put("pow", "lys_thuak");
+        map.put("random", "waug_nhily");
+        map.put("round", "laml_tronl");
+        map.put("sqrt", "cano_bacf_hai");
+        map.put("next", "tifb_theo");
+        map.put("prefix", "tild_tob");
+        map.put("show", "hilq_thir");
+        return map;
     }
 
     private static Map<String, String> arrayToMap(String [] arr)

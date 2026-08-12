@@ -50,6 +50,7 @@ import org.mozilla.javascript.BabylTokenizer;
 import org.mozilla.javascript.ParserErrorReportingBase;
 import org.mozilla.javascript.TokenCharStream;
 import org.mozilla.javascript.TokenStream;
+import org.mozilla.javascript.babylscript.gen.Cvnss40;
 
 public class BabylGenericTokenizer extends BabylTokenizer
 {
@@ -129,6 +130,20 @@ public class BabylGenericTokenizer extends BabylTokenizer
                 new BabylTokenizer.DecimalNumberReader(),
                 TranslatedNameBindings.getKeywordMap("en"));
     }
+    /** Native BilaScript/CVNSS4.0 tokenizer (v1.2.0). */
+    public static BabylTokenizer createBilaTokenizer(ParserErrorReportingBase p, TokenCharStream in, TokenStream ts)
+    {
+        BabylGenericTokenizer tokenizer = new BabylGenericTokenizer(p,
+                in,
+                ts,
+                new BabylTokenizer.DecimalNumberReader(),
+                Cvnss40.keywordMap());
+        // CVNSS4.0 is canonical. English remains a fallback for unmapped terms,
+        // migrations from v1.0.0, and parser-safe collision cases.
+        tokenizer.keywordLookup.putAll(englishKeywordLookup);
+        return tokenizer;
+    }
+
     public static BabylTokenizer createBengaliTokenizer(ParserErrorReportingBase p, TokenCharStream in, TokenStream ts)
     {
         return new BabylGenericTokenizer(p, 

@@ -591,6 +591,12 @@ public class BabylTokenizer
         languageModeCodes  = new HashMap<String, TokenStream.LanguageMode>();
         languageModeCodes.put("\u0639\u0631\u0628\u064a", TokenStream.LanguageMode.ar);
         languageModeCodes.put("ar", TokenStream.LanguageMode.ar);
+        // BilaScript v1.2.0: native CVNSS4.0 language mode.
+        languageModeCodes.put("bila", TokenStream.LanguageMode.bila);
+        languageModeCodes.put("cvss", TokenStream.LanguageMode.bila);
+        languageModeCodes.put("cvnss", TokenStream.LanguageMode.bila);
+        languageModeCodes.put("cvnss40", TokenStream.LanguageMode.bila);
+        languageModeCodes.put("cvnss4", TokenStream.LanguageMode.bila);
         languageModeCodes.put("de", TokenStream.LanguageMode.de);
         languageModeCodes.put("en", TokenStream.LanguageMode.en);
         languageModeCodes.put("eo", TokenStream.LanguageMode.eo);
@@ -958,7 +964,9 @@ public class BabylTokenizer
          Id_try           = Token.TRY,
          Id_volatile      = Token.RESERVED;
 
-    static Map<String, Integer> englishKeywordLookup;
+    // Native Bila mode prefers CVNSS4.0 aliases but accepts original ECMAScript
+    // keywords as a compatibility/fallback layer.
+    protected static Map<String, Integer> englishKeywordLookup;
     static {
         englishKeywordLookup = new HashMap<String, Integer>();
         englishKeywordLookup.put("if", Id_if);

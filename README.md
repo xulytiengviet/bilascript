@@ -1,7 +1,7 @@
 # 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
 
 [![BilaScript CVNSS4.0 CI](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml)
-[![Release v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v1.0.0)
+[![Release v1.2.0](https://img.shields.io/badge/release-v1.2.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v1.2.0)
 
 > **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**
 
@@ -10,6 +10,25 @@
 ![CVNSS4.0](https://img.shields.io/badge/CVNSS4.0-Translation-0b63ce)
 ![Encoding](https://img.shields.io/badge/Encoding-UTF--8-success)
 ![License](https://img.shields.io/badge/License-MPL%201.1%20%2F%20GPL%202.0-green)
+
+
+## 🚀 BilaScript v1.2.0 — Native Bila Mode
+
+Từ v1.2.0, chỉ thị chuẩn là **`---bila---`** và được lexer nhận bằng `TokenStream.LanguageMode.bila` thực sự. `---cvss---`, `---cvnss---`, `---cvnss40---`, `---cvnss4---` chỉ còn là alias tương thích ngược. Từ khóa/API được CVNSS4.0 hóa tối đa theo nguyên tắc parser-safe; mục nào không thể chuyển duy nhất/an toàn thì giữ tên gốc. Xem `docs/BILASCRIPT_LANGUAGE_v1.2.0.md`.
+
+Ví dụ:
+
+```javascript
+---bila---
+
+haml_sob tong(a, b) {
+    trov_ved a + b;
+}
+
+bilb cetb_qaz = tong(10, 20);
+```
+
+---
 
 ## 🎯 BilaScript là gì?
 
@@ -88,10 +107,10 @@ Tệp BilaScript UTF-8
 
 Babylscript vốn có `CustomTokenizer`, và lớp này kế thừa trực tiếp `BabylGenericTokenizer`. BilaScript tận dụng đúng cơ chế đó để tạo lớp CVNSS4.0; không viết một parser JavaScript khác và không dùng search/replace làm cơ chế thực thi chính.
 
-### Chỉ thị ngôn ngữ công khai
+### Chỉ thị ngôn ngữ native
 
 ```text
----cvss---
+---bila---
 ```
 
 Các bí danh cũng được chấp nhận:
@@ -102,7 +121,7 @@ Các bí danh cũng được chấp nhận:
 ---cvnss4---
 ```
 
-Để tương thích tối đa với mã Babylscript gốc, Runner và Babyl2JS chuẩn hóa các chỉ thị trên vào custom-language channel nội bộ của Babylscript. Chi tiết này không thay đổi cú pháp người dùng: mã BilaScript nên dùng `---cvss---`.
+Để tương thích tối đa với mã Babylscript gốc, Runner và Babyl2JS chuẩn hóa các chỉ thị trên vào custom-language channel nội bộ của Babylscript. Chi tiết này không thay đổi cú pháp người dùng: mã BilaScript v1.2+ nên dùng `---bila---`.
 
 ---
 
@@ -141,7 +160,7 @@ var danh_sach = moix Magz("BilaScript", "CVNSS4.0");
 Tệp chạy mẫu có sẵn tại:
 
 ```text
-babylrunner/sample.cvss.js
+babylrunner/sample.bila.js
 ```
 
 ---
@@ -280,7 +299,7 @@ ant babylscriptrun
 ### Chạy ví dụ
 
 ```bash
-java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
+java -jar build/babylscriptrun.jar babylrunner/sample.bila.js
 ```
 
 Runner hỗ trợ nhiều tệp theo thứ tự:
@@ -304,13 +323,13 @@ ant babyl2js
 Dịch tệp CVNSS4.0 sang JavaScript:
 
 ```bash
-java -jar build/babyl2js.jar babylrunner/sample.cvss.js output.js
+java -jar build/babyl2js.jar babylrunner/sample.bila.js output.js
 ```
 
 Xuất trực tiếp thành HTML:
 
 ```bash
-java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js output.html
+java -jar build/babyl2js.jar -html babylrunner/sample.bila.js output.html
 ```
 
 Babyl2JS thực hiện ba việc trước khi gọi `compileStringToJS`:
@@ -345,7 +364,7 @@ Với `-noheaders`, ứng dụng phải tự cung cấp Babylscript runtime tư�
 | `src/org/mozilla/javascript/babylscript/gen/Cvnss40.java` | bảng CVNSS4.0 của BilaScript |
 | `babylrunner/Runner.java` | chạy BilaScript CVNSS4.0 bằng Rhino Interpreter |
 | `babylrunner/Babyl2JS.java` | biên dịch BilaScript CVNSS4.0 sang JavaScript/HTML |
-| `babylrunner/sample.cvss.js` | ví dụ mã BilaScript |
+| `babylrunner/sample.bila.js` | ví dụ mã BilaScript |
 | `docs/CVNSS40_TRANSLATION.md` | bảng đối chiếu và chính sách parser-safe |
 
 ---

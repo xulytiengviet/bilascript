@@ -6,17 +6,14 @@ import java.util.Locale;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.babylscript.CustomTokenizerConfig;
-import org.mozilla.javascript.babylscript.gen.Cvnss40;
 
 
 /**
  * BilaScript runner.
  *
- * BilaScript exposes CVNSS4.0 source blocks with ---cvss--- (plus aliases
- * ---cvnss--- and ---cvnss40---). Babylscript's original custom-language
- * channel is internally named "test"; this runner normalizes the public
- * CVNSS4.0 directive to that channel before parsing.
+ * BilaScript v1.2.0 exposes the native ---bila--- language mode.
+ * Legacy ---cvss---/---cvnss--- directives remain accepted as compatibility
+ * aliases and normalize to the same native LanguageMode.bila.
  *
  * CustomTokenizer extends BabylGenericTokenizer, so CVNSS4.0 keywords are
  * tokenized through the same multilingual keyword mechanism as Babylscript.
@@ -30,7 +27,6 @@ public class Runner
         Context cx = Context.enter();
         cx.setLocale(Locale.ENGLISH);
         cx.setOptimizationLevel(-1);
-        cx.setCustomTokenizerConfig(createCvnssTokenizerConfig());
         try {
             scope = cx.initStandardObjects();
 
@@ -44,36 +40,27 @@ public class Runner
                 0,
                 null
             );
-            cx.initCustomLanguageObjectTranslations(scope, Cvnss40.objectMap());
         } finally {
             Context.exit();
         }
-    }
-
-    private static CustomTokenizerConfig createCvnssTokenizerConfig()
-    {
-        CustomTokenizerConfig config = new CustomTokenizerConfig();
-        config.keywords.putAll(Cvnss40.keywordMap());
-        return config;
     }
 
     private static String normalizeCvnssDirectives(String code)
     {
         if (code == null) return "";
 
-        // Public BilaScript aliases -> Babylscript custom-language channel.
+        // Legacy aliases -> native BilaScript language mode.
         return code
-            .replaceAll("(?m)^(\\s*)---cvss---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss40---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss4---(\\s*)$", "$1---test---$2");
+            .replaceAll("(?m)^(\\s*)---cvss---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss40---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss4---(\\s*)$", "$1---bila---$2");
     }
 
     public String runCode(String code, String filename)
     {
         Context cx = Context.enter();
         cx.setOptimizationLevel(-1);
-        cx.setCustomTokenizerConfig(createCvnssTokenizerConfig());
         try {
             String source = normalizeCvnssDirectives(code);
             return Context.toString(cx.evaluateString(scope, source, filename, 0, null));
@@ -110,7 +97,7 @@ public class Runner
                 "BilaScript - JavaScript/ECMAScript voi bo tu khoa CVNSS4.0\n"
                 + "Cach dung: java -jar build/babylscriptrun.jar <tep1> [tep2 ...]\n"
                 + "Tep nguon phai duoc luu o UTF-8.\n"
-                + "Dung ---cvss--- de bat che do CVNSS4.0 trong ma nguon.\n"
+                + "Dung ---bila--- de bat BilaScript CVNSS4.0 (---cvss--- van la alias).\n"
             );
             return;
         }

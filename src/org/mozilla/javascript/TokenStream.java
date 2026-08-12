@@ -259,6 +259,7 @@ public class TokenStream
     {
         ar,
         bn,
+        bila,
         de,
         en,
         eo,
@@ -287,6 +288,8 @@ public class TokenStream
             return LanguageMode.ar;
         else if ("bn".equals(str))
             return LanguageMode.bn;
+        else if ("bila".equals(str) || "cvss".equals(str) || "cvnss".equals(str) || "cvnss40".equals(str) || "cvnss4".equals(str))
+            return LanguageMode.bila;
         else if ("de".equals(str))
             return LanguageMode.de;
         else if ("en".equals(str))
@@ -335,6 +338,8 @@ public class TokenStream
             return "ar";
         case bn:
             return "bn";
+        case bila:
+            return "bila";
         case de:
             return "de";
         case en:
@@ -386,6 +391,9 @@ public class TokenStream
             break;
         case bn:
             currentTokenizer = BabylGenericTokenizer.createBengaliTokenizer(parser, in, this);
+            break;
+        case bila:
+            currentTokenizer = BabylGenericTokenizer.createBilaTokenizer(parser, in, this);
             break;
         case de:
             currentTokenizer = new GermanTokenizer(parser, in, this);

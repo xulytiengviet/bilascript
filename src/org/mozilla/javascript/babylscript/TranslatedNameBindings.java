@@ -16,6 +16,7 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.TokenStream;
 import org.mozilla.javascript.TokenStream.LanguageMode;
+import org.mozilla.javascript.babylscript.gen.Cvnss40;
 import org.mozilla.javascript.babylscript.gen.Keywords;
 import org.mozilla.javascript.babylscript.gen.Objects;
 
@@ -53,6 +54,14 @@ public class TranslatedNameBindings
         EquivalentLanguageNames.put("ko", new String[] {"ko", "\uD55C\uAD6D\uC5B4"});
         EquivalentLanguageNames.put("\uD55C\uAD6D\uC5B4", new String[] {"ko", "\uD55C\uAD6D\uC5B4"});
 
+        // BilaScript names are aliases of one native language mode.
+        String [] bilaNames = new String[] {"bila", "cvss", "cvnss", "cvnss40", "cvnss4"};
+        EquivalentLanguageNames.put("bila", bilaNames);
+        EquivalentLanguageNames.put("cvss", bilaNames);
+        EquivalentLanguageNames.put("cvnss", bilaNames);
+        EquivalentLanguageNames.put("cvnss40", bilaNames);
+        EquivalentLanguageNames.put("cvnss4", bilaNames);
+
         EquivalentLanguageNames.put("id", new String[] {"id", "ms"});
         EquivalentLanguageNames.put("ms", new String[] {"id", "ms"});
 
@@ -63,6 +72,7 @@ public class TranslatedNameBindings
     public static Map<String, Map<String, String>> langResourceMap = new HashMap<String, Map<String, String>>();
     static {
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.en), arrayToMap(Objects.en));
+        langResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila), Cvnss40.objectMap());
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.eo), arrayToMap(Objects.eo));
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.fr), arrayToMap(Objects.fr));
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.ro), arrayToMap(Objects.ro));
@@ -84,6 +94,7 @@ public class TranslatedNameBindings
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.pl), arrayToMap(Objects.pl));
 
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.en), arrayToMap(Keywords.en));
+        keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila), Cvnss40.keywordMap());
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.eo), arrayToMap(Keywords.eo));
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.fr), arrayToMap(Keywords.fr));
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.ro), arrayToMap(Keywords.ro));

@@ -43,8 +43,8 @@ public class Babyl2JS
      */
     private static void registerCvnssTranslations()
     {
-        TranslatedNameBindings.keywordResourceMap.put("test", Cvnss40.keywordMap());
-        TranslatedNameBindings.langResourceMap.put("test", Cvnss40.objectMap());
+        TranslatedNameBindings.keywordResourceMap.put("bila", Cvnss40.keywordMap());
+        TranslatedNameBindings.langResourceMap.put("bila", Cvnss40.objectMap());
     }
 
     private static String normalizeCvnssDirectives(String code)
@@ -52,10 +52,10 @@ public class Babyl2JS
         if (code == null) return "";
 
         return code
-            .replaceAll("(?m)^(\\s*)---cvss---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss40---(\\s*)$", "$1---test---$2")
-            .replaceAll("(?m)^(\\s*)---cvnss4---(\\s*)$", "$1---test---$2");
+            .replaceAll("(?m)^(\\s*)---cvss---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss40---(\\s*)$", "$1---bila---$2")
+            .replaceAll("(?m)^(\\s*)---cvnss4---(\\s*)$", "$1---bila---$2");
     }
 
     public String translateCode(String code, String filename, boolean useHeaders)
@@ -65,7 +65,6 @@ public class Babyl2JS
         Context cx = Context.enter();
         cx.setLocale(Locale.ENGLISH);
         cx.setOptimizationLevel(-1);
-        cx.setCustomTokenizerConfig(createCvnssTokenizerConfig());
         String result = "";
         try {
             String source = normalizeCvnssDirectives(code);
@@ -116,7 +115,7 @@ public class Babyl2JS
         System.out.println(
                 "   java -jar babyl2js.jar [-noheaders] [-html] input-BilaScript-file output-JS-file\n" +
                 "Chuyen BilaScript/Babylscript CVNSS4.0 thanh JavaScript thong thuong.\n" +
-                "Tep dau vao phai o UTF-8. Dung ---cvss--- cho khoi CVNSS4.0.\n" +
+                "Tep dau vao phai o UTF-8. Dung ---bila--- cho BilaScript CVNSS4.0.\n" +
                 "-noheaders: khong chen Babylscript runtime header.\n" +
                 "-html: boc JavaScript dau ra trong mot tep HTML co the mo truc tiep.\n");
     }
