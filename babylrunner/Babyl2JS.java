@@ -45,6 +45,10 @@ public class Babyl2JS
     {
         TranslatedNameBindings.keywordResourceMap.put("bila", Cvnss40.keywordMap());
         TranslatedNameBindings.langResourceMap.put("bila", Cvnss40.objectMap());
+        TranslatedNameBindings.keywordResourceMap.put("bila:strict", Cvnss40.keywordMap());
+        TranslatedNameBindings.langResourceMap.put("bila:strict", Cvnss40.objectMap());
+        TranslatedNameBindings.keywordResourceMap.put("bila:js", Cvnss40.keywordMap());
+        TranslatedNameBindings.langResourceMap.put("bila:js", Cvnss40.objectMap());
     }
 
     private static String normalizeCvnssDirectives(String code)

@@ -1,0 +1,63 @@
+(* BilaScript 2.0 Core Grammar — JavaScript-compatible surface syntax. *)
+Program              = BilaDirective , StatementList ;
+BilaDirective        = "---bila---" | "---bila:strict---" | "---bila:js---"
+                     | "---cvss---" | "---cvnss---" | "---cvnss40---" | "---cvnss4---" ;
+StatementList        = { Statement } ;
+Statement            = Block | VariableStatement | FunctionDeclaration | IfStatement
+                     | ForStatement | WhileStatement | DoWhileStatement | ReturnStatement
+                     | BreakStatement | ContinueStatement | TryStatement | SwitchStatement
+                     | ExpressionStatement | EmptyStatement ;
+Block                = "{" , StatementList , "}" ;
+VariableStatement    = KW_VAR , VariableDeclaration , { "," , VariableDeclaration } , [ ";" ] ;
+VariableDeclaration  = Identifier , [ "=" , Expression ] ;
+FunctionDeclaration  = KW_FUNCTION , Identifier , "(" , [ FormalParameters ] , ")" , Block ;
+FormalParameters     = Identifier , { "," , Identifier } ;
+IfStatement          = KW_IF , "(" , Expression , ")" , Statement , [ KW_ELSE , Statement ] ;
+ForStatement         = KW_FOR , "(" , [ Expression ] , ";" , [ Expression ] , ";" , [ Expression ] , ")" , Statement ;
+WhileStatement       = KW_WHILE , "(" , Expression , ")" , Statement ;
+DoWhileStatement     = KW_DO , Statement , KW_WHILE , "(" , Expression , ")" , [ ";" ] ;
+ReturnStatement      = KW_RETURN , [ Expression ] , [ ";" ] ;
+BreakStatement       = KW_BREAK , [ Identifier ] , [ ";" ] ;
+ContinueStatement    = KW_CONTINUE , [ Identifier ] , [ ";" ] ;
+TryStatement         = KW_TRY , Block , ( CatchClause , [ FinallyClause ] | FinallyClause ) ;
+CatchClause          = KW_CATCH , "(" , Identifier , ")" , Block ;
+FinallyClause        = KW_FINALLY , Block ;
+SwitchStatement      = KW_SWITCH , "(" , Expression , ")" , "{" , { CaseClause } , "}" ;
+CaseClause           = ( KW_CASE , Expression | KW_DEFAULT ) , ":" , StatementList ;
+ExpressionStatement  = Expression , [ ";" ] ;
+EmptyStatement       = ";" ;
+Expression           = AssignmentExpression , { "," , AssignmentExpression } ;
+AssignmentExpression = ConditionalExpression , [ AssignmentOperator , AssignmentExpression ] ;
+ConditionalExpression = LogicalExpression , [ "?" , Expression , ":" , AssignmentExpression ] ;
+LogicalExpression    = UnaryExpression , { BinaryOperator , UnaryExpression } ;
+UnaryExpression      = [ UnaryOperator ] , MemberExpression ;
+MemberExpression     = PrimaryExpression , { "." , Identifier | "[" , Expression , "]" | Arguments } ;
+Arguments            = "(" , [ AssignmentExpression , { "," , AssignmentExpression } ] , ")" ;
+PrimaryExpression    = Identifier | Literal | ArrayLiteral | ObjectLiteral | "(" , Expression , ")" ;
+ArrayLiteral         = "[" , [ AssignmentExpression , { "," , AssignmentExpression } ] , "]" ;
+ObjectLiteral        = "{" , [ Property , { "," , Property } ] , "}" ;
+Property             = Identifier , ":" , AssignmentExpression ;
+Identifier           = identifier ;
+Literal              = string | number | KW_TRUE | KW_FALSE | KW_NULL ;
+
+(* Semantic tokens: lexer accepts canonical CVNSS4.0; compatible profiles also accept English aliases. *)
+KW_FUNCTION = "haml_sob" ;
+KW_IF       = "neub" ;
+KW_ELSE     = "kac" ;
+KW_FOR      = "vil" ;
+KW_WHILE    = "trogp_ki" ;
+KW_RETURN   = "trov_ved" ;
+KW_DO       = "laml" ;
+KW_TRUE     = "thatf" ;
+KW_FALSE    = "sai" ;
+KW_VAR      = "bilb" ;
+KW_NEW      = "moix" ;
+KW_NULL     = "voy_jaj_trir" ;
+KW_TRY      = "thuv" ;
+KW_CATCH    = "chupr_layb" ;
+KW_FINALLY  = "cujb_cugl" ;
+KW_BREAK    = "faj_vow" ;
+KW_CONTINUE = "tifb_tucr" ;
+KW_SWITCH   = "cogy_tacx" ;
+KW_CASE     = "truzk_hoph" ;
+KW_DEFAULT  = "mach_dihr" ;

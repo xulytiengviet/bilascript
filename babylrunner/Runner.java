@@ -11,7 +11,7 @@ import org.mozilla.javascript.ScriptableObject;
 /**
  * BilaScript runner.
  *
- * BilaScript v1.2.0 exposes the native ---bila--- language mode.
+ * BilaScript v2.0 exposes ---bila---, ---bila:strict--- and ---bila:js--- profiles.
  * Legacy ---cvss---/---cvnss--- directives remain accepted as compatibility
  * aliases and normalize to the same native LanguageMode.bila.
  *
@@ -97,7 +97,7 @@ public class Runner
                 "BilaScript - JavaScript/ECMAScript voi bo tu khoa CVNSS4.0\n"
                 + "Cach dung: java -jar build/babylscriptrun.jar <tep1> [tep2 ...]\n"
                 + "Tep nguon phai duoc luu o UTF-8.\n"
-                + "Dung ---bila--- de bat BilaScript CVNSS4.0 (---cvss--- van la alias).\n"
+                + "Profiles: ---bila--- (mac dinh), ---bila:strict--- (CVNSS canonical), ---bila:js--- (migration).\n"
             );
             return;
         }

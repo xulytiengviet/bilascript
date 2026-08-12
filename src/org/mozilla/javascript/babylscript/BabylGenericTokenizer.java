@@ -138,8 +138,29 @@ public class BabylGenericTokenizer extends BabylTokenizer
                 ts,
                 new BabylTokenizer.DecimalNumberReader(),
                 Cvnss40.keywordMap());
-        // CVNSS4.0 is canonical. English remains a fallback for unmapped terms,
-        // migrations from v1.0.0, and parser-safe collision cases.
+        // Default profile: CVNSS4.0 canonical + ECMAScript compatibility aliases.
+        tokenizer.keywordLookup.putAll(englishKeywordLookup);
+        return tokenizer;
+    }
+
+    /** Strict profile: if a canonical Bila token exists, English is not a keyword fallback. */
+    public static BabylTokenizer createBilaStrictTokenizer(ParserErrorReportingBase p, TokenCharStream in, TokenStream ts)
+    {
+        return new BabylGenericTokenizer(p,
+                in,
+                ts,
+                new BabylTokenizer.DecimalNumberReader(),
+                Cvnss40.keywordMap());
+    }
+
+    /** JavaScript migration profile: accepts both ECMAScript and canonical Bila tokens. */
+    public static BabylTokenizer createBilaJsTokenizer(ParserErrorReportingBase p, TokenCharStream in, TokenStream ts)
+    {
+        BabylGenericTokenizer tokenizer = new BabylGenericTokenizer(p,
+                in,
+                ts,
+                new BabylTokenizer.DecimalNumberReader(),
+                Cvnss40.keywordMap());
         tokenizer.keywordLookup.putAll(englishKeywordLookup);
         return tokenizer;
     }

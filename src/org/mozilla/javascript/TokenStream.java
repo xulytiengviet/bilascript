@@ -260,6 +260,8 @@ public class TokenStream
         ar,
         bn,
         bila,
+        bila_js,
+        bila_strict,
         de,
         en,
         eo,
@@ -288,6 +290,10 @@ public class TokenStream
             return LanguageMode.ar;
         else if ("bn".equals(str))
             return LanguageMode.bn;
+        else if ("bila:strict".equals(str) || "bilastrict".equals(str) || "bila_strict".equals(str))
+            return LanguageMode.bila_strict;
+        else if ("bila:js".equals(str) || "bilajs".equals(str) || "bila_js".equals(str))
+            return LanguageMode.bila_js;
         else if ("bila".equals(str) || "cvss".equals(str) || "cvnss".equals(str) || "cvnss40".equals(str) || "cvnss4".equals(str))
             return LanguageMode.bila;
         else if ("de".equals(str))
@@ -340,6 +346,10 @@ public class TokenStream
             return "bn";
         case bila:
             return "bila";
+        case bila_js:
+            return "bila:js";
+        case bila_strict:
+            return "bila:strict";
         case de:
             return "de";
         case en:
@@ -394,6 +404,12 @@ public class TokenStream
             break;
         case bila:
             currentTokenizer = BabylGenericTokenizer.createBilaTokenizer(parser, in, this);
+            break;
+        case bila_js:
+            currentTokenizer = BabylGenericTokenizer.createBilaJsTokenizer(parser, in, this);
+            break;
+        case bila_strict:
+            currentTokenizer = BabylGenericTokenizer.createBilaStrictTokenizer(parser, in, this);
             break;
         case de:
             currentTokenizer = new GermanTokenizer(parser, in, this);

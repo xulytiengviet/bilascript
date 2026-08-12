@@ -593,6 +593,12 @@ public class BabylTokenizer
         languageModeCodes.put("ar", TokenStream.LanguageMode.ar);
         // BilaScript v1.2.0: native CVNSS4.0 language mode.
         languageModeCodes.put("bila", TokenStream.LanguageMode.bila);
+        languageModeCodes.put("bila:strict", TokenStream.LanguageMode.bila_strict);
+        languageModeCodes.put("bilastrict", TokenStream.LanguageMode.bila_strict);
+        languageModeCodes.put("bila_strict", TokenStream.LanguageMode.bila_strict);
+        languageModeCodes.put("bila:js", TokenStream.LanguageMode.bila_js);
+        languageModeCodes.put("bilajs", TokenStream.LanguageMode.bila_js);
+        languageModeCodes.put("bila_js", TokenStream.LanguageMode.bila_js);
         languageModeCodes.put("cvss", TokenStream.LanguageMode.bila);
         languageModeCodes.put("cvnss", TokenStream.LanguageMode.bila);
         languageModeCodes.put("cvnss40", TokenStream.LanguageMode.bila);
@@ -641,7 +647,8 @@ public class BabylTokenizer
                 return Token.ERROR;
             }
             
-            if (!Character.isJavaIdentifierPart(c))
+            // BilaScript v2 profile directives use ':' (---bila:strict--- / ---bila:js---).
+            if (!Character.isJavaIdentifierPart(c) && c != ':')
             {
                 parser.addError("msg.unknown.language.mode");
                 return Token.ERROR;

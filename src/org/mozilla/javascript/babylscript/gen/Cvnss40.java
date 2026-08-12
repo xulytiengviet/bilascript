@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public final class Cvnss40
 {
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "2.0.0";
     public static final String LANGUAGE_CODE = "bila";
     public static final String LEGACY_LANGUAGE_CODE = "cvss";
 

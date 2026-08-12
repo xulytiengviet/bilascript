@@ -55,8 +55,12 @@ public class TranslatedNameBindings
         EquivalentLanguageNames.put("\uD55C\uAD6D\uC5B4", new String[] {"ko", "\uD55C\uAD6D\uC5B4"});
 
         // BilaScript names are aliases of one native language mode.
-        String [] bilaNames = new String[] {"bila", "cvss", "cvnss", "cvnss40", "cvnss4"};
+        String [] bilaNames = new String[] {"bila", "bila:strict", "bila:js", "bilastrict", "bilajs", "cvss", "cvnss", "cvnss40", "cvnss4"};
         EquivalentLanguageNames.put("bila", bilaNames);
+        EquivalentLanguageNames.put("bila:strict", bilaNames);
+        EquivalentLanguageNames.put("bila:js", bilaNames);
+        EquivalentLanguageNames.put("bilastrict", bilaNames);
+        EquivalentLanguageNames.put("bilajs", bilaNames);
         EquivalentLanguageNames.put("cvss", bilaNames);
         EquivalentLanguageNames.put("cvnss", bilaNames);
         EquivalentLanguageNames.put("cvnss40", bilaNames);
@@ -73,6 +77,8 @@ public class TranslatedNameBindings
     static {
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.en), arrayToMap(Objects.en));
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila), Cvnss40.objectMap());
+        langResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila_strict), Cvnss40.objectMap());
+        langResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila_js), Cvnss40.objectMap());
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.eo), arrayToMap(Objects.eo));
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.fr), arrayToMap(Objects.fr));
         langResourceMap.put(TokenStream.languageModeToString(LanguageMode.ro), arrayToMap(Objects.ro));
@@ -95,6 +101,8 @@ public class TranslatedNameBindings
 
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.en), arrayToMap(Keywords.en));
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila), Cvnss40.keywordMap());
+        keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila_strict), Cvnss40.keywordMap());
+        keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.bila_js), Cvnss40.keywordMap());
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.eo), arrayToMap(Keywords.eo));
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.fr), arrayToMap(Keywords.fr));
         keywordResourceMap.put(TokenStream.languageModeToString(LanguageMode.ro), arrayToMap(Keywords.ro));

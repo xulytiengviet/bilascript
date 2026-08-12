@@ -1,7 +1,7 @@
 # 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
 
 [![BilaScript v1.2.0 Native CI](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml)
-[![Release v1.2.0](https://img.shields.io/badge/release-v1.2.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v1.2.0)
+[![Release v2.0.0](https://img.shields.io/badge/release-v2.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v2.0.0)
 
 > **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**
 
@@ -12,7 +12,28 @@
 ![License](https://img.shields.io/badge/License-MPL%201.1%20%2F%20GPL%202.0-green)
 
 
-## 🚀 BilaScript v1.2.0 — Native Bila Mode
+## 🚀 BilaScript v2.0.0 — JavaScript-compatible CVNSS4.0 Grammar
+
+BilaScript 2.0 **giữ cú pháp JavaScript** (`{}`, `()`, `[]`, toán tử, expression, object/array literal, member access...) và chuẩn hóa lớp **semantic vocabulary** sang CVNSS4.0. Engine có 3 profile: `---bila---`, `---bila:strict---`, `---bila:js---`.
+
+```javascript
+---bila:strict---
+
+haml_sob tong(a, b) {
+    trov_ved a + b;
+}
+
+bilb ds = moix Magz(10, 20, 30);
+neub (ds.dof_zail > 0) {
+    java.lang.System.out.println(tong(ds[0], ds[1]));
+}
+```
+
+**Đặc tả:** `spec/BilaScript-2.0.ebnf` · **Vocabulary:** `spec/bila-vocabulary-v2.json` · **Tool:** `python tools/bilac_v2.py --help` · **Chi tiết:** `docs/BILASCRIPT_v2.0.0.md`.
+
+---
+
+## 🧬 BilaScript v1.2.0 — nền native Bila Mode
 
 Từ v1.2.0, chỉ thị chuẩn là **`---bila---`** và được lexer nhận bằng `TokenStream.LanguageMode.bila` thực sự. `---cvss---`, `---cvnss---`, `---cvnss40---`, `---cvnss4---` chỉ còn là alias tương thích ngược. Từ khóa/API được CVNSS4.0 hóa tối đa theo nguyên tắc parser-safe; mục nào không thể chuyển duy nhất/an toàn thì giữ tên gốc. Xem `docs/BILASCRIPT_LANGUAGE_v1.2.0.md`.
 
