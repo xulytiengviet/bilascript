@@ -1,151 +1,162 @@
-name: BilaScript v1.2.0 Native CI
+name: BilaScript v2.0 CI
 
 on:
   push:
-    branches:
-      - Babylscript1_7R2_BRANCH
+    branches: [Babylscript1_7R2_BRANCH]
   pull_request:
-    branches:
-      - Babylscript1_7R2_BRANCH
+    branches: [Babylscript1_7R2_BRANCH]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  linux-jdk8:
-    name: Ubuntu / JDK 8 / Ant
+  linux:
+    name: Ubuntu / JDK 8 / Python / Node
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Java 8
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '8'
-
-      - name: Install Apache Ant
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install Ant
         run: |
           sudo apt-get update
           sudo apt-get install -y ant
-
-      - name: Show toolchain
+      - name: Build Runner and Babyl2JS
         run: |
-          java -version
-          javac -version
-          ant -version
-
-      - name: Build BilaScript runner
-        run: ant babylscriptrun
-
-      - name: Run native ---bila--- smoke test
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+      - name: Test default profile
         run: |
-          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/runner-output.txt
-          grep -F "Xin chaol BilaScript" build/runner-output.txt
-          grep -F "Xin chaol CVNSS4.0" build/runner-output.txt
-          grep -F "Dof zail: 3" build/runner-output.txt
-
-      - name: Verify legacy ---cvss--- compatibility
+          java -jar build/babylscriptrun.jar examples/v2/hello.bila.js | tee build/v2-default.txt
+          grep -F 'Xin chaol BilaScript' build/v2-default.txt
+          grep -F 'Dof zail: 2' build/v2-default.txt
+      - name: Test strict profile
         run: |
-          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/legacy-output.txt
-          grep -F "Xin chaol BilaScript" build/legacy-output.txt
-          grep -F "Xin chaol CVNSS4.0" build/legacy-output.txt
-
-      - name: Build Babyl2JS compiler
-        run: ant babyl2js
-
-      - name: Translate native BilaScript to JavaScript and HTML
+          java -jar build/babylscriptrun.jar examples/v2/strict.bila.js | tee build/v2-strict.txt
+          grep -F '3' build/v2-strict.txt
+          cat > build/strict-invalid.bila.js <<'EOF'
+          ---bila:strict---
+          function bad() { return 1; }
+          EOF
+          if java -jar build/babylscriptrun.jar build/strict-invalid.bila.js; then
+            echo 'Strict profile accepted English canonical keyword'
+            exit 1
+          fi
+      - name: Test JavaScript migration profile
         run: |
-          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/sample.bila.compiled.js
-          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/sample.bila.html
-          test -s build/sample.bila.compiled.js
-          test -s build/sample.bila.html
-          grep -F "'bila'" build/sample.bila.compiled.js
-          grep -F "dof_zail" build/sample.bila.compiled.js
-
-      - name: Upload Linux build artifacts
+          java -jar build/babylscriptrun.jar examples/v2/js-compat.bila.js | tee build/v2-js.txt
+          grep -F '30' build/v2-js.txt
+      - name: Test Babyl2JS v2
+        run: |
+          java -jar build/babyl2js.jar examples/v2/strict.bila.js build/v2-strict.compiled.js
+          java -jar build/babyl2js.jar -html examples/v2/hello.bila.js build/v2-default.html
+          test -s build/v2-strict.compiled.js
+          test -s build/v2-default.html
+          grep -F 'bila:strict' build/v2-strict.compiled.js
+      - name: Test bilac v2 bridge
+        run: |
+          python -m py_compile tools/bilac_v2.py
+          python tools/bilac_v2.py from-js examples/v2/source.js build/source.canonical.bila.js
+          grep -F 'haml_sob max' build/source.canonical.bila.js
+          grep -F 'bilb ds = moix Magz' build/source.canonical.bila.js
+          grep -F 'ds.dof_zail' build/source.canonical.bila.js
+          python tools/bilac_v2.py to-js build/source.canonical.bila.js build/source.roundtrip.js
+          node build/source.roundtrip.js | tee build/node-output.txt
+          grep -F '3 2' build/node-output.txt
+          python tools/bilac_v2.py check examples/v2/strict.bila.js --strict
+      - name: Upload Linux artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: bilascript-v1.2.0-linux-jdk8
+          name: bilascript-v2.0.0-linux
           path: |
             build/babylscriptrun.jar
             build/babyl2js.jar
-            build/runner-output.txt
-            build/legacy-output.txt
-            build/sample.bila.compiled.js
-            build/sample.bila.html
+            build/v2-default.txt
+            build/v2-strict.txt
+            build/v2-js.txt
+            build/source.canonical.bila.js
+            build/source.roundtrip.js
 
-  windows-jdk8:
-    name: Windows / JDK 8 / Ant
+  windows:
+    name: Windows / JDK 8 / Python / Node
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up Java 8
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '8'
-
-      - name: Install Apache Ant
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install Ant
         shell: powershell
         run: choco install ant --no-progress -y
-
-      - name: Show toolchain
+      - name: Build Runner and Babyl2JS
         shell: powershell
         run: |
-          java -version
-          javac -version
-          ant -version
-
-      - name: Build BilaScript runner
-        shell: powershell
-        run: ant babylscriptrun
-
-      - name: Run native ---bila--- smoke test
+          ant clean
+          if ($LASTEXITCODE -ne 0) { throw 'ant clean failed' }
+          ant babylscriptrun
+          if ($LASTEXITCODE -ne 0) { throw 'Runner build failed' }
+          ant babyl2js
+          if ($LASTEXITCODE -ne 0) { throw 'Babyl2JS build failed' }
+      - name: Test three profiles
         shell: powershell
         run: |
-          $output = java -jar build/babylscriptrun.jar babylrunner/sample.bila.js
-          $output | Tee-Object -FilePath build/runner-output-windows.txt
-          if (-not ($output -match 'Xin chaol BilaScript')) { throw 'Missing BilaScript smoke-test output' }
-          if (-not ($output -match 'Xin chaol CVNSS4.0')) { throw 'Missing CVNSS4.0 smoke-test output' }
-          if (-not ($output -match 'Dof zail: 3')) { throw 'Native translated Array.length failed' }
-
-      - name: Verify legacy ---cvss--- compatibility
+          $default = java -jar build/babylscriptrun.jar examples/v2/hello.bila.js
+          if (-not ($default -match 'Xin chaol BilaScript')) { throw 'Default profile failed' }
+          if (-not ($default -match 'Dof zail: 2')) { throw 'Translated property failed' }
+          $strict = java -jar build/babylscriptrun.jar examples/v2/strict.bila.js
+          if (-not ($strict -match '3')) { throw 'Strict profile failed' }
+          $js = java -jar build/babylscriptrun.jar examples/v2/js-compat.bila.js
+          if (-not ($js -match '30')) { throw 'JS migration profile failed' }
+          @'
+---bila:strict---
+function bad() { return 1; }
+'@ | Set-Content -Encoding UTF8 build/strict-invalid.bila.js
+          java -jar build/babylscriptrun.jar build/strict-invalid.bila.js 2>$null
+          if ($LASTEXITCODE -eq 0) { throw 'Strict profile accepted English keyword' }
+      - name: Test Babyl2JS v2
         shell: powershell
         run: |
-          $legacy = java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
-          $legacy | Tee-Object -FilePath build/legacy-output-windows.txt
-          if (-not ($legacy -match 'Xin chaol BilaScript')) { throw 'Legacy BilaScript source failed' }
-          if (-not ($legacy -match 'Xin chaol CVNSS4.0')) { throw 'Legacy CVNSS4.0 source failed' }
-
-      - name: Build Babyl2JS compiler
-        shell: powershell
-        run: ant babyl2js
-
-      - name: Translate native BilaScript to JavaScript and HTML
+          java -jar build/babyl2js.jar examples/v2/strict.bila.js build/v2-strict.compiled.js
+          if ($LASTEXITCODE -ne 0) { throw 'Babyl2JS strict compile failed' }
+          if (-not (Select-String -Path build/v2-strict.compiled.js -SimpleMatch 'bila:strict')) { throw 'Strict namespace missing' }
+      - name: Test bilac v2 bridge
         shell: powershell
         run: |
-          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/sample.bila.compiled.js
-          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/sample.bila.html
-          if (-not (Test-Path build/sample.bila.compiled.js)) { throw 'Missing compiled JavaScript' }
-          if (-not (Test-Path build/sample.bila.html)) { throw 'Missing HTML output' }
-          if ((Get-Item build/sample.bila.compiled.js).Length -eq 0) { throw 'Compiled JavaScript is empty' }
-          if ((Get-Item build/sample.bila.html).Length -eq 0) { throw 'HTML output is empty' }
-          if (-not (Select-String -Path build/sample.bila.compiled.js -SimpleMatch "'bila'")) { throw 'Native bila namespace missing' }
-          if (-not (Select-String -Path build/sample.bila.compiled.js -SimpleMatch 'dof_zail')) { throw 'Translated property missing' }
-
-      - name: Upload Windows build artifacts
+          python -m py_compile tools/bilac_v2.py
+          python tools/bilac_v2.py from-js examples/v2/source.js build/source.canonical.bila.js
+          if ($LASTEXITCODE -ne 0) { throw 'from-js failed' }
+          if (-not (Select-String -Path build/source.canonical.bila.js -SimpleMatch 'haml_sob max')) { throw 'Keyword canonicalization missing' }
+          if (-not (Select-String -Path build/source.canonical.bila.js -SimpleMatch 'ds.dof_zail')) { throw 'Property canonicalization missing' }
+          python tools/bilac_v2.py to-js build/source.canonical.bila.js build/source.roundtrip.js
+          if ($LASTEXITCODE -ne 0) { throw 'to-js failed' }
+          $nodeOut = node build/source.roundtrip.js
+          if (-not ($nodeOut -match '3 2')) { throw 'Node round-trip failed' }
+          python tools/bilac_v2.py check examples/v2/strict.bila.js --strict
+          if ($LASTEXITCODE -ne 0) { throw 'Strict checker failed' }
+      - name: Upload Windows artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: bilascript-v1.2.0-windows-jdk8
+          name: bilascript-v2.0.0-windows
           path: |
             build/babylscriptrun.jar
             build/babyl2js.jar
-            build/runner-output-windows.txt
-            build/legacy-output-windows.txt
-            build/sample.bila.compiled.js
-            build/sample.bila.html
+            build/v2-strict.compiled.js
+            build/source.canonical.bila.js
+            build/source.roundtrip.js
