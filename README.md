@@ -1,5 +1,8 @@
 # 🇻🇳 BilaScript — JavaScript/ECMAScript bằng CVNSS4.0
 
+[![BilaScript CVNSS4.0 CI](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml)
+[![Release v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/xulytiengviet/bilascript/releases/tag/v1.0.0)
+
 > **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**
 
 ![Java](https://img.shields.io/badge/Java-Rhino%201.7R2-orange?logo=openjdk)
