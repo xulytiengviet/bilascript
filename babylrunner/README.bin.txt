@@ -1,77 +1,137 @@
-BILASCRIPT / BABYLSCRIPT - HƯỚNG DẪN BỘ CÔNG CỤ DÒNG LỆNH
-=========================================================
-
-Mã nguồn Babylscript dựa trên trình thông dịch JavaScript Mozilla Rhino 1.7R2.
-Do Babylscript là biến thể của Rhino nên các thành phần kế thừa tiếp tục sử dụng
-các điều khoản giấy phép tương ứng của mã nguồn gốc, chủ yếu theo mô hình giấy
-phép kép MPL 1.1 / GPL 2.0.
-
-Gói công cụ có hai tệp JAR chính:
-
-1. babylscriptrun.jar
-   Trình chạy Babylscript dựa trên Java. Công cụ cung cấp một lớp bao đơn giản
-   để thực thi mã Babylscript/Rhino/JavaScript từ dòng lệnh và có thể gọi trực
-   tiếp các lớp Java từ script.
-
-2. babyl2js.jar
-   Trình dịch Babylscript sang JavaScript thông thường để mã kết quả có thể chạy
-   trong trình duyệt.
-
-
-TRÌNH CHẠY BABYLSCRIPT TRÊN JAVA
-================================
-
-BẮT ĐẦU NHANH
-
-Repo có sẵn ví dụ Hello World tại "sample.js". Chạy bằng:
-
-   java -jar babylscriptrun.jar sample.js
-
-THÔNG TIN BỔ SUNG
-
-Có thể chạy nhiều tệp theo thứ tự để nạp thư viện trước chương trình chính:
-
-   java -jar babylscriptrun.jar lib.js sample.js
-
-Các tệp nguồn dùng với trình chạy phải được lưu ở UTF-8 để bảo đảm ký tự Unicode
-và các ngôn ngữ không dùng bảng chữ cái Latin được xử lý đúng.
-
-
-TRÌNH DỊCH BABYLSCRIPT SANG JAVASCRIPT
+BILASCRIPT CVNSS4.0 - HƯỚNG DẪN RUNNER
 ======================================
 
-BẮT ĐẦU NHANH
+BilaScript là biến thể JavaScript/ECMAScript mã nguồn mở phát triển theo chuỗi:
 
-Ví dụ nguồn nằm tại "sample.babyl2js.js". Chuyển tệp này sang JavaScript được
-bọc trong một trang HTML bằng:
+   Mozilla Rhino 1.7R2 -> Babylscript -> BilaScript CVNSS4.0
 
-   java -jar babyl2js.jar -html sample.babyl2js.js output.html
+Bản runner hiện nạp bảng "Babylscript CVNSS4.0 Translation" vào cơ chế custom
+language của Babylscript. CustomTokenizer kế thừa BabylGenericTokenizer, vì vậy
+các từ khóa CVNSS4.0 được ánh xạ thành token ECMAScript bằng chính kiến trúc đa
+ngôn ngữ của Babylscript.
 
-Sau đó mở output.html bằng trình duyệt để chạy kết quả.
+BIÊN DỊCH
+=========
 
-THÔNG TIN BỔ SUNG
+Từ thư mục gốc:
 
-Trình dịch nhận tệp nguồn Babylscript mã hóa UTF-8 và tạo tệp JavaScript đầu ra
-cũng theo UTF-8.
+   ant babylscriptrun
 
-Các tùy chọn dòng lệnh chính:
+Lệnh trên tạo:
 
-   -html
-      Bọc mã kết quả trong cấu trúc HTML và thẻ <script>...</script> để tệp đầu
-      ra có thể mở trực tiếp trong trình duyệt.
+   build/babylscriptrun.jar
 
-   -noheaders
-      Không chèn thư viện runtime Babylscript vào phần đầu của mã kết quả.
+CHẠY BILASCRIPT CVNSS4.0
+========================
 
-Nếu một ứng dụng gồm nhiều tệp Babylscript/JavaScript, runtime chỉ cần xuất hiện
-trong tệp đầu tiên được trang HTML tải. Chèn runtime nhiều lần vẫn có thể chạy,
-nhưng sẽ làm tăng kích thước đầu ra không cần thiết.
+Ví dụ có sẵn:
 
+   babylrunner/sample.cvss.js
 
-LƯU Ý CHO BILASCRIPT
-====================
+Chạy bằng:
 
-BilaScript là fork định hướng Việt hóa của Babylscript. Tài liệu tiếng Việt đầy
-đủ hơn nằm tại README.md ở thư mục gốc. Engine hiện vẫn giữ nguyên danh sách chế
-độ ngôn ngữ của Babylscript gốc; hỗ trợ cú pháp tiếng Việt ---vi--- cần được bổ
-sung ở cấp tokenizer, bảng từ khóa, ánh xạ thư viện chuẩn và kiểm thử.
+   java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
+
+Có thể chạy nhiều tệp theo thứ tự:
+
+   java -jar build/babylscriptrun.jar thu_vien.js chuong_trinh.cvss.js
+
+Mọi tệp nguồn nên lưu ở UTF-8.
+
+CHẾ ĐỘ NGÔN NGỮ
+===============
+
+Chỉ thị công khai của BilaScript:
+
+   ---cvss---
+
+Các bí danh được chấp nhận:
+
+   ---cvnss---
+   ---cvnss40---
+   ---cvnss4---
+
+Runner đưa các chỉ thị này về ---test---, là kênh custom-language sẵn có của
+Babylscript. Đây chỉ là ánh xạ nội bộ; mã BilaScript nên dùng ---cvss---.
+
+VÍ DỤ
+=====
+
+   ---cvss---
+
+   haml_sob chao(ten) {
+       neub (ten == voy_jaj_trir) {
+           trov_ved "Xin chaol CVNSS4.0!";
+       } kac {
+           trov_ved "Xin chaol " + ten;
+       }
+   }
+
+   var danh_sach = moix Magz("BilaScript", "CVNSS4.0");
+
+Một số token chính:
+
+   function -> haml_sob
+   if       -> neub
+   else     -> kac
+   while    -> trogp_ki
+   return   -> trov_ved
+   new      -> moix
+   null     -> voy_jaj_trir
+   Array    -> Magz
+
+BẢNG DỊCH
+=========
+
+Mã Java:
+
+   src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+
+Tài liệu đầy đủ:
+
+   docs/CVNSS40_TRANSLATION.md
+
+Các cụm nhiều từ trong bảng dịch được nối bằng dấu _ để tokenizer nhận chúng là
+một identifier duy nhất.
+
+VA CHẠM TỪ KHÓA
+===============
+
+Bảng nguồn có hai alias trùng:
+
+   throw/throws   -> nemj
+   finally/final  -> cujb cugl
+
+Bản chạy ưu tiên từ khóa ECMAScript hoạt động:
+
+   throw   -> nemj
+   throws  -> throws
+   finally -> cujb_cugl
+   final   -> final
+
+Bảng gốc vẫn được giữ trong RAW_KEYWORDS để audit.
+
+BABYL2JS
+========
+
+Công cụ Babylscript -> JavaScript gốc vẫn có thể biên dịch bằng:
+
+   ant babyl2js
+
+và dùng như trước:
+
+   java -jar build/babyl2js.jar -html sample.babyl2js.js output.html
+
+Runner là đường thực thi đã được nối CVNSS4.0 trong phiên bản này. Hỗ trợ alias
+---cvss--- trực tiếp trong toàn bộ pipeline Babyl2JS là phần tương thích tiếp
+theo.
+
+LƯU Ý RHINO
+===========
+
+Phải chạy ở interpreted mode:
+
+   cx.setOptimizationLevel(-1);
+
+vì optimizer/bytecode compiler của Rhino 1.7R2 không tương thích đầy đủ với các
+thay đổi Babylscript.
