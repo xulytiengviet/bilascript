@@ -1,0 +1,296 @@
+name: Publish BilaScript v2.0.0
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - .github/workflows/release-v2.0.0.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, verify, checksum and publish v2.0.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install Apache Ant and zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant zip
+
+      - name: Verify v2 source tree
+        run: |
+          grep -F 'bila_strict' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'bila_js' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'VERSION = "2.0.0"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          test -s spec/BilaScript-2.0.ebnf
+          test -s spec/bila-vocabulary-v2.json
+          test -s spec/PROFILE_MODES.md
+          test -s spec/JAVASCRIPT_COMPATIBILITY.md
+          test -s spec/CVNSS40_CANONICAL.md
+          test -s tools/bilac_v2.py
+
+      - name: Build Runner and Babyl2JS
+        run: |
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+          test -s build/babylscriptrun.jar
+          test -s build/babyl2js.jar
+
+      - name: Verify three Bila profiles
+        run: |
+          java -jar build/babylscriptrun.jar examples/v2/hello.bila.js | tee build/release-default.txt
+          grep -F 'Xin chaol BilaScript' build/release-default.txt
+          grep -F 'Dof zail: 2' build/release-default.txt
+
+          java -jar build/babylscriptrun.jar examples/v2/strict.bila.js | tee build/release-strict.txt
+          grep -F '3' build/release-strict.txt
+
+          java -jar build/babylscriptrun.jar examples/v2/js-compat.bila.js | tee build/release-js.txt
+          grep -F '30' build/release-js.txt
+
+          printf '%s\n' '---bila:strict---' 'function bad() { return 1; }' > build/strict-invalid.bila.js
+          if java -jar build/babylscriptrun.jar build/strict-invalid.bila.js; then
+            echo 'Strict profile accepted English canonical keyword'
+            exit 1
+          fi
+
+      - name: Verify Babyl2JS and JS bridge
+        run: |
+          java -jar build/babyl2js.jar examples/v2/strict.bila.js build/release-strict.compiled.js
+          java -jar build/babyl2js.jar -html examples/v2/hello.bila.js build/release-default.html
+          test -s build/release-strict.compiled.js
+          test -s build/release-default.html
+          grep -F 'bila:strict' build/release-strict.compiled.js
+
+          python -m py_compile tools/bilac_v2.py
+          python tools/bilac_v2.py from-js examples/v2/source.js build/release.canonical.bila.js
+          grep -F 'haml_sob max' build/release.canonical.bila.js
+          grep -F 'bilb ds = moix Magz' build/release.canonical.bila.js
+          grep -F 'ds.dof_zail' build/release.canonical.bila.js
+          python tools/bilac_v2.py to-js build/release.canonical.bila.js build/release.roundtrip.js
+          node build/release.roundtrip.js | tee build/release-node.txt
+          grep -F '3 2' build/release-node.txt
+          python tools/bilac_v2.py check examples/v2/strict.bila.js --strict
+
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf release
+          mkdir -p release/assets release/windows/BilaScript-v2.0.0 release/tooling/BilaScript-v2.0.0-Tooling
+
+          cp build/babylscriptrun.jar release/assets/BilaScript-v2.0.0-Runner.jar
+          cp build/babyl2js.jar release/assets/BilaScript-v2.0.0-Babyl2JS.jar
+
+          W=release/windows/BilaScript-v2.0.0
+          cp release/assets/BilaScript-v2.0.0-Runner.jar "$W/"
+          cp release/assets/BilaScript-v2.0.0-Babyl2JS.jar "$W/"
+          cp tools/bilac_v2.py "$W/"
+          cp spec/bila-vocabulary-v2.json "$W/"
+          cp LICENSE.txt "$W/LICENSE.txt"
+          cp docs/BILASCRIPT_v2.0.0.md "$W/BILASCRIPT-v2.md"
+          cp spec/BilaScript-2.0.ebnf "$W/BilaScript-2.0.ebnf"
+          cp spec/PROFILE_MODES.md "$W/PROFILE-MODES.md"
+          cp spec/JAVASCRIPT_COMPATIBILITY.md "$W/JAVASCRIPT-COMPATIBILITY.md"
+          cp spec/CVNSS40_CANONICAL.md "$W/CVNSS40-CANONICAL.md"
+          cp examples/v2/hello.bila.js "$W/hello.bila.js"
+          cp examples/v2/strict.bila.js "$W/strict.bila.js"
+          cp examples/v2/js-compat.bila.js "$W/js-compat.bila.js"
+          cp examples/v2/source.js "$W/source.js"
+
+          cat > "$W/RUN-DEFAULT.cmd" <<'EOF'
+          @echo off
+          java -jar BilaScript-v2.0.0-Runner.jar hello.bila.js
+          pause
+          EOF
+          cat > "$W/RUN-STRICT.cmd" <<'EOF'
+          @echo off
+          java -jar BilaScript-v2.0.0-Runner.jar strict.bila.js
+          pause
+          EOF
+          cat > "$W/RUN-JS-COMPAT.cmd" <<'EOF'
+          @echo off
+          java -jar BilaScript-v2.0.0-Runner.jar js-compat.bila.js
+          pause
+          EOF
+          cat > "$W/BILA-FROM-JS.cmd" <<'EOF'
+          @echo off
+          if "%~1"=="" (
+            echo Cach dung: BILA-FROM-JS.cmd input.js [output.bila.js]
+            exit /b 1
+          )
+          set OUT=%~2
+          if "%OUT%"=="" set OUT=output.bila.js
+          python bilac_v2.py from-js "%~1" "%OUT%"
+          EOF
+          cat > "$W/BILA-TO-JS.cmd" <<'EOF'
+          @echo off
+          if "%~1"=="" (
+            echo Cach dung: BILA-TO-JS.cmd input.bila.js [output.js]
+            exit /b 1
+          )
+          set OUT=%~2
+          if "%OUT%"=="" set OUT=output.js
+          python bilac_v2.py to-js "%~1" "%OUT%"
+          EOF
+          cat > "$W/README-WINDOWS.txt" <<'EOF'
+          BilaScript v2.0.0
+          ==================
+
+          Runtime Java: can Java 8+ de chay JAR. Source legacy hien van build bang JDK 8.
+          Tool bilac_v2.py: can Python 3 neu dung JS <-> Bila lexical bridge.
+
+          Chay mau:
+            RUN-DEFAULT.cmd
+            RUN-STRICT.cmd
+            RUN-JS-COMPAT.cmd
+
+          Chay tep rieng:
+            java -jar BilaScript-v2.0.0-Runner.jar app.bila.js
+
+          Bila -> JavaScript:
+            java -jar BilaScript-v2.0.0-Babyl2JS.jar app.bila.js app.js
+
+          JavaScript -> Bila canonical:
+            python bilac_v2.py from-js source.js source.bila.js
+
+          Profiles:
+            ---bila---        canonical CVNSS4.0 + English compatibility
+            ---bila:strict--- canonical Bila keyword profile
+            ---bila:js---     JavaScript migration profile
+
+          Luu y: JAR runtime ke thua Rhino 1.7R2, khong phai full modern ECMAScript runtime.
+          EOF
+
+          (cd release/windows && zip -qr ../assets/BilaScript-v2.0.0-Windows-x64.zip BilaScript-v2.0.0)
+
+          T=release/tooling/BilaScript-v2.0.0-Tooling
+          mkdir -p "$T/spec" "$T/examples" "$T/docs"
+          cp tools/bilac_v2.py "$T/"
+          cp spec/bila-vocabulary-v2.json "$T/spec/"
+          cp spec/BilaScript-2.0.ebnf "$T/spec/"
+          cp spec/PROFILE_MODES.md "$T/spec/"
+          cp spec/JAVASCRIPT_COMPATIBILITY.md "$T/spec/"
+          cp spec/CVNSS40_CANONICAL.md "$T/spec/"
+          cp examples/v2/* "$T/examples/"
+          cp docs/BILASCRIPT_v2.0.0.md "$T/docs/"
+          cp LICENSE.txt "$T/"
+          (cd release/tooling && zip -qr ../assets/BilaScript-v2.0.0-Tooling.zip BilaScript-v2.0.0-Tooling)
+
+          cd release/assets
+          sha256sum \
+            BilaScript-v2.0.0-Runner.jar \
+            BilaScript-v2.0.0-Babyl2JS.jar \
+            BilaScript-v2.0.0-Windows-x64.zip \
+            BilaScript-v2.0.0-Tooling.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create release notes
+        run: |
+          cat > release/RELEASE_NOTES.md <<'EOF'
+          # BilaScript v2.0.0 — JavaScript-compatible CVNSS4.0 Grammar
+
+          BilaScript 2.0 giữ **cấu trúc và cú pháp JavaScript** nhưng chuẩn hóa lớp semantic vocabulary sang CVNSS4.0. Đây là bước chuyển từ một native language mode đơn lẻ ở v1.2 sang một language profile có grammar, vocabulary máy đọc và tooling riêng.
+
+          ## Ba profile ngôn ngữ
+
+          - `---bila---` — CVNSS4.0 canonical + English compatibility fallback.
+          - `---bila:strict---` — tokenizer canonical; English keyword fallback không được nạp khi đã có spelling Bila.
+          - `---bila:js---` — profile di trú, chấp nhận JavaScript vocabulary và Bila vocabulary.
+          - Các alias cũ `---cvss---`, `---cvnss---`, `---cvnss40---`, `---cvnss4---` vẫn ánh xạ về Bila mặc định.
+
+          ## JavaScript-compatible grammar
+
+          BilaScript giữ nguyên `{ } ( ) [ ]`, dấu câu, toán tử, expression structure, array/object literal, member access và function-call syntax. Vocabulary canonical được ánh xạ thành semantic token rồi mới đi vào parser.
+
+          Ví dụ:
+
+          ```javascript
+          ---bila:strict---
+
+          haml_sob tong(a, b) {
+              trov_ved a + b;
+          }
+
+          bilb ds = moix Magz(10, 20, 30);
+          neub (ds.dof_zail > 0) {
+              java.lang.System.out.println(tong(ds[0], ds[1]));
+          }
+          ```
+
+          ## Đặc tả và tooling
+
+          - `spec/BilaScript-2.0.ebnf` — EBNF core grammar.
+          - `spec/bila-vocabulary-v2.json` — vocabulary máy đọc, sinh từ `Cvnss40.java`.
+          - `spec/PROFILE_MODES.md` — định nghĩa 3 profile.
+          - `spec/JAVASCRIPT_COMPATIBILITY.md` — chính sách tương thích.
+          - `tools/bilac_v2.py` — lexical bridge `from-js`, `to-js`, `fmt`, `check --strict`.
+
+          `bilac_v2.py` không thay string/comment và chỉ canonicalize property/method ở ngữ cảnh member access. Đây là lexical bridge có chủ đích, **không phải full ECMAScript parser**.
+
+          ## Xác minh
+
+          GitHub Actions đã xác minh v2 trên Ubuntu và Windows với JDK 8, Python 3.12 và Node.js. Bộ test bao gồm Runner, 3 profile, strict rejection, Babyl2JS, JavaScript → Bila canonical → JavaScript round-trip và chạy kết quả bằng Node.
+
+          ## Runtime compatibility
+
+          Java JAR hiện vẫn kế thừa Rhino 1.7R2/Babylscript. Vì vậy v2.0 **không tuyên bố full modern ECMAScript runtime**. Grammar/vocabulary/tooling v2 được tách rõ để các backend JavaScript hiện đại hơn có thể được bổ sung sau mà không phải đổi spelling canonical.
+
+          ## Assets
+
+          - `BilaScript-v2.0.0-Runner.jar`
+          - `BilaScript-v2.0.0-Babyl2JS.jar`
+          - `BilaScript-v2.0.0-Windows-x64.zip`
+          - `BilaScript-v2.0.0-Tooling.zip`
+          - `SHA256SUMS.txt`
+          EOF
+
+      - name: Publish GitHub Release v2.0.0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v2.0.0 >/dev/null 2>&1; then
+            gh release upload v2.0.0 release/assets/* --clobber
+            gh release edit v2.0.0 \
+              --title 'BilaScript v2.0.0 — JavaScript-compatible CVNSS4.0 Grammar' \
+              --notes-file release/RELEASE_NOTES.md \
+              --target "$GITHUB_SHA"
+          else
+            gh release create v2.0.0 release/assets/* \
+              --target "$GITHUB_SHA" \
+              --title 'BilaScript v2.0.0 — JavaScript-compatible CVNSS4.0 Grammar' \
+              --notes-file release/RELEASE_NOTES.md
+          fi
+
+      - name: Verify uploaded release checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf release/verify
+          mkdir -p release/verify
+          gh release download v2.0.0 --dir release/verify
+          cd release/verify
+          sha256sum -c SHA256SUMS.txt
