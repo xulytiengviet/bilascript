@@ -1,0 +1,284 @@
+name: Publish BilaScript v1.2.0
+
+on:
+  push:
+    branches:
+      - Babylscript1_7R2_BRANCH
+    paths:
+      - '.github/workflows/release-v1.2.0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, verify, checksum and publish v1.2.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Install Apache Ant and zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant zip
+
+      - name: Show toolchain
+        run: |
+          java -version
+          javac -version
+          ant -version
+          gh --version
+
+      - name: Verify v1.2.0 native source wiring
+        run: |
+          grep -F 'bila,' src/org/mozilla/javascript/TokenStream.java
+          grep -F 'languageModeCodes.put("bila"' src/org/mozilla/javascript/BabylTokenizer.java
+          grep -F 'createBilaTokenizer' src/org/mozilla/javascript/babylscript/BabylGenericTokenizer.java
+          grep -F 'LanguageMode.bila' src/org/mozilla/javascript/babylscript/TranslatedNameBindings.java
+          grep -F 'VERSION = "1.2.0"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          grep -F 'LANGUAGE_CODE = "bila"' src/org/mozilla/javascript/babylscript/gen/Cvnss40.java
+          grep -F -- '---bila---' babylrunner/sample.bila.js
+
+      - name: Build Runner and Babyl2JS
+        run: |
+          ant clean
+          ant babylscriptrun
+          ant babyl2js
+          test -s build/babylscriptrun.jar
+          test -s build/babyl2js.jar
+
+      - name: Native ---bila--- runtime test
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.bila.js | tee build/release-native-output.txt
+          grep -F 'Xin chaol BilaScript' build/release-native-output.txt
+          grep -F 'Xin chaol CVNSS4.0' build/release-native-output.txt
+          grep -F 'Dof zail: 3' build/release-native-output.txt
+
+      - name: Legacy source compatibility test
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/release-legacy-output.txt
+          grep -F 'Xin chaol BilaScript' build/release-legacy-output.txt
+          grep -F 'Xin chaol CVNSS4.0' build/release-legacy-output.txt
+
+      - name: Babyl2JS native compiler test
+        run: |
+          java -jar build/babyl2js.jar babylrunner/sample.bila.js build/release-sample.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.bila.js build/release-sample.html
+          test -s build/release-sample.js
+          test -s build/release-sample.html
+          grep -F "'bila'" build/release-sample.js
+          grep -F 'dof_zail' build/release-sample.js
+
+      - name: Prepare v1.2.0 release assets
+        run: |
+          set -euo pipefail
+          rm -rf release-dist
+          mkdir -p release-dist/BilaScript-v1.2.0
+
+          cp build/babylscriptrun.jar release-dist/BilaScript-v1.2.0-Runner.jar
+          cp build/babyl2js.jar release-dist/BilaScript-v1.2.0-Babyl2JS.jar
+
+          cp release-dist/BilaScript-v1.2.0-Runner.jar release-dist/BilaScript-v1.2.0/
+          cp release-dist/BilaScript-v1.2.0-Babyl2JS.jar release-dist/BilaScript-v1.2.0/
+          cp babylrunner/sample.bila.js release-dist/BilaScript-v1.2.0/sample.bila.js
+          cp babylrunner/sample.cvss.js release-dist/BilaScript-v1.2.0/sample-v1.0-legacy.cvss.js
+          cp docs/BILASCRIPT_LANGUAGE_v1.2.0.md release-dist/BilaScript-v1.2.0/BILASCRIPT-LANGUAGE.md
+          cp docs/WINDOWS_BUILD.md release-dist/BilaScript-v1.2.0/WINDOWS-BUILD.md
+          cp LICENSE.txt release-dist/BilaScript-v1.2.0/LICENSE.txt
+
+          cat > release-dist/BilaScript-v1.2.0/RUN-SAMPLE.cmd <<'CMD'
+          @echo off
+          cd /d "%~dp0"
+          java -jar BilaScript-v1.2.0-Runner.jar sample.bila.js
+          echo.
+          pause
+          CMD
+
+          cat > release-dist/BilaScript-v1.2.0/RUN-BILA.cmd <<'CMD'
+          @echo off
+          cd /d "%~dp0"
+          if "%~1"=="" (
+            echo Cach dung: RUN-BILA.cmd tenfile.bila.js
+            echo Vi du: RUN-BILA.cmd sample.bila.js
+            pause
+            exit /b 1
+          )
+          java -jar BilaScript-v1.2.0-Runner.jar "%~1"
+          CMD
+
+          cat > release-dist/BilaScript-v1.2.0/COMPILE-SAMPLE.cmd <<'CMD'
+          @echo off
+          cd /d "%~dp0"
+          java -jar BilaScript-v1.2.0-Babyl2JS.jar sample.bila.js sample.compiled.js
+          java -jar BilaScript-v1.2.0-Babyl2JS.jar -html sample.bila.js sample.html
+          echo Da tao sample.compiled.js va sample.html
+          echo.
+          pause
+          CMD
+
+          cat > release-dist/BilaScript-v1.2.0/README-WINDOWS.txt <<'TXT'
+          BilaScript v1.2.0 - Native CVNSS4.0
+          ===================================
+
+          Chi thi chinh:
+              ---bila---
+
+          Alias tuong thich:
+              ---cvss---
+              ---cvnss---
+              ---cvnss40---
+              ---cvnss4---
+
+          Chay sample:
+              RUN-SAMPLE.cmd
+
+          Chay file cua ban:
+              RUN-BILA.cmd tenfile.bila.js
+
+          Hoac dung truc tiep:
+              java -jar BilaScript-v1.2.0-Runner.jar tenfile.bila.js
+
+          Dich sang JavaScript:
+              java -jar BilaScript-v1.2.0-Babyl2JS.jar tenfile.bila.js output.js
+
+          Dich sang HTML:
+              java -jar BilaScript-v1.2.0-Babyl2JS.jar -html tenfile.bila.js output.html
+
+          Release duoc build/xac minh bang Temurin JDK 8.
+          TXT
+
+          (cd release-dist && zip -r BilaScript-v1.2.0-Windows-x64.zip BilaScript-v1.2.0)
+
+          cd release-dist
+          sha256sum \
+            BilaScript-v1.2.0-Runner.jar \
+            BilaScript-v1.2.0-Babyl2JS.jar \
+            BilaScript-v1.2.0-Windows-x64.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create release notes
+        run: |
+          cat > release-dist/RELEASE_NOTES.md <<'MD'
+          # BilaScript v1.2.0 — Native CVNSS4.0 JavaScript/ECMAScript
+
+          **BilaScript v1.2.0** nâng lớp CVNSS4.0 từ custom channel lịch sử của Babylscript thành một **language mode native trong engine**.
+
+          ## Thay đổi kiến trúc chính
+
+          - Chỉ thị chuẩn mới: `---bila---`.
+          - Thêm `TokenStream.LanguageMode.bila` thực sự.
+          - Lexer nhận `bila`, `cvss`, `cvnss`, `cvnss40`, `cvnss4` và quy về cùng native mode.
+          - Thêm `BabylGenericTokenizer.createBilaTokenizer()`.
+          - `TranslatedNameBindings` có namespace `bila` native cho built-in object, property và method.
+          - Runner/Babyl2JS không còn mượn custom channel `test` cho BilaScript.
+          - `---cvss---` và các chỉ thị cũ vẫn chạy để tương thích v1.0.0.
+
+          ## CVNSS4.0 hóa sâu hơn
+
+          v1.2.0 mở rộng từ khóa và API theo nguyên tắc **CVNSS4.0 tối đa, ECMAScript parser-safe**. Ví dụ:
+
+          | ECMAScript/API | BilaScript v1.2.0 |
+          |---|---|
+          | `var` | `bilb` |
+          | `function` | `haml_sob` |
+          | `if` | `neub` |
+          | `else` | `kac` |
+          | `return` | `trov_ved` |
+          | `new` | `moix` |
+          | `Array` | `Magz` |
+          | `length` | `dof_zail` |
+          | `call` | `goir` |
+          | `apply` | `ap_zugr` |
+          | `parseInt` | `fany_tikj_sob_wyly` |
+          | `parseFloat` | `fany_tikj_sob_thuch` |
+          | `toString` | `denb_chujg` |
+          | `sort` | `sapx_xepb` |
+          | `map` | `ahj_xar` |
+          | `random` | `waug_nhily` |
+          | `round` | `laml_tronl` |
+          | `sqrt` | `cano_bacf_hai` |
+
+          Các keyword/API gốc vẫn có thể được dùng làm fallback khi chưa có ánh xạ duy nhất, khi có va chạm parser, hoặc để giữ tương thích mã cũ. Điều này phù hợp với bản chất many-to-one của CVNSS4.0 và tránh đổi tên mù làm hỏng semantics.
+
+          ## Ví dụ native
+
+          ```javascript
+          ---bila---
+
+          haml_sob chao(ten) {
+              neub (ten == voy_jaj_trir) {
+                  trov_ved "Xin chaol BilaScript v1.2.0!";
+              } kac {
+                  trov_ved "Xin chaol " + ten;
+              }
+          }
+
+          bilb danh_sach = moix Magz("BilaScript", "CVNSS4.0");
+          danh_sach.dayq("Native bila");
+          java.lang.System.out.println("Dof zail: " + danh_sach.dof_zail);
+          ```
+
+          ## Xác minh
+
+          Source v1.2.0 đã được kiểm thử trên **Ubuntu + JDK 8** và **Windows + JDK 8**. Release workflow còn build lại từ source, chạy native `---bila---`, kiểm tra tương thích `---cvss---`, build Babyl2JS, sinh JavaScript/HTML và kiểm tra SHA-256 trước khi phát hành.
+
+          ## Asset
+
+          - `BilaScript-v1.2.0-Runner.jar`
+          - `BilaScript-v1.2.0-Babyl2JS.jar`
+          - `BilaScript-v1.2.0-Windows-x64.zip`
+          - `SHA256SUMS.txt`
+
+          ## Phạm vi hỗ trợ
+
+          “Toàn diện” trong v1.2.0 là CVNSS4.0 hóa tối đa **bề mặt ngôn ngữ mà codebase Rhino 1.7R2/Babylscript hiện hỗ trợ**. Đây không phải tuyên bố hỗ trợ toàn bộ ECMAScript hiện đại, Node.js hay TypeScript.
+          MD
+
+      - name: Publish GitHub Release v1.2.0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.2.0 >/dev/null 2>&1; then
+            echo 'Release v1.2.0 already exists; replacing uploaded assets.'
+            gh release upload v1.2.0 \
+              release-dist/BilaScript-v1.2.0-Runner.jar \
+              release-dist/BilaScript-v1.2.0-Babyl2JS.jar \
+              release-dist/BilaScript-v1.2.0-Windows-x64.zip \
+              release-dist/SHA256SUMS.txt --clobber
+            gh release edit v1.2.0 \
+              --title 'BilaScript v1.2.0 — Native CVNSS4.0 JavaScript/ECMAScript' \
+              --notes-file release-dist/RELEASE_NOTES.md
+          else
+            gh release create v1.2.0 \
+              release-dist/BilaScript-v1.2.0-Runner.jar \
+              release-dist/BilaScript-v1.2.0-Babyl2JS.jar \
+              release-dist/BilaScript-v1.2.0-Windows-x64.zip \
+              release-dist/SHA256SUMS.txt \
+              --target "$GITHUB_SHA" \
+              --title 'BilaScript v1.2.0 — Native CVNSS4.0 JavaScript/ECMAScript' \
+              --notes-file release-dist/RELEASE_NOTES.md
+          fi
+
+      - name: Verify uploaded release checksums
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p verify-release
+          gh release download v1.2.0 \
+            --pattern 'BilaScript-v1.2.0-Runner.jar' \
+            --pattern 'BilaScript-v1.2.0-Babyl2JS.jar' \
+            --pattern 'BilaScript-v1.2.0-Windows-x64.zip' \
+            --pattern 'SHA256SUMS.txt' \
+            --dir verify-release
+          cd verify-release
+          sha256sum -c SHA256SUMS.txt
