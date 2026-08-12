@@ -61,7 +61,7 @@ jobs:
         run: |
           grep -F 'KW_IF' v3/src/vocabulary.js
           grep -F 'BILA-S310' v3/src/normalize.js
-          grep -F 'source map' v3/PERFORMANCE_CONTRACT.md
+          grep -F 'Source map' v3/PERFORMANCE_CONTRACT.md
 
       - name: Verify Pascal-inspired website and history
         shell: bash
