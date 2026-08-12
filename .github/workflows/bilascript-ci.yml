@@ -44,10 +44,7 @@ jobs:
         run: |
           java -jar build/babylscriptrun.jar examples/v2/strict.bila.js | tee build/v2-strict.txt
           grep -F '3' build/v2-strict.txt
-          cat > build/strict-invalid.bila.js <<'EOF'
-          ---bila:strict---
-          function bad() { return 1; }
-          EOF
+          printf '%s\n' '---bila:strict---' 'function bad() { return 1; }' > build/strict-invalid.bila.js
           if java -jar build/babylscriptrun.jar build/strict-invalid.bila.js; then
             echo 'Strict profile accepted English canonical keyword'
             exit 1
@@ -124,10 +121,7 @@ jobs:
           if (-not ($strict -match '3')) { throw 'Strict profile failed' }
           $js = java -jar build/babylscriptrun.jar examples/v2/js-compat.bila.js
           if (-not ($js -match '30')) { throw 'JS migration profile failed' }
-          @'
----bila:strict---
-function bad() { return 1; }
-'@ | Set-Content -Encoding UTF8 build/strict-invalid.bila.js
+          @('---bila:strict---', 'function bad() { return 1; }') | Set-Content -Encoding UTF8 build/strict-invalid.bila.js
           java -jar build/babylscriptrun.jar build/strict-invalid.bila.js 2>$null
           if ($LASTEXITCODE -eq 0) { throw 'Strict profile accepted English keyword' }
       - name: Test Babyl2JS v2
