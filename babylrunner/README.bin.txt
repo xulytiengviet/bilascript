@@ -1,70 +1,77 @@
-The code for Babylscript is based on Mozilla's Rhino JavaScript interpreter, 
-version 1.7R2. Since the Babylscript implementation is merely a modification
-of Rhino's source code, the Babylscript code has the same license terms (a mix 
-of MPL1.1 and GPL2).
+BILASCRIPT / BABYLSCRIPT - HƯỚNG DẪN BỘ CÔNG CỤ DÒNG LỆNH
+=========================================================
 
-This package contains two jar files:
+Mã nguồn Babylscript dựa trên trình thông dịch JavaScript Mozilla Rhino 1.7R2.
+Do Babylscript là biến thể của Rhino nên các thành phần kế thừa tiếp tục sử dụng
+các điều khoản giấy phép tương ứng của mã nguồn gốc, chủ yếu theo mô hình giấy
+phép kép MPL 1.1 / GPL 2.0.
 
-babylscriptrun.jar is a Java-based Babylscript engine wrapped in simple
-harness that lets you run Babylscript/Rhino/JavaScript code from the 
-command-line. You can script Java using Babylscript code using this
-engine. You need Java (version 1.5 or later) to run this jar file.
+Gói công cụ có hai tệp JAR chính:
 
-babyl2js.jar is a Babylscript to JavaScript translator. It translates
-Babylscript code into regular JavaScript code that can be run in 
-a browser. 
+1. babylscriptrun.jar
+   Trình chạy Babylscript dựa trên Java. Công cụ cung cấp một lớp bao đơn giản
+   để thực thi mã Babylscript/Rhino/JavaScript từ dòng lệnh và có thể gọi trực
+   tiếp các lớp Java từ script.
+
+2. babyl2js.jar
+   Trình dịch Babylscript sang JavaScript thông thường để mã kết quả có thể chạy
+   trong trình duyệt.
 
 
-JAVA BABYLSCRIPT ENGINE
-=======================
+TRÌNH CHẠY BABYLSCRIPT TRÊN JAVA
+================================
 
-QUICK-START GUIDE 
+BẮT ĐẦU NHANH
 
-A sample HelloWorld Babylscript program is provided called "sample.js". 
-Run this program using
+Repo có sẵn ví dụ Hello World tại "sample.js". Chạy bằng:
 
    java -jar babylscriptrun.jar sample.js
 
+THÔNG TIN BỔ SUNG
 
-ADDITIONAL INFO
-
-You can also run multiple files by listing each one in turn. This is useful
-for including libraries.
+Có thể chạy nhiều tệp theo thứ tự để nạp thư viện trước chương trình chính:
 
    java -jar babylscriptrun.jar lib.js sample.js
-   
-The programs run using this Babylscript harness must be encoded in UTF-8 
-(e.g. in Windows Notepad, when you choose the "Save As..." option, there is an
-option that lets you change the encoding). 
+
+Các tệp nguồn dùng với trình chạy phải được lưu ở UTF-8 để bảo đảm ký tự Unicode
+và các ngôn ngữ không dùng bảng chữ cái Latin được xử lý đúng.
 
 
-BABYLSCRIPT TO JAVASCRIPT COMPILER
-==================================
+TRÌNH DỊCH BABYLSCRIPT SANG JAVASCRIPT
+======================================
 
-QUICK-START GUIDE 
+BẮT ĐẦU NHANH
 
-A sample HelloWorld Babylscript program is provided called "sample.babyl2js.js". 
-Translate it to JavaScript using
+Ví dụ nguồn nằm tại "sample.babyl2js.js". Chuyển tệp này sang JavaScript được
+bọc trong một trang HTML bằng:
 
    java -jar babyl2js.jar -html sample.babyl2js.js output.html
-   
-Then, open the resulting output.html file in a browser to run the code.
+
+Sau đó mở output.html bằng trình duyệt để chạy kết quả.
+
+THÔNG TIN BỔ SUNG
+
+Trình dịch nhận tệp nguồn Babylscript mã hóa UTF-8 và tạo tệp JavaScript đầu ra
+cũng theo UTF-8.
+
+Các tùy chọn dòng lệnh chính:
+
+   -html
+      Bọc mã kết quả trong cấu trúc HTML và thẻ <script>...</script> để tệp đầu
+      ra có thể mở trực tiếp trong trình duyệt.
+
+   -noheaders
+      Không chèn thư viện runtime Babylscript vào phần đầu của mã kết quả.
+
+Nếu một ứng dụng gồm nhiều tệp Babylscript/JavaScript, runtime chỉ cần xuất hiện
+trong tệp đầu tiên được trang HTML tải. Chèn runtime nhiều lần vẫn có thể chạy,
+nhưng sẽ làm tăng kích thước đầu ra không cần thiết.
 
 
-ADDITIONAL INFO 
+LƯU Ý CHO BILASCRIPT
+====================
 
-The babyl2js translator takes two arguments: an input text file of Babylscript
-code encoded in UTF-8 and the output file where the translated JavaScript
-code will be put (again in UTF-8).
-
-The translator tool has two command-line options. The "-html" option causes
-the translator to wrap the resulting output with html <script>...</script>
-tags so that the resulting file can be opened directly in a browser (as opposed 
-to having the embed the JavaScript file in a separate html file). The "-noheaders"
-option will disable the inclusion of the Babylscript runtime library
-in the resulting JavaScript code. Although the Babylscript library is needed
-to run the translated JavaScript code, if a program consists of multiple
-Babylscript/JavaScript files, this runtime library only needs to be included
-in the first JavaScript file to be loaded by an html page. The code runs
-fine if the runtime library is included more than once, but your programs
-will be smaller if they are only included once.   
+BilaScript là fork định hướng Việt hóa của Babylscript. Tài liệu tiếng Việt đầy
+đủ hơn nằm tại README.md ở thư mục gốc. Engine hiện vẫn giữ nguyên danh sách chế
+độ ngôn ngữ của Babylscript gốc; hỗ trợ cú pháp tiếng Việt ---vi--- cần được bổ
+sung ở cấp tokenizer, bảng từ khóa, ánh xạ thư viện chuẩn và kiểm thử.
