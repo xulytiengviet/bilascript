@@ -1,0 +1,9 @@
+from pathlib import Path
+p=Path(__file__).resolve().parents[1]/'README.md'
+s=p.read_text(encoding='utf-8')
+s=s.replace('[![BilaScript v1.2.0 Native CI](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/bilascript-ci.yml)', '[![BilaScript v3 Native Frontend CI](https://github.com/xulytiengviet/bilascript/actions/workflows/v3-ci.yml/badge.svg?branch=Babylscript1_7R2_BRANCH)](https://github.com/xulytiengviet/bilascript/actions/workflows/v3-ci.yml)')
+s=s.replace('https://img.shields.io/badge/release-v2.0.0-blue', 'https://img.shields.io/badge/release-v3.0.0-blue')
+s=s.replace('> **BilaScript là một biến thể JavaScript (ECMAScript) mã nguồn mở, phát triển từ Babylscript trên nền Mozilla Rhino, dành cho cộng đồng học tập, nghiên cứu và yêu thích CVNSS4.0.**', '> **BilaScript v3 là frontend ngôn ngữ lập trình CVNSS4.0 có compiler riêng; JavaScript là backend thực thi đầu tiên. Dòng v1–v2 từ Rhino/Babylscript được giữ như lớp lịch sử và tương thích.**')
+s=s.replace('![Java](https://img.shields.io/badge/Java-Rhino%201.7R2-orange?logo=openjdk)\n![ECMAScript](https://img.shields.io/badge/ECMAScript-Multilingual-blue)\n![CVNSS4.0](https://img.shields.io/badge/CVNSS4.0-Translation-0b63ce)\n![Encoding](https://img.shields.io/badge/Encoding-UTF--8-success)\n![License](https://img.shields.io/badge/License-MPL%201.1%20%2F%20GPL%202.0-green)', '![Frontend](https://img.shields.io/badge/Frontend-Bila%20Lexer%20%2B%20Parser%20%2B%20AST-0b63ce)\n![Backend](https://img.shields.io/badge/Backend-JavaScript-f7df1e)\n![CVNSS4.0](https://img.shields.io/badge/CVNSS4.0-Canonical-0b63ce)\n![License v3](https://img.shields.io/badge/v3%20Core-MIT-success)\n![Legacy](https://img.shields.io/badge/Legacy-Upstream%20licenses-lightgrey)')
+p.write_text(s,encoding='utf-8')
+print('README v3 normalized')
