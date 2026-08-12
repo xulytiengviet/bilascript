@@ -1,0 +1,130 @@
+name: BilaScript CVNSS4.0 CI
+
+on:
+  push:
+    branches:
+      - Babylscript1_7R2_BRANCH
+  pull_request:
+    branches:
+      - Babylscript1_7R2_BRANCH
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-jdk8:
+    name: Ubuntu / JDK 8 / Ant
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Install Apache Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Show toolchain
+        run: |
+          java -version
+          javac -version
+          ant -version
+
+      - name: Build BilaScript runner
+        run: ant babylscriptrun
+
+      - name: Run CVNSS4.0 smoke test
+        run: |
+          java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js | tee build/runner-output.txt
+          grep -F "Xin chaol BilaScript" build/runner-output.txt
+          grep -F "Xin chaol CVNSS4.0" build/runner-output.txt
+
+      - name: Build Babyl2JS compiler
+        run: ant babyl2js
+
+      - name: Translate CVNSS4.0 to JavaScript and HTML
+        run: |
+          java -jar build/babyl2js.jar babylrunner/sample.cvss.js build/sample.cvss.compiled.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js build/sample.cvss.html
+          test -s build/sample.cvss.compiled.js
+          test -s build/sample.cvss.html
+          grep -F "function" build/sample.cvss.compiled.js
+
+      - name: Upload Linux build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilascript-linux-jdk8
+          path: |
+            build/babylscriptrun.jar
+            build/babyl2js.jar
+            build/runner-output.txt
+            build/sample.cvss.compiled.js
+            build/sample.cvss.html
+
+  windows-jdk8:
+    name: Windows / JDK 8 / Ant
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Install Apache Ant
+        shell: powershell
+        run: choco install ant --no-progress -y
+
+      - name: Show toolchain
+        shell: powershell
+        run: |
+          java -version
+          javac -version
+          ant -version
+
+      - name: Build BilaScript runner
+        shell: powershell
+        run: ant babylscriptrun
+
+      - name: Run CVNSS4.0 smoke test
+        shell: powershell
+        run: |
+          $output = java -jar build/babylscriptrun.jar babylrunner/sample.cvss.js
+          $output | Tee-Object -FilePath build/runner-output-windows.txt
+          if (-not ($output -match 'Xin chaol BilaScript')) { throw 'Missing BilaScript smoke-test output' }
+          if (-not ($output -match 'Xin chaol CVNSS4.0')) { throw 'Missing CVNSS4.0 smoke-test output' }
+
+      - name: Build Babyl2JS compiler
+        shell: powershell
+        run: ant babyl2js
+
+      - name: Translate CVNSS4.0 to JavaScript and HTML
+        shell: powershell
+        run: |
+          java -jar build/babyl2js.jar babylrunner/sample.cvss.js build/sample.cvss.compiled.js
+          java -jar build/babyl2js.jar -html babylrunner/sample.cvss.js build/sample.cvss.html
+          if (-not (Test-Path build/sample.cvss.compiled.js)) { throw 'Missing compiled JavaScript' }
+          if (-not (Test-Path build/sample.cvss.html)) { throw 'Missing HTML output' }
+          if ((Get-Item build/sample.cvss.compiled.js).Length -eq 0) { throw 'Compiled JavaScript is empty' }
+          if ((Get-Item build/sample.cvss.html).Length -eq 0) { throw 'HTML output is empty' }
+
+      - name: Upload Windows build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilascript-windows-jdk8
+          path: |
+            build/babylscriptrun.jar
+            build/babyl2js.jar
+            build/runner-output-windows.txt
+            build/sample.cvss.compiled.js
+            build/sample.cvss.html
