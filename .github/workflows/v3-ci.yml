@@ -1,0 +1,64 @@
+name: BilaScript v3 Native Frontend CI
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'v3/**'
+      - 'index.html'
+      - 'docs/BILASCRIPT_v3.0.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v3.0.0.md'
+      - '.github/workflows/v3-ci.yml'
+  pull_request:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'v3/**'
+      - 'index.html'
+      - 'docs/BILASCRIPT_v3.0.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v3.0.0.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: ${{ matrix.os }} / Node 24
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Test native frontend
+        working-directory: v3
+        run: npm test
+      - name: Check example
+        run: node v3/bin/bila.js check v3/examples/hello.bila
+      - name: Compile example
+        run: node v3/bin/bila.js compile v3/examples/hello.bila -o v3/examples/hello.compiled.js
+      - name: Run generated JavaScript
+        run: node v3/examples/hello.compiled.js
+      - name: Verify browser-safe compiler modules
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import {compile, parse, lex} from './v3/src/compiler.js';
+          const src='---bila:strict---\nhaml_sob f(a){ trov_ved a + 1; } console.log(f(4));';
+          const r=compile(src);
+          if (r.backend !== 'javascript') throw new Error('wrong backend');
+          if (parse(src).ast.type !== 'Program') throw new Error('AST failed');
+          if (lex(src).mode !== 'strict') throw new Error('profile failed');
+          console.log('frontend modules OK');
+          NODE
+      - name: Verify scientific site references live compiler
+        shell: bash
+        run: |
+          grep -F "./v3/src/compiler.js" index.html
+          grep -F "Đánh giá như bài báo khoa học" index.html
+          grep -F "Long Ngo" index.html
+          grep -F "MIT" index.html
