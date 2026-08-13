@@ -1,0 +1,110 @@
+name: Upgrade BilaScript v4.0.0 — Four-loop Frontend Hardening
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'tools/upgrade_v4.py'
+      - '.github/workflows/upgrade-v4.0.0.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bilascript-v4-upgrade
+  cancel-in-progress: false
+
+jobs:
+  four-loop-upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: Babylscript1_7R2_BRANCH
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Configure commit identity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: LOOP 1 — Compile-time safety
+        run: |
+          python tools/upgrade_v4.py --stage 1
+          cd v4
+          npm test
+          node bin/bila.js check examples/hello.bila
+          cd ..
+          grep -F 'BILA-T310' v4/src/normalize.js
+          grep -F 'parseTypeAnnotation' v4/src/parser.js
+          if grep -R -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' v4/src v4/test; then
+            echo 'Unexpected runtime helper in v4 source'; exit 1
+          fi
+          git add v4
+          git commit -m 'feat(v4-loop1): compile-time alias safety and type evidence'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+
+      - name: LOOP 2 — Tooling and language service
+        run: |
+          python tools/upgrade_v4.py --stage 2
+          cd v4
+          npm install --no-save --no-package-lock typescript@latest
+          npm test
+          node -e "import('./src/typescript-oracle.js').then(async m=>{const r=await m.analyzeWithTypeScript('const x=1; x.trim();');if(!r.available||!r.diagnostics.length)process.exit(2);console.log('TS oracle',r.version,r.diagnostics[0].code)})"
+          cd ..
+          grep -F 'Content-Length' v4/tools/bila-language-server.js
+          grep -F 'typescript' v4/src/typescript-oracle.js
+          git add v4
+          git commit -m 'feat(v4-loop2): language service LSP and offline TypeScript oracle'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+
+      - name: LOOP 3 — Modern JavaScript grammar
+        run: |
+          python tools/upgrade_v4.py --stage 3
+          cd v4
+          npm test
+          cd ..
+          grep -F 'KW_CLASS' v4/src/vocabulary.js
+          grep -F 'parseImportDeclaration' v4/src/parser.js
+          grep -F 'parseBindingPattern' v4/src/parser.js
+          git add v4
+          git commit -m 'feat(v4-loop3): modern grammar classes ESM destructuring async'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+
+      - name: LOOP 4 — Conformance hardening
+        run: |
+          python tools/upgrade_v4.py --stage 4
+          cd v4
+          npm test
+          npm run conformance
+          node bin/bila.js compile examples/hello.bila -o /tmp/bila-v4.js --map
+          node /tmp/bila-v4.js
+          cd ..
+          if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' /tmp/bila-v4.js; then
+            echo 'Runtime helper detected in generated JavaScript'; exit 1
+          fi
+          grep -F 'LOOP 4' v4/docs/LOOP4_AUDIT_v4.0.0.md
+          grep -F 'LỊCH SỬ NÂNG CẤP' index.html
+          grep -F 'Evidence-driven' docs/BILASCRIPT_v4.0.0.md
+          git add v4 README.md index.html docs/BILASCRIPT_v4.0.0.md docs/SCIENTIFIC_EVALUATION_v4.0.0.md
+          git commit -m 'feat: BilaScript v4.0.0 evidence-driven zero-cost frontend'
+          git push origin HEAD:Babylscript1_7R2_BRANCH
+
+      - name: Final four-loop audit
+        run: |
+          git log -4 --pretty=format:'%h %s'
+          test "$(node -p "require('./v4/package.json').version")" = '4.0.0'
+          test "$(git status --porcelain | wc -l)" -eq 0
+          echo 'BilaScript v4.0.0 four-loop hardening completed successfully.'
