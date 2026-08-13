@@ -76,7 +76,7 @@ jobs:
           rm -rf node_modules
           cd ..
           grep -F 'Content-Length' v4/tools/bila-language-server.js
-          grep -F 'mod.default||mod' v4/src/typescript-oracle.js
+          grep -F 'createRequire' v4/src/typescript-oracle.js
           git add v4
           if ! git diff --cached --quiet; then
             git commit -m 'feat(v4-loop2): language service LSP and offline TypeScript oracle'
