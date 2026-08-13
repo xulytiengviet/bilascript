@@ -1,0 +1,1 @@
+const vscode=require("vscode"),cp=require("child_process"),path=require("path");let proc;exports.activate=(ctx)=>{proc=cp.spawn(process.execPath,[path.join(ctx.extensionPath,"../../tools/bila-language-server.js")],{stdio:["pipe","pipe","inherit"]});ctx.subscriptions.push({dispose:()=>proc?.kill()});};exports.deactivate=()=>proc?.kill();

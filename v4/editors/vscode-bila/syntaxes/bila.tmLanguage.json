@@ -1,0 +1,18 @@
+{
+  "scopeName": "source.bila",
+  "patterns": [
+    {
+      "name": "keyword.control.bila",
+      "match": "\\b(neub|kac|vil|trogp_ki|haml_sob|trov_ved|bilb|moix|thuv|chupr_layb|nemj|cujb_cugl)\\b"
+    },
+    {
+      "name": "string.quoted.double.bila",
+      "begin": "\"",
+      "end": "\""
+    },
+    {
+      "name": "comment.line.double-slash.bila",
+      "match": "//.*$"
+    }
+  ]
+}

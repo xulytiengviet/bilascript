@@ -1,0 +1,36 @@
+{
+  "name": "bilascript-vscode",
+  "displayName": "BilaScript v4",
+  "version": "4.0.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:bila"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bila",
+        "aliases": [
+          "BilaScript",
+          "bila"
+        ],
+        "extensions": [
+          ".bila"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bila",
+        "scopeName": "source.bila",
+        "path": "./syntaxes/bila.tmLanguage.json"
+      }
+    ]
+  }
+}

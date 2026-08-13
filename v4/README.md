@@ -5,3 +5,7 @@
 Strict mode turns unresolved standard aliases into compile-time errors. Type annotations such as `bilb ds: Magz<Sob>` are erased before JavaScript code generation and exist only to prove lowering safety. No runtime translator/helper is introduced.
 
 MIT License · Copyright © 2026 Long Ngo · based on CVNSS4.0.
+
+## Stage 2 / v3.7 — Tooling & Language Service
+
+Adds native Bila language-service primitives, a minimal LSP stdio server, VS Code language metadata, and an optional offline TypeScript oracle. TypeScript is advisory; Bila remains the source of truth for CVNSS4.0 semantics and alias safety.
