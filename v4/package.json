@@ -1,0 +1,15 @@
+{
+  "name": "@bilascript/core",
+  "version": "3.6.0",
+  "description": "BilaScript v4 hardened CVNSS4.0 frontend with zero-cost JavaScript backend",
+  "type": "module",
+  "bin": {
+    "bila": "./bin/bila.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "example": "node bin/bila.js run examples/hello.bila"
+  },
+  "license": "MIT",
+  "author": "Long Ngo"
+}
