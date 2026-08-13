@@ -1,0 +1,19 @@
+{
+  "version": "4.0.0",
+  "contract": "Bila frontend / clean JavaScript backend / zero runtime helper",
+  "required": [
+    "strict-alias-negative-corpus",
+    "typed-alias-positive-corpus",
+    "operator-differential",
+    "modern-grammar-smoke",
+    "zero-helper-audit",
+    "source-map-smoke",
+    "language-service-smoke",
+    "typescript-oracle-optional"
+  ],
+  "notClaimed": [
+    "full Test262",
+    "full ECMAScript grammar",
+    "faster-than-JavaScript"
+  ]
+}

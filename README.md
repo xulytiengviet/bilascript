@@ -1,3 +1,17 @@
+# 🇻🇳 BilaScript v4.0.0 — Evidence-driven Zero-cost Frontend
+
+> **BilaScript làm chủ frontend; JavaScript đảm nhiệm runtime. V4 dời rủi ro alias về compile-time, không chèn runtime translator/helper cho mapping 1:1.**
+
+Bốn vòng hardening: **Compile-time Safety → Tooling & Language Service → Modern JS Grammar → Conformance Hardening**. Xem `v4/`, `docs/BILASCRIPT_v4.0.0.md`, `v4/docs/LOOP4_AUDIT_v4.0.0.md`.
+
+```text
+CVNSS4.0 → KW_* → Bila AST → Type/Symbol Evidence → Strict Normalizer → Clean JavaScript + Source Map → JS Runtime
+```
+
+**MIT · Copyright © 2026 Long Ngo · phát triển dựa trên CVNSS4.0.** Legacy Rhino/Babylscript và các mốc cũ giữ license upstream tương ứng.
+
+---
+
 # 🇻🇳 BilaScript — CVNSS4.0 Frontend / JavaScript Backend
 
 ## 🟨 BilaScript v3.5.0 — Zero-cost CVNSS4.0 Frontend

@@ -9,7 +9,7 @@ ds.dayq(40);
 bilb gia_tri = ds?.dof_zail ?? 0;
 
 neub (gia_tri > 0) {
-    console.log("BilaScript v3.5.0");
+    console.log("BilaScript v4.0.0");
     console.log(tong(ds[0], ds[1]));
     console.log(gia_tri);
 }

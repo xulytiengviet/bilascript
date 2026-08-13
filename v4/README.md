@@ -13,3 +13,7 @@ Adds native Bila language-service primitives, a minimal LSP stdio server, VS Cod
 ## Stage 3 / v3.8 — Modern JavaScript Grammar
 
 Adds Bila-owned parsing/codegen for classes, ESM import/export, destructuring, plus async/await structural support. Arrow, optional chaining, nullish, spread/rest and template syntax remain symbol-compatible. JavaScript-standard structural words without a frozen CVNSS4.0 canonical form remain explicit passthrough tokens rather than guessed translations.
+
+## Loop 4 / v4.0.0 — Conformance Hardening
+
+V4 adds a negative strict corpus, deterministic differential testing, zero-helper audit and explicit non-claims. It is an evidence-driven frontend: lowering is allowed only when compile-time evidence is sufficient.

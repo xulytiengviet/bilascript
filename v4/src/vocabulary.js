@@ -1,5 +1,5 @@
 /** BilaScript v3.5 canonical vocabulary. MIT License. Copyright (c) 2026 Long Ngo. */
-export const VERSION = "3.8.0";
+export const VERSION = "4.0.0";
 
 export const KEYWORD_SPECS = Object.freeze({
   haml_sob: { id: "KW_FUNCTION", js: "function" },
