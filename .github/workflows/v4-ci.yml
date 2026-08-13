@@ -1,0 +1,98 @@
+name: BilaScript v4.0 CI — Evidence-driven Frontend
+
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'v4/**'
+      - 'index.html'
+      - 'README.md'
+      - 'docs/BILASCRIPT_v4.0.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v4.0.0.md'
+      - '.github/workflows/v4-ci.yml'
+  pull_request:
+    paths:
+      - 'v4/**'
+      - 'index.html'
+      - 'README.md'
+      - 'docs/BILASCRIPT_v4.0.0.md'
+      - 'docs/SCIENTIFIC_EVALUATION_v4.0.0.md'
+      - '.github/workflows/v4-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  frontend-conformance:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [24]
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / Node ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install optional offline TypeScript oracle
+        working-directory: v4
+        shell: bash
+        run: npm install --no-save --no-package-lock 'typescript@5'
+
+      - name: Run complete v4 test suite
+        working-directory: v4
+        shell: bash
+        run: npm test
+
+      - name: Run conformance corpus
+        working-directory: v4
+        shell: bash
+        run: npm run conformance
+
+      - name: Verify offline TypeScript oracle
+        working-directory: v4
+        shell: bash
+        run: |
+          node -e "import('./src/typescript-oracle.js').then(async m=>{const r=await m.analyzeWithTypeScript('const x = ;');console.log(JSON.stringify({available:r.available,version:r.version,diagnostics:r.diagnostics.length}));if(!r.available||!r.diagnostics.length)process.exit(2)})"
+
+      - name: Compile v4 example with source map
+        shell: bash
+        run: node v4/bin/bila.js compile v4/examples/hello.bila -o generated-v4.js --map
+
+      - name: Execute generated JavaScript
+        shell: bash
+        run: node generated-v4.js
+
+      - name: Audit zero-runtime-helper contract
+        shell: bash
+        run: |
+          if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' generated-v4.js; then
+            echo 'Unexpected Bila runtime helper detected'
+            exit 1
+          fi
+
+      - name: Verify strict compile-time alias safety
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { compile } from './v4/src/compiler.js';
+          let failed=false;
+          try { compile('---bila:strict---\nbilb x=unknown(); x.dayq(1);'); }
+          catch (e) { failed=/BILA-T310/.test(String(e.message)); }
+          if (!failed) process.exit(2);
+          const good=compile('---bila:strict---\nbilb ds: Magz<Sob>=[1,2]; ds.dayq(3);');
+          if (!/ds\.push\(3\)/.test(good.code) || /Magz<Sob>|BilaRuntime/.test(good.code)) process.exit(3);
+          NODE
+
+      - name: Verify modern frontend and Pascal site
+        shell: bash
+        run: |
+          grep -F 'KW_CLASS' v4/src/vocabulary.js
+          grep -F 'parseImportDeclaration' v4/src/parser.js
+          grep -F 'Content-Length' v4/tools/bila-language-server.js
+          grep -F 'LỊCH SỬ NÂNG CẤP' index.html
+          grep -F -- '--bg:#001b33' index.html
+          grep -F -- '--yellow:#ffd43b' index.html
+          grep -F 'BilaScript v4.0.0' v4/examples/hello.bila
+          grep -F 'Evidence-driven' docs/BILASCRIPT_v4.0.0.md
