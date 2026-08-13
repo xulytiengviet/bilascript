@@ -10,6 +10,7 @@ on:
       - 'tools/v4_hotfix_typescript_oracle.py'
       - 'tools/v4_hotfix_stage3_generator.py'
       - 'tools/v4_hotfix_stage3_frontend.py'
+      - 'tools/v4_hotfix_stage4_release.py'
       - '.github/workflows/upgrade-v4.0.0.yml'
 
 permissions:
@@ -124,6 +125,7 @@ jobs:
           else
             echo 'Loop 4 checkpoint already present; validating v4.0.0.'
           fi
+          python tools/v4_hotfix_stage4_release.py
           cd v4
           npm test
           npm run conformance
@@ -133,9 +135,10 @@ jobs:
           if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' /tmp/bila-v4.js; then
             echo 'Runtime helper detected in generated JavaScript'; exit 1
           fi
-          grep -F 'LOOP 4' v4/docs/LOOP4_AUDIT_v4.0.0.md
+          grep -F 'Loop 4' v4/docs/LOOP4_AUDIT_v4.0.0.md
           grep -F 'LỊCH SỬ NÂNG CẤP' index.html
           grep -F 'Evidence-driven' docs/BILASCRIPT_v4.0.0.md
+          grep -F 'BilaScript v4.0.0' v4/examples/hello.bila
           git add v4 README.md index.html docs/BILASCRIPT_v4.0.0.md docs/SCIENTIFIC_EVALUATION_v4.0.0.md
           if ! git diff --cached --quiet; then
             git commit -m 'feat: BilaScript v4.0.0 evidence-driven zero-cost frontend'
