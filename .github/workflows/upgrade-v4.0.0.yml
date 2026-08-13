@@ -9,6 +9,7 @@ on:
       - 'tools/v4_hotfix_typeclose.py'
       - 'tools/v4_hotfix_typescript_oracle.py'
       - 'tools/v4_hotfix_stage3_generator.py'
+      - 'tools/v4_hotfix_stage3_frontend.py'
       - '.github/workflows/upgrade-v4.0.0.yml'
 
 permissions:
@@ -98,6 +99,7 @@ jobs:
           if [ "$DONE" != "true" ]; then
             python tools/v4_hotfix_stage3_generator.py
             python tools/upgrade_v4.py --stage 3
+            python tools/v4_hotfix_stage3_frontend.py
           else
             echo 'Loop 3 checkpoint already present; validating modern grammar.'
           fi
@@ -107,6 +109,7 @@ jobs:
           grep -F 'KW_CLASS' v4/src/vocabulary.js
           grep -F 'parseImportDeclaration' v4/src/parser.js
           grep -F 'parseBindingPattern' v4/src/parser.js
+          grep -F 'structural JavaScript passthrough' v4/src/lexer.js
           git add v4 tools/upgrade_v4.py
           if ! git diff --cached --quiet; then
             git commit -m 'feat(v4-loop3): modern grammar classes ESM destructuring async'
