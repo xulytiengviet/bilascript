@@ -7,6 +7,7 @@ on:
     paths:
       - 'tools/upgrade_v4.py'
       - 'tools/v4_hotfix_typeclose.py'
+      - 'tools/v4_hotfix_typescript_oracle.py'
       - '.github/workflows/upgrade-v4.0.0.yml'
 
 permissions:
@@ -57,22 +58,32 @@ jobs:
             echo 'Unexpected runtime helper in generated JavaScript'; exit 1
           fi
           git add v4
-          git commit -m 'feat(v4-loop1): compile-time alias safety and type evidence'
-          git push origin HEAD:Babylscript1_7R2_BRANCH
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat(v4-loop1): compile-time alias safety and type evidence'
+            git push origin HEAD:Babylscript1_7R2_BRANCH
+          else
+            echo 'Loop 1 checkpoint already present; continuing.'
+          fi
 
       - name: LOOP 2 — Tooling and language service
         run: |
           python tools/upgrade_v4.py --stage 2
+          python tools/v4_hotfix_typescript_oracle.py
           cd v4
           npm install --no-save --no-package-lock typescript@latest
           npm test
           node -e "import('./src/typescript-oracle.js').then(async m=>{const r=await m.analyzeWithTypeScript('const x=1; x.trim();');if(!r.available||!r.diagnostics.length)process.exit(2);console.log('TS oracle',r.version,r.diagnostics[0].code)})"
+          rm -rf node_modules
           cd ..
           grep -F 'Content-Length' v4/tools/bila-language-server.js
-          grep -F 'typescript' v4/src/typescript-oracle.js
+          grep -F 'mod.default||mod' v4/src/typescript-oracle.js
           git add v4
-          git commit -m 'feat(v4-loop2): language service LSP and offline TypeScript oracle'
-          git push origin HEAD:Babylscript1_7R2_BRANCH
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat(v4-loop2): language service LSP and offline TypeScript oracle'
+            git push origin HEAD:Babylscript1_7R2_BRANCH
+          else
+            echo 'Loop 2 checkpoint already present; continuing.'
+          fi
 
       - name: LOOP 3 — Modern JavaScript grammar
         run: |
@@ -84,8 +95,12 @@ jobs:
           grep -F 'parseImportDeclaration' v4/src/parser.js
           grep -F 'parseBindingPattern' v4/src/parser.js
           git add v4
-          git commit -m 'feat(v4-loop3): modern grammar classes ESM destructuring async'
-          git push origin HEAD:Babylscript1_7R2_BRANCH
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat(v4-loop3): modern grammar classes ESM destructuring async'
+            git push origin HEAD:Babylscript1_7R2_BRANCH
+          else
+            echo 'Loop 3 checkpoint already present; continuing.'
+          fi
 
       - name: LOOP 4 — Conformance hardening
         run: |
@@ -103,12 +118,16 @@ jobs:
           grep -F 'LỊCH SỬ NÂNG CẤP' index.html
           grep -F 'Evidence-driven' docs/BILASCRIPT_v4.0.0.md
           git add v4 README.md index.html docs/BILASCRIPT_v4.0.0.md docs/SCIENTIFIC_EVALUATION_v4.0.0.md
-          git commit -m 'feat: BilaScript v4.0.0 evidence-driven zero-cost frontend'
-          git push origin HEAD:Babylscript1_7R2_BRANCH
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat: BilaScript v4.0.0 evidence-driven zero-cost frontend'
+            git push origin HEAD:Babylscript1_7R2_BRANCH
+          else
+            echo 'Loop 4 checkpoint already present; continuing.'
+          fi
 
       - name: Final four-loop audit
         run: |
-          git log -4 --pretty=format:'%h %s'
+          git log -8 --pretty=format:'%h %s' | grep -E 'v4-loop1|v4-loop2|v4-loop3|BilaScript v4.0.0' || true
           test "$(node -p "require('./v4/package.json').version")" = '4.0.0'
           test "$(git status --porcelain | wc -l)" -eq 0
           echo 'BilaScript v4.0.0 four-loop hardening completed successfully.'
