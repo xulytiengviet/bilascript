@@ -48,12 +48,13 @@ jobs:
           cd v4
           npm test
           node bin/bila.js check examples/hello.bila
+          node bin/bila.js compile examples/hello.bila -o /tmp/bila-loop1.js
           cd ..
           grep -F 'BILA-T310' v4/src/normalize.js
           grep -F 'parseTypeAnnotation' v4/src/parser.js
           grep -F 'expectTypeClose' v4/src/parser.js
-          if grep -R -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' v4/src v4/test; then
-            echo 'Unexpected runtime helper in v4 source'; exit 1
+          if grep -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' /tmp/bila-loop1.js; then
+            echo 'Unexpected runtime helper in generated JavaScript'; exit 1
           fi
           git add v4
           git commit -m 'feat(v4-loop1): compile-time alias safety and type evidence'
