@@ -6,6 +6,7 @@ on:
     branches: [Babylscript1_7R2_BRANCH]
     paths:
       - 'tools/upgrade_v4.py'
+      - 'tools/v4_hotfix_typeclose.py'
       - '.github/workflows/upgrade-v4.0.0.yml'
 
 permissions:
@@ -43,12 +44,14 @@ jobs:
       - name: LOOP 1 — Compile-time safety
         run: |
           python tools/upgrade_v4.py --stage 1
+          python tools/v4_hotfix_typeclose.py
           cd v4
           npm test
           node bin/bila.js check examples/hello.bila
           cd ..
           grep -F 'BILA-T310' v4/src/normalize.js
           grep -F 'parseTypeAnnotation' v4/src/parser.js
+          grep -F 'expectTypeClose' v4/src/parser.js
           if grep -R -E 'BilaRuntime|BilaArray|__bilaRuntime|__bilaGet|__bilaCall' v4/src v4/test; then
             echo 'Unexpected runtime helper in v4 source'; exit 1
           fi
