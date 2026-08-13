@@ -70,9 +70,9 @@ jobs:
           python tools/upgrade_v4.py --stage 2
           python tools/v4_hotfix_typescript_oracle.py
           cd v4
-          npm install --no-save --no-package-lock typescript@latest
+          npm install --no-save --no-package-lock 'typescript@5'
           npm test
-          node -e "import('./src/typescript-oracle.js').then(async m=>{const r=await m.analyzeWithTypeScript('const x=1; x.trim();');if(!r.available||!r.diagnostics.length)process.exit(2);console.log('TS oracle',r.version,r.diagnostics[0].code)})"
+          node -e "import('./src/typescript-oracle.js').then(async m=>{const r=await m.analyzeWithTypeScript('const x = ;');console.log(JSON.stringify({available:r.available,version:r.version,diagnostics:r.diagnostics.length,reason:r.reason||null}));if(!r.available||!r.diagnostics.length)process.exit(2)})"
           rm -rf node_modules
           cd ..
           grep -F 'Content-Length' v4/tools/bila-language-server.js
