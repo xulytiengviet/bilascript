@@ -362,15 +362,15 @@ def stage3():
     code=code.replace('${expr(n.id)}(${n.params.map(expr).join(", ")})', '${expr(n.id)}(${n.params.map(pattern).join(", ")})')
     code=code.replace('n.params.map(expr).join(", ")', 'n.params.map(pattern).join(", ")')
     # add statement cases before ExpressionStatement
-    marker='      case "ExpressionStatement": emit(ind()+expr(n.expression)+";\\n"); break;'
+    marker='    case "ExpressionStatement": emit(ind()+expr(n.expression)+";\\n"); break;'
     modern_cases=r'''      case "ClassDeclaration": { emit(ind()+`class ${expr(n.id)}${n.superClass?` extends ${expr(n.superClass)}`:""} {\n`); level++; for(const md of n.body.body){ emit(ind()+(md.static?"static ":"")+(md.async?"async ":"")+`${md.key.name}(${md.params.map(pattern).join(", ")}) `); stmt(md.body); emit("\n"); } level--; emit(ind()+"}\n"); break; }
       case "ImportDeclaration": { const specs=n.specifiers.map(s=>s.type==="ImportDefaultSpecifier"?s.local.name:(s.imported.name===s.local.name?s.imported.name:`${s.imported.name} as ${s.local.name}`)); const head=n.specifiers[0]?.type==="ImportDefaultSpecifier"?specs[0]:`{ ${specs.join(", ")} }`; emit(ind()+`import ${head} from ${JSON.stringify(n.source.value)};\n`); break; }
       case "ExportNamedDeclaration": { if(n.declaration){ emit(ind()+"export "); const before=out.length; stmt(n.declaration); if(out.length>before&&out[before].startsWith(ind()))out[before]=out[before].slice(ind().length); } else emit(ind()+`export { ${n.specifiers.map(s=>s.local.name===s.exported.name?s.local.name:`${s.local.name} as ${s.exported.name}`).join(", ")} };\n`); break; }
       case "ExpressionStatement": emit(ind()+expr(n.expression)+";\n"); break;'''
     code=replace_required(code,marker,modern_cases,"codegen modern statements")
     # add expr Await, patterns helper before ast.body
-    code=replace_required(code,'      case "MemberExpression": return n.computed?', '      case "AwaitExpression": return `await ${expr(n.argument)}`;\n      case "MemberExpression": return n.computed?',"await codegen")
-    anchor='  ast.body.forEach(stmt); return out.join("").trimEnd()+"\\n";'
+    code=replace_required(code,'    case "MemberExpression":', '    case "AwaitExpression": return `await ${expr(n.argument)}`;\n    case "MemberExpression":',"await codegen")
+    anchor='  function blockExpr(b){'
     helper=r'''  function pattern(n){
     if(!n)return ""; if(n.type==="Identifier")return n.name; if(n.type==="RestElement")return "..."+pattern(n.argument);
     if(n.type==="ArrayPattern")return "["+n.elements.map(x=>x?pattern(x):"").join(", ")+"]";

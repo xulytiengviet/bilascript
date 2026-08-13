@@ -127,7 +127,9 @@ export function lex(input) {
         if (c === "`") { closed = true; break; }
       }
       if (!closed) throw new BilaSyntaxError("Template literal chưa đóng", start);
-      if (interpolation) throw new BilaSyntaxError("v3.5 chưa hạ CVNSS4.0 bên trong ${...}; hãy dùng nối chuỗi hoặc template không nội suy", start);
+      // Template interpolation is a structural JavaScript passthrough in v4.
+      // The complete template is preserved verbatim; CVNSS4.0 aliases inside ${...}
+      // are not semantically lowered yet, so no runtime helper or hidden rewrite is added.
       add("template", raw, raw, start); continue;
     }
 

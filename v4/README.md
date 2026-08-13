@@ -9,3 +9,7 @@ MIT License · Copyright © 2026 Long Ngo · based on CVNSS4.0.
 ## Stage 2 / v3.7 — Tooling & Language Service
 
 Adds native Bila language-service primitives, a minimal LSP stdio server, VS Code language metadata, and an optional offline TypeScript oracle. TypeScript is advisory; Bila remains the source of truth for CVNSS4.0 semantics and alias safety.
+
+## Stage 3 / v3.8 — Modern JavaScript Grammar
+
+Adds Bila-owned parsing/codegen for classes, ESM import/export, destructuring, plus async/await structural support. Arrow, optional chaining, nullish, spread/rest and template syntax remain symbol-compatible. JavaScript-standard structural words without a frozen CVNSS4.0 canonical form remain explicit passthrough tokens rather than guessed translations.

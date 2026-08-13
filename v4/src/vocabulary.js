@@ -1,5 +1,5 @@
 /** BilaScript v3.5 canonical vocabulary. MIT License. Copyright (c) 2026 Long Ngo. */
-export const VERSION = "3.7.0";
+export const VERSION = "3.8.0";
 
 export const KEYWORD_SPECS = Object.freeze({
   haml_sob: { id: "KW_FUNCTION", js: "function" },
@@ -19,7 +19,11 @@ export const KEYWORD_SPECS = Object.freeze({
   cujb_cugl: { id: "KW_FINALLY", js: "finally" },
   laml: { id: "KW_DO", js: "do" },
   zugk: { id: "KW_BREAK", js: "break" },
-  tifb_tucr: { id: "KW_CONTINUE", js: "continue" }
+  tifb_tucr: { id: "KW_CONTINUE", js: "continue" },
+  lopx: { id: "KW_CLASS", js: "class" },
+  nhapf: { id: "KW_IMPORT", js: "import" },
+  xadb: { id: "KW_EXPORT", js: "export" },
+  tuk: { id: "KW_FROM", js: "from" }
 });
 
 export const JS_PASSTHROUGH = Object.freeze({
@@ -28,7 +32,12 @@ export const JS_PASSTHROUGH = Object.freeze({
   delete: { id: "KW_DELETE", js: "delete" },
   in: { id: "KW_IN", js: "in" },
   instanceof: { id: "KW_INSTANCEOF", js: "instanceof" },
-  this: { id: "KW_THIS", js: "this" }
+  this: { id: "KW_THIS", js: "this" },
+  async: { id: "KW_ASYNC", js: "async" },
+  await: { id: "KW_AWAIT", js: "await" },
+  extends: { id: "KW_EXTENDS", js: "extends" },
+  static: { id: "KW_STATIC", js: "static" },
+  as: { id: "KW_AS", js: "as" }
 });
 
 export const JS_TO_KEYWORD = Object.freeze(Object.fromEntries(

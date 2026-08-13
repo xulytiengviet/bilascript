@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 import { compile, parse, lex } from "../src/compiler.js";
 
 const [cmd,file,...rest]=process.argv.slice(2);
-const usage=()=>console.log(`BilaScript v3.7.0\n\n  bila compile <file.bila> [-o out.js] [--map]\n  bila run <file.bila>\n  bila ast <file.bila> [--normalized]\n  bila tokens <file.bila>\n  bila check <file.bila>`);
+const usage=()=>console.log(`BilaScript v3.8.0\n\n  bila compile <file.bila> [-o out.js] [--map]\n  bila run <file.bila>\n  bila ast <file.bila> [--normalized]\n  bila tokens <file.bila>\n  bila check <file.bila>`);
 if(!cmd||!file){usage();process.exit(cmd?1:0)}
 const src=fs.readFileSync(file,"utf8");
 try{

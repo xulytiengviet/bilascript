@@ -1,0 +1,8 @@
+
+import test from "node:test"; import assert from "node:assert/strict"; import vm from "node:vm"; import { compile } from "../src/compiler.js";
+const logs=code=>{const out=[];vm.runInNewContext(code,{console:{log:x=>out.push(String(x))},Promise});return out;};
+test("stage3: class declaration is owned by Bila parser",()=>{const r=compile(`---bila:strict---\nlopx MayTinh { cong(a: Sob,b: Sob): Sob { trov_ved a+b; } } bilb m=moix MayTinh(); console.log(m.cong(2,3));`);assert.match(r.code,/class MayTinh/);assert.deepEqual(logs(r.code),["5"]);});
+test("stage3: ESM import/export compile without runtime helpers",()=>{const r=compile(`---bila:strict---\nnhapf { readFile } tuk "node:fs"; xadb haml_sob id(x: Sob): Sob { trov_ved x; }`);assert.match(r.code,/import \{ readFile \} from/);assert.match(r.code,/export function id/);assert.equal(r.performance.zeroCost,true);});
+test("stage3: destructuring patterns are preserved structurally",()=>{const r=compile(`---bila:strict---\nbilb {a,b}={a:1,b:2}; bilb [x,y]=[3,4]; console.log(a+b+x+y);`);assert.match(r.code,/var \{a, b\}/);assert.deepEqual(logs(r.code),["10"]);});
+test("stage3: async/await is compile-time syntax passthrough",()=>{const r=compile(`---bila:strict---\nasync haml_sob f(){ bilb x = await Promise.resolve(3); trov_ved x; }`);assert.match(r.code,/async function f/);assert.match(r.code,/await Promise\.resolve/);});
+test("stage3: optional chaining, nullish, arrow, spread and template remain structural",()=>{const r=compile('---bila:strict---\nbilb f=(x)=>x+1; bilb a=[1,...[2]]; bilb x=a?.dof_zail ?? 0; console.log(`n=${x}`);');assert.match(r.code,/=>/);assert.match(r.code,/\.\.\./);assert.match(r.code,/\?\./);assert.match(r.code,/\?\?/);assert.match(r.code,/`n=\$\{x\}`/);});

@@ -1,6 +1,6 @@
 {
   "name": "@bilascript/core",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "description": "BilaScript v4 hardened CVNSS4.0 frontend with zero-cost JavaScript backend",
   "type": "module",
   "bin": {

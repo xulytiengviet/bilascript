@@ -27,9 +27,10 @@ export function normalize(inputAst,{mode="bila"}={}){
   const report=(severity,node,code,message)=>{ const p=node?.loc?.start; diagnostics.push({severity,code,message,line:p?.line||null,column:p?.column||null}); };
   const aliasFailure=(node,spec,name)=>{ metadata.unresolvedMemberAliases++; report(mode==="strict"?"error":"warning",node,mode==="strict"?"BILA-T310":"BILA-S310",`Không thể chứng minh receiver của '${name}' thuộc [${spec.receivers.join(", ")}]. ${mode==="strict"?"Strict mode dừng biên dịch":"Giữ nguyên property để bảo vệ user/npm API"}.`); };
 
+  function bindingNames(p,out=[]){ if(!p)return out; if(p.type==="Identifier")out.push(p.name); else if(p.type==="RestElement")bindingNames(p.argument,out); else if(p.type==="ArrayPattern")p.elements.forEach(x=>bindingNames(x,out)); else if(p.type==="ObjectPattern")p.properties.forEach(x=>bindingNames(x.type==="RestElement"?x.argument:x.value,out)); return out; }
   function predeclare(body,scope){
     for(const n of body||[]){
-      if(n?.type==="VariableDeclaration") for(const d of n.declarations) if(d.id?.type==="Identifier") { scope.define(d.id.name,{declaration:d}); metadata.symbols++; }
+      if(n?.type==="VariableDeclaration") for(const d of n.declarations) for(const name of bindingNames(d.id)) { scope.define(name,{declaration:d}); metadata.symbols++; }
       if(n?.type==="FunctionDeclaration"&&n.id) { scope.define(n.id.name,{kind:"function",type:{kind:"function"},certainty:CERTAINTY.PROVEN,declaration:n}); metadata.symbols++; }
     }
   }
@@ -51,9 +52,9 @@ export function normalize(inputAst,{mode="bila"}={}){
     switch(node.type){
       case "Program": predeclare(node.body,scope); node.body.forEach(n=>visit(n,scope)); return;
       case "BlockStatement": { const child=new Scope(scope); predeclare(node.body,child); node.body.forEach(n=>visit(n,child)); return; }
-      case "FunctionDeclaration": case "FunctionExpression": case "ArrowFunctionExpression": {
+      case "FunctionDeclaration": case "FunctionExpression": case "ArrowFunctionExpression": case "MethodDefinition": {
         const fnScope=new Scope(scope); if(node.id) fnScope.define(node.id.name,{kind:"function",type:{kind:"function"},certainty:CERTAINTY.PROVEN});
-        for(const p of node.params||[]){ const declared=typeFromAnnotation(p.typeAnnotation); fnScope.define(p.name,{kind:"parameter",type:declared,certainty:declared?CERTAINTY.DECLARED:CERTAINTY.UNKNOWN}); if(declared) metadata.declaredTypes++; }
+        for(const p of node.params||[]){ const declared=typeFromAnnotation(p.typeAnnotation); for(const name of bindingNames(p)) fnScope.define(name,{kind:"parameter",type:declared,certainty:declared?CERTAINTY.DECLARED:CERTAINTY.UNKNOWN}); if(declared) metadata.declaredTypes++; }
         visit(node.body,fnScope); return;
       }
       case "VariableDeclaration":

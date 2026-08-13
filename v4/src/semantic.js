@@ -5,6 +5,9 @@ export function analyze(ast) {
   function visit(node,ctx={functionDepth:0,loopDepth:0}) {
     if(!node||typeof node!=="object") return;
     switch(node.type) {
+      case "MethodDefinition": {
+        visit(node.body,{...ctx,functionDepth:ctx.functionDepth+1}); return;
+      }
       case "FunctionDeclaration": case "FunctionExpression": case "ArrowFunctionExpression": {
         const seen=new Set(); for(const p of node.params||[]){ if(seen.has(p.name)) error(p,"BILA-S101",`Tham số trùng '${p.name}'`); seen.add(p.name); }
         if(node.body?.type==="BlockStatement") visit(node.body,{...ctx,functionDepth:ctx.functionDepth+1}); else visit(node.body,{...ctx,functionDepth:ctx.functionDepth+1}); return;
