@@ -8,6 +8,7 @@ on:
       - 'tools/upgrade_v4.py'
       - 'tools/v4_hotfix_typeclose.py'
       - 'tools/v4_hotfix_typescript_oracle.py'
+      - 'tools/v4_hotfix_stage3_generator.py'
       - '.github/workflows/upgrade-v4.0.0.yml'
 
 permissions:
@@ -44,8 +45,13 @@ jobs:
 
       - name: LOOP 1 — Compile-time safety
         run: |
-          python tools/upgrade_v4.py --stage 1
-          python tools/v4_hotfix_typeclose.py
+          DONE=$(node -e "try{const v=require('./v4/package.json').version.split('.').map(Number);process.stdout.write(String(v[0]>3||v[1]>=6))}catch{process.stdout.write('false')}")
+          if [ "$DONE" != "true" ]; then
+            python tools/upgrade_v4.py --stage 1
+            python tools/v4_hotfix_typeclose.py
+          else
+            echo 'Loop 1 checkpoint already present; validating current frontend.'
+          fi
           cd v4
           npm test
           node bin/bila.js check examples/hello.bila
@@ -61,14 +67,17 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m 'feat(v4-loop1): compile-time alias safety and type evidence'
             git push origin HEAD:Babylscript1_7R2_BRANCH
-          else
-            echo 'Loop 1 checkpoint already present; continuing.'
           fi
 
       - name: LOOP 2 — Tooling and language service
         run: |
-          python tools/upgrade_v4.py --stage 2
-          python tools/v4_hotfix_typescript_oracle.py
+          DONE=$(node -e "try{const v=require('./v4/package.json').version.split('.').map(Number);process.stdout.write(String(v[0]>3||v[1]>=7))}catch{process.stdout.write('false')}")
+          if [ "$DONE" != "true" ]; then
+            python tools/upgrade_v4.py --stage 2
+            python tools/v4_hotfix_typescript_oracle.py
+          else
+            echo 'Loop 2 checkpoint already present; validating tooling.'
+          fi
           cd v4
           npm install --no-save --no-package-lock 'typescript@5'
           npm test
@@ -81,30 +90,37 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m 'feat(v4-loop2): language service LSP and offline TypeScript oracle'
             git push origin HEAD:Babylscript1_7R2_BRANCH
-          else
-            echo 'Loop 2 checkpoint already present; continuing.'
           fi
 
       - name: LOOP 3 — Modern JavaScript grammar
         run: |
-          python tools/upgrade_v4.py --stage 3
+          DONE=$(node -e "try{const v=require('./v4/package.json').version.split('.').map(Number);process.stdout.write(String(v[0]>3||v[1]>=8))}catch{process.stdout.write('false')}")
+          if [ "$DONE" != "true" ]; then
+            python tools/v4_hotfix_stage3_generator.py
+            python tools/upgrade_v4.py --stage 3
+          else
+            echo 'Loop 3 checkpoint already present; validating modern grammar.'
+          fi
           cd v4
           npm test
           cd ..
           grep -F 'KW_CLASS' v4/src/vocabulary.js
           grep -F 'parseImportDeclaration' v4/src/parser.js
           grep -F 'parseBindingPattern' v4/src/parser.js
-          git add v4
+          git add v4 tools/upgrade_v4.py
           if ! git diff --cached --quiet; then
             git commit -m 'feat(v4-loop3): modern grammar classes ESM destructuring async'
             git push origin HEAD:Babylscript1_7R2_BRANCH
-          else
-            echo 'Loop 3 checkpoint already present; continuing.'
           fi
 
       - name: LOOP 4 — Conformance hardening
         run: |
-          python tools/upgrade_v4.py --stage 4
+          DONE=$(node -e "try{const v=require('./v4/package.json').version.split('.').map(Number);process.stdout.write(String(v[0]>=4))}catch{process.stdout.write('false')}")
+          if [ "$DONE" != "true" ]; then
+            python tools/upgrade_v4.py --stage 4
+          else
+            echo 'Loop 4 checkpoint already present; validating v4.0.0.'
+          fi
           cd v4
           npm test
           npm run conformance
@@ -121,13 +137,11 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m 'feat: BilaScript v4.0.0 evidence-driven zero-cost frontend'
             git push origin HEAD:Babylscript1_7R2_BRANCH
-          else
-            echo 'Loop 4 checkpoint already present; continuing.'
           fi
 
       - name: Final four-loop audit
         run: |
-          git log -8 --pretty=format:'%h %s' | grep -E 'v4-loop1|v4-loop2|v4-loop3|BilaScript v4.0.0' || true
+          git log -12 --pretty=format:'%h %s' | grep -E 'v4-loop1|v4-loop2|v4-loop3|BilaScript v4.0.0'
           test "$(node -p "require('./v4/package.json').version")" = '4.0.0'
           test "$(git status --porcelain | wc -l)" -eq 0
           echo 'BilaScript v4.0.0 four-loop hardening completed successfully.'
