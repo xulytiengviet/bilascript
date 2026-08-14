@@ -17,3 +17,14 @@ Adds Bila-owned parsing/codegen for classes, ESM import/export, destructuring, p
 ## Loop 4 / v4.0.0 — Conformance Hardening
 
 V4 adds a negative strict corpus, deterministic differential testing, zero-helper audit and explicit non-claims. It is an evidence-driven frontend: lowering is allowed only when compile-time evidence is sufficient.
+
+## Architecture ownership model — BilaScript ↔ JavaScript
+
+The project website includes an interactive 3D architecture model explaining how BilaScript is formed on top of JavaScript. The canonical data and weighting formula live in `src/architecture-metrics.js`; the website imports that module directly, so the published visualization and repository source cannot silently diverge.
+
+Default equal-weight interpretation across six architectural layers:
+
+- BilaScript-owned language/application logic: **45%**
+- JavaScript engine / host / ecosystem capabilities: **55%**
+
+Alternative explanatory presets are **57/43** when emphasizing the language frontend and **42/58** when emphasizing runtime infrastructure. These figures are a conceptual ownership/delegation model only — **not** source-line percentages, performance benchmarks, or ECMAScript conformance scores.
