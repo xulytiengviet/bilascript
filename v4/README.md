@@ -18,13 +18,8 @@ Adds Bila-owned parsing/codegen for classes, ESM import/export, destructuring, p
 
 V4 adds a negative strict corpus, deterministic differential testing, zero-helper audit and explicit non-claims. It is an evidence-driven frontend: lowering is allowed only when compile-time evidence is sufficient.
 
-## Architecture ownership model — BilaScript ↔ JavaScript
+## Architecture ownership model
 
-The project website includes an interactive 3D architecture model explaining how BilaScript is formed on top of JavaScript. The canonical data and weighting formula live in `src/architecture-metrics.js`; the website imports that module directly, so the published visualization and repository source cannot silently diverge.
+`src/architecture-metrics.js` is the single source of truth for the conceptual BilaScript ↔ JavaScript/Host ownership model used by the GitHub Pages visualization. The documented presets are 45/55 (equal six-layer weighting), 57/43 (language-core weighting), and 42/58 (runtime-heavy weighting). These numbers are architectural interpretation aids, not source-line percentages, runtime benchmarks, or ECMAScript conformance scores.
 
-Default equal-weight interpretation across six architectural layers:
-
-- BilaScript-owned language/application logic: **45%**
-- JavaScript engine / host / ecosystem capabilities: **55%**
-
-Alternative explanatory presets are **57/43** when emphasizing the language frontend and **42/58** when emphasizing runtime infrastructure. These figures are a conceptual ownership/delegation model only — **not** source-line percentages, performance benchmarks, or ECMAScript conformance scores.
+The site visualizer at `../site/architecture-ratio-3d.js` now uses **zero-CDN CSS 3D**. It imports only the local architecture model, builds the six 3D layers with browser-native CSS transforms, and provides drag-to-rotate, wheel zoom, auto-rotation, reset, and layer inspection without Three.js, OrbitControls, WebGL, unpkg, jsDelivr, or esm.sh. `test/architecture-metrics.test.js` guards both the published ratios and the no-external-3D-CDN contract.
