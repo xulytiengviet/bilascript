@@ -2,7 +2,7 @@
 
 ## Hợp đồng tương thích
 
-**Toàn bộ thư mục v4 vẫn giữ nguyên.** Các dự án trước đây tiếp tục dùng lệnh:
+**Toàn bộ mã compiler v4/src vẫn giữ nguyên.** Các dự án trước đây tiếp tục dùng lệnh:
 ```bash
 node v4/bin/bila.js compile v4/examples/hello.bila -o output.js
 ```
