@@ -1,0 +1,406 @@
+/** Generated vocabulary snapshot. Update only with explicit version bump and audit. */
+export const VOCABULARY_LOCK = Object.freeze({
+  "schema": "bilascript.cvnss40.vocabulary-lock.v1",
+  "release": "5.0.0-alpha.1",
+  "status": "FROZEN",
+  "date": "2026-10-22",
+  "source": {
+    "repository": "xulytiengviet/bilascript",
+    "ref": "Babylscript1_7R2_BRANCH",
+    "commit": "32a04d50a56b098d9df046c70dcb98e25033b4bc",
+    "path": "v4/src/vocabulary.js"
+  },
+  "policy": {
+    "strict": "Only canonical CVNSS4.0 tokens; JS_PASSTHROUGH forbidden; missing mappings fail closed",
+    "legacy": "v4 compiler unmodified",
+    "runtime": "JavaScript",
+    "scope": "Known v4 keywords, built-ins and members; external npm host APIs require future registry"
+  },
+  "keywords": [
+    {
+      "cvnss": "haml_sob",
+      "id": "KW_FUNCTION",
+      "js": "function"
+    },
+    {
+      "cvnss": "bilb",
+      "id": "KW_VAR",
+      "js": "var"
+    },
+    {
+      "cvnss": "neub",
+      "id": "KW_IF",
+      "js": "if"
+    },
+    {
+      "cvnss": "kac",
+      "id": "KW_ELSE",
+      "js": "else"
+    },
+    {
+      "cvnss": "vil",
+      "id": "KW_FOR",
+      "js": "for"
+    },
+    {
+      "cvnss": "trogp_ki",
+      "id": "KW_WHILE",
+      "js": "while"
+    },
+    {
+      "cvnss": "trov_ved",
+      "id": "KW_RETURN",
+      "js": "return"
+    },
+    {
+      "cvnss": "moix",
+      "id": "KW_NEW",
+      "js": "new"
+    },
+    {
+      "cvnss": "voy_jaj_trir",
+      "id": "KW_NULL",
+      "js": "null"
+    },
+    {
+      "cvnss": "thatf",
+      "id": "KW_TRUE",
+      "js": "true"
+    },
+    {
+      "cvnss": "sai",
+      "id": "KW_FALSE",
+      "js": "false"
+    },
+    {
+      "cvnss": "thuv",
+      "id": "KW_TRY",
+      "js": "try"
+    },
+    {
+      "cvnss": "chupr_layb",
+      "id": "KW_CATCH",
+      "js": "catch"
+    },
+    {
+      "cvnss": "nemj",
+      "id": "KW_THROW",
+      "js": "throw"
+    },
+    {
+      "cvnss": "cujb_cugl",
+      "id": "KW_FINALLY",
+      "js": "finally"
+    },
+    {
+      "cvnss": "laml",
+      "id": "KW_DO",
+      "js": "do"
+    },
+    {
+      "cvnss": "zugk",
+      "id": "KW_BREAK",
+      "js": "break"
+    },
+    {
+      "cvnss": "tifb_tucr",
+      "id": "KW_CONTINUE",
+      "js": "continue"
+    },
+    {
+      "cvnss": "lopx",
+      "id": "KW_CLASS",
+      "js": "class"
+    },
+    {
+      "cvnss": "nhapf",
+      "id": "KW_IMPORT",
+      "js": "import"
+    },
+    {
+      "cvnss": "xadb",
+      "id": "KW_EXPORT",
+      "js": "export"
+    },
+    {
+      "cvnss": "tuk",
+      "id": "KW_FROM",
+      "js": "from"
+    }
+  ],
+  "legacyJsPassThrough": [
+    {
+      "word": "typeof",
+      "id": "KW_TYPEOF",
+      "js": "typeof"
+    },
+    {
+      "word": "void",
+      "id": "KW_VOID",
+      "js": "void"
+    },
+    {
+      "word": "delete",
+      "id": "KW_DELETE",
+      "js": "delete"
+    },
+    {
+      "word": "in",
+      "id": "KW_IN",
+      "js": "in"
+    },
+    {
+      "word": "instanceof",
+      "id": "KW_INSTANCEOF",
+      "js": "instanceof"
+    },
+    {
+      "word": "this",
+      "id": "KW_THIS",
+      "js": "this"
+    },
+    {
+      "word": "async",
+      "id": "KW_ASYNC",
+      "js": "async"
+    },
+    {
+      "word": "await",
+      "id": "KW_AWAIT",
+      "js": "await"
+    },
+    {
+      "word": "extends",
+      "id": "KW_EXTENDS",
+      "js": "extends"
+    },
+    {
+      "word": "static",
+      "id": "KW_STATIC",
+      "js": "static"
+    },
+    {
+      "word": "as",
+      "id": "KW_AS",
+      "js": "as"
+    }
+  ],
+  "globals": [
+    {
+      "cvnss": "Magz",
+      "js": "Array",
+      "type": "array"
+    },
+    {
+      "cvnss": "Suh_vatf",
+      "js": "Object",
+      "type": "object"
+    },
+    {
+      "cvnss": "Haml_sob",
+      "js": "Function",
+      "type": "function"
+    },
+    {
+      "cvnss": "Wayl",
+      "js": "Date",
+      "type": "date"
+    },
+    {
+      "cvnss": "mony_Tolj",
+      "js": "Math",
+      "type": "math"
+    },
+    {
+      "cvnss": "Chujg",
+      "js": "String",
+      "type": "string-constructor"
+    },
+    {
+      "cvnss": "Sob",
+      "js": "Number",
+      "type": "number-constructor"
+    },
+    {
+      "cvnss": "Lalf_lij",
+      "js": "Boolean",
+      "type": "boolean-constructor"
+    }
+  ],
+  "members": [
+    {
+      "cvnss": "dof_zail",
+      "js": "length",
+      "receivers": [
+        "array",
+        "string"
+      ]
+    },
+    {
+      "cvnss": "dayq",
+      "js": "push",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "layb_cujb",
+      "js": "pop",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "sapx_xepb",
+      "js": "sort",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "daoz_wush",
+      "js": "reverse",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "ahj_xar",
+      "js": "map",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "locr",
+      "js": "filter",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "cho_moig",
+      "js": "forEach",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "motf_vail",
+      "js": "some",
+      "receivers": [
+        "array"
+      ]
+    },
+    {
+      "cvnss": "takj",
+      "js": "split",
+      "receivers": [
+        "string"
+      ]
+    },
+    {
+      "cvnss": "chujg_con",
+      "js": "substring",
+      "receivers": [
+        "string"
+      ]
+    },
+    {
+      "cvnss": "kopx",
+      "js": "match",
+      "receivers": [
+        "string"
+      ]
+    },
+    {
+      "cvnss": "timl_civb",
+      "js": "search",
+      "receivers": [
+        "string"
+      ]
+    },
+    {
+      "cvnss": "thay_theb",
+      "js": "replace",
+      "receivers": [
+        "string"
+      ]
+    },
+    {
+      "cvnss": "denb_chujg",
+      "js": "toString",
+      "receivers": [
+        "array",
+        "string",
+        "number",
+        "object",
+        "date",
+        "boolean"
+      ]
+    },
+    {
+      "cvnss": "goir",
+      "js": "call",
+      "receivers": [
+        "function"
+      ]
+    },
+    {
+      "cvnss": "ap_zugr",
+      "js": "apply",
+      "receivers": [
+        "function"
+      ]
+    },
+    {
+      "cvnss": "waug_nhily",
+      "js": "random",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "laml_tronl",
+      "js": "round",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "cano_bacf_hai",
+      "js": "sqrt",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "jaj_trir_tydf_doib",
+      "js": "abs",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "trand",
+      "js": "ceil",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "sanl",
+      "js": "floor",
+      "receivers": [
+        "math"
+      ]
+    },
+    {
+      "cvnss": "lys_thuak",
+      "js": "pow",
+      "receivers": [
+        "math"
+      ]
+    }
+  ]
+});
