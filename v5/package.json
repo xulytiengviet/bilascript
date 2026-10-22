@@ -1,0 +1,11 @@
+{
+  "name": "@bilascript/strict",
+  "version": "5.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "CVNSS4.0 frozen strict vocabulary with unmodified v4 JavaScript backend",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "conformance": "node --test test/*.test.mjs"
+  }
+}
