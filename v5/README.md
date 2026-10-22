@@ -40,3 +40,21 @@ node --test v5/test/*.test.mjs
 cd v4 && npm test
 ```
 Mở `/v5/` trên GitHub Pages sau khi nhánh chính được hợp nhất. Nếu Pages dùng nguồn branch, chọn `Babylscript1_7R2_BRANCH` và `/(root)` tại Settings → Pages. Kết nối GitHub dùng cho thay đổi mã **không có khả năng chỉnh Settings → Pages**.
+
+
+## 50 bài toán mẫu chạy trực tiếp
+
+- Truy cập `/v5/`. Thanh bên có 50 bài, chia đều năm nhóm: Cơ bản, Điều kiện, Vòng lặp, Mảng, Thuật toán & ứng dụng.
+- Chọn bài → ô mã `.bila` được nạp từ `v5/examples.mjs` → nhấn **Chạy bài toán** (hoặc Ctrl+Enter). Ô kết quả hiển thị kết quả **thực sự thực thi**, không phải chuỗi kết quả viết sẵn.
+- Mỗi bài khai báo `haml_sob bai() {...}`; trình chạy chủ động gọi `bai()` sau khi compiler sinh JavaScript. Có ô kết quả mẫu để đối chiếu và ô JavaScript sinh ra có thể mở rộng.
+- Mọi bài đều dùng canonical CVNSS4.0 keywords `haml_sob`, `trov_ved`, `bilb`, `neub`, `vil`, `trogp_ki`, v.v., không cần `JS_PASSTHROUGH`, `console.log` hoặc alias mới chưa được kiểm toán.
+- Tạo kết quả cục bộ bên trong iframe không cùng origin (`sandbox="allow-scripts"`) với Worker riêng và giới hạn chạy 2,5 giây. Không chạy mã do người dùng nhập trên luồng giao diện chính. Cài đặt CSP trong iframe hạn chế mạng. Đây **không phải** môi trường thực thi mã độc an toàn tuyệt đối.
+- Không thu thập hay tự gửi mã nguồn, không ký/gửi giao dịch blockchain; ví dụ blockchain là bài kiểm tra hạn mức off-chain.
+
+Kiểm thử cả 50 bài bằng compiler CVNSS strict và JavaScript VM có giới hạn thời gian:
+
+```bash
+node --test v5/test/*.test.mjs
+node --check v5/playground.mjs
+node --check v5/src/demo-runner.mjs
+```

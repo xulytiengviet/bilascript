@@ -27,6 +27,26 @@ jobs:
           node-version: '22'
       - name: Test v5 frozen CVNSS vocabulary and strict pass-through rejection
         run: node --test v5/test/*.test.mjs
+      - name: Syntax check browser playground modules
+        run: |
+          node --check v5/examples.mjs
+          node --check v5/playground.mjs
+          node --check v5/src/demo-runner.mjs
+      - name: Assert lesson catalog and sandbox runner are shipped
+        shell: bash
+        run: |
+          grep -F '50 bài toán thực hành' v5/index.html
+          grep -F 'playground.mjs' v5/index.html
+          grep -F 'runCompiled' v5/playground.mjs
+          grep -F 'sandbox' v5/src/demo-runner.mjs
+      - name: Run Chromium browser smoke for actual CVNSS Web Worker output
+        shell: bash
+        working-directory: v5
+        run: |
+          npm install --no-save --no-package-lock playwright@1
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          node test/browser-smoke.mjs
       - name: Test unmodified BilaScript v4 suite
         working-directory: v4
         run: npm test
