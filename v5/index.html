@@ -1,55 +1,135 @@
 <!doctype html>
-<html lang="vi"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BilaScript 5.0 Alpha | CVNSS4.0 Frozen Strict</title>
-<meta name="description" content="CVNSS4.0 vocabulary freeze, zero JS passthrough in strict, legacy v4 compatibility, clean JS backend.">
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#061c31">
+<meta name="description" content="50 bài toán mẫu CVNSS4.0: học BilaScript v5, sửa mã, biên dịch và chạy trực tiếp với JavaScript engine trong môi trường thử nghiệm tách biệt.">
+<title>BilaScript v5 · 50 bài toán CVNSS4.0</title>
 <style>
-:root{color-scheme:dark;--bg:#001b33;--p:#002b52;--line:#31577a;--yellow:#ffd43b;--muted:#c1cfdb;--green:#7ee787}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font:15px/1.6 Consolas,"Courier New",monospace}
-main{max-width:1150px;margin:auto;padding:24px 16px 70px}header{border-bottom:2px solid var(--yellow);padding:10px 0 26px}
-h1{color:var(--yellow);font-size:clamp(28px,5vw,48px);line-height:1.13;margin:14px 0}h2{color:var(--yellow);font-size:19px}
-a{color:var(--yellow)}p{color:var(--muted)}.tag{color:var(--green);letter-spacing:.08em}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.card{padding:18px;background:var(--p);border:1px solid var(--line);min-width:0}.stats{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.stats span{padding:6px 10px;border:1px solid var(--line);color:var(--yellow)}
-textarea,pre{width:100%;display:block;min-height:300px;padding:14px;background:#001327;color:#fff;border:1px solid var(--line);font:14px/1.6 Consolas,"Courier New",monospace;white-space:pre;overflow:auto}
-textarea{resize:vertical}.bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:16px 0}button{background:var(--yellow);color:#00152a;cursor:pointer;border:0;padding:10px 13px;font:700 14px Consolas,monospace}
-button.secondary{background:transparent;border:1px solid var(--yellow);color:var(--yellow)}
-.notice{padding:13px;background:#001327;border-left:3px solid var(--yellow);margin:14px 0}.hint{font-size:12px;color:var(--muted)}#status{color:var(--green);min-height:26px}
-@media(max-width:780px){.grid{grid-template-columns:1fr}textarea,pre{min-height:220px}}
+:root{color-scheme:dark;--navy:#061c31;--blue:#0a2743;--panel:#0d304f;--inner:#061a2e;--line:#2b5068;--gold:#e9be5c;--gold2:#f9d57b;--mint:#7ce5bc;--text:#eef5fb;--muted:#a6bdd1;--red:#ff9b9b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--navy);color:var(--text);font:14px/1.55 "Segoe UI",Arial,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:var(--gold2);text-decoration:none}a:hover{text-decoration:underline}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:13px clamp(15px,3vw,42px);border-bottom:1px solid var(--line);background:#061a2b;gap:14px}
+.logo{font-weight:900;font-size:19px;letter-spacing:.015em}.logo b{color:var(--gold)}
+.toplinks{display:flex;gap:19px;font-size:13px;flex-wrap:wrap}
+.toplinks a{color:var(--muted)}.toplinks a:hover{color:var(--gold)}
+.shell{max-width:1600px;display:grid;grid-template-columns:310px minmax(0,1fr);gap:0;margin:0 auto;min-height:calc(100vh - 58px)}
+aside{border-right:1px solid var(--line);background:#08223b;padding:23px 14px;min-width:0}
+.sidebar-title{display:flex;align-items:center;justify-content:space-between;padding:0 5px 14px}
+.sidebar-title h2{font-size:18px;line-height:1.3;margin:0}
+.count{color:var(--gold2);font-size:12px;font-weight:700}
+label.block{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}
+.search,.category{border:1px solid var(--line);background:var(--inner);color:var(--text);padding:11px 12px;width:100%;border-radius:8px;outline:none}
+.search:focus,.category:focus,textarea:focus{border-color:var(--gold);outline:2px solid #e9be5c25}
+.exercise-list{display:grid;gap:6px;margin-top:14px;max-height:calc(100vh - 266px);min-height:250px;overflow:auto;padding:3px 2px 10px}
+.exercise{background:transparent;color:var(--text);border:1px solid transparent;border-radius:9px;padding:11px 10px;width:100%;display:flex;align-items:center;text-align:left;gap:10px;transition:background .14s,border .14s}
+.exercise:hover{background:#113653}.exercise.active{background:#163b55;border-color:#b38b48}
+.exercise .num{color:var(--gold);font:700 12px Consolas,monospace;width:29px;flex-shrink:0}
+.exercise-detail{min-width:0;display:grid;gap:2px}.exercise strong{font-size:13px;font-weight:650}.exercise small{color:var(--muted);font-size:11px}
+.workspace{min-width:0;padding:clamp(18px,2.8vw,36px)}
+.eyebrow{font:700 11px Consolas,monospace;color:var(--mint);letter-spacing:.12em}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.hero h1{margin:7px 0 9px;font-size:clamp(25px,3vw,38px);line-height:1.15;font-weight:800;letter-spacing:-.03em}
+.hero p{color:var(--muted);max-width:760px;margin:0}
+.pills{display:flex;gap:7px;flex-wrap:wrap;align-self:flex-start}
+.pill{display:inline-flex;background:#173850;color:var(--gold2);border:1px solid var(--line);padding:5px 9px;border-radius:99px;font:600 11px Consolas,monospace}
+.belt{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#102f47;border:1px solid var(--line);border-left:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin:18px 0;font-size:12px}
+.belt span{color:var(--muted)}.belt strong{color:var(--mint)}
+.panels{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(300px,.86fr);gap:14px;align-items:stretch}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0;overflow:hidden;box-shadow:0 12px 28px #00000015}
+.card-header{padding:15px 17px;display:flex;gap:10px;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.card-heading{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.card-info{font:11px Consolas,monospace;color:var(--muted)}
+.editor-wrap,.output-wrap{padding:14px;min-width:0}
+.editor{display:block;width:100%;min-height:450px;resize:vertical;tab-size:2;background:#031827;border:1px solid #2b5068;border-radius:8px;color:#e7f4ff;padding:18px;font:13px/1.75 Consolas,"Courier New",monospace;white-space:pre;overflow:auto}
+.terminal{min-height:165px;margin:0;background:#031827;color:#d6f8e9;border:1px solid #2b5068;border-radius:8px;padding:18px;font:14px/1.6 Consolas,monospace;white-space:pre-wrap;overflow:auto;overflow-wrap:anywhere}
+.terminal.bad{color:var(--red)}.terminal.idle{color:var(--muted)}
+.run-controls{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px}
+.btn{border:1px solid #54718a;color:var(--text);background:#163e5b;border-radius:8px;padding:9px 13px;font-weight:650;transition:background .14s}
+.btn:hover{background:#255475}.btn:disabled{opacity:.55;cursor:wait}
+.btn.primary{background:var(--gold);color:#152331;border-color:var(--gold);font-weight:800}
+.btn.primary:hover{background:var(--gold2)}
+.btn.quiet{background:transparent;font-weight:500}
+.text-status{padding:0 14px 15px;color:var(--muted);font-size:12px}
+.key-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
+.key-stat{border:1px solid var(--line);border-radius:8px;background:#082640;padding:10px 12px;min-width:0}
+.key-stat strong{display:block;font-size:11px;letter-spacing:.04em;color:var(--gold2);margin-bottom:8px}
+.key-stat pre{margin:0;font:13px/1.6 Consolas,monospace;white-space:pre-wrap;word-break:break-word;color:var(--text)}
+#elapsed{color:var(--mint)}#status[data-state="bad"]{color:var(--red)}#status[data-state="good"]{color:var(--mint)}
+.details{margin-top:15px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.details summary{list-style:none;cursor:pointer;padding:13px 17px;display:flex;align-items:center;justify-content:space-between;font-weight:700}
+.details summary:after{content:"⌄";color:var(--gold);font-size:18px}
+.details[open] summary{border-bottom:1px solid var(--line)}.details[open] summary:after{content:"⌃"}
+.details pre{margin:13px 14px;background:#031827;border:1px solid var(--line);padding:16px;border-radius:7px;color:#c9e5ff;max-height:370px;overflow:auto;font:12px/1.6 Consolas,monospace}
+.details .inner-text{padding:0 16px 12px;color:var(--muted);font-size:12px}
+.tip{margin-top:16px;padding:12px 14px;border-left:3px solid #497e93;background:#0d2b44;color:var(--muted);border-radius:4px;font-size:12px}
+.tip strong{color:var(--gold)}
+.footer{color:var(--muted);font-size:11px;margin-top:16px}
+@media(max-width:1150px){.shell{grid-template-columns:250px minmax(0,1fr)}.panels{grid-template-columns:1fr}.editor{min-height:320px}.exercise-list{max-height:calc(100vh - 290px)}}
+@media(max-width:680px){.topbar{padding:12px 15px;align-items:flex-start}.toplinks{gap:10px}.shell{display:block}aside{border-right:0;border-bottom:1px solid var(--line);padding:15px}.exercise-list{max-height:238px;min-height:80px}.workspace{padding:18px 12px}.editor{min-height:290px;font-size:12px}.card-header{padding:12px}.key-stats{grid-template-columns:1fr}.hero{margin-bottom:12px}.belt{align-items:flex-start;flex-direction:column}}
 </style></head>
-<body><main><header><div class="tag">BILASCRIPT / CVNSS4.0 / VOCABULARY FREEZE</div>
-<h1>BilaScript 5.0 Alpha<br>CVNSS4.0 Strict</h1>
-<p>Đóng băng 22 từ khóa CVNSS4.0, từ chối 11 JavaScript passthrough trong strict. Giữ nguyên compiler v4 cho các dự án cũ; JavaScript vẫn là backend.</p>
-<a href="../">← Trang chủ BilaScript v4</a> · <a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v5">Mã nguồn v5</a> · <a href="./vocabulary-lock.json">Manifest từ vựng</a>
+<body>
+<header class="topbar">
+<div class="logo">BILA<b>SCRIPT</b><span style="font:11px Consolas;color:#a6bdd1;padding-left:8px">5.0 / LAB</span></div>
+<nav class="toplinks" aria-label="Điều hướng"><a href="../">Trang chủ v4</a><a href="./vocabulary-lock.json">Từ vựng khóa</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v5">Mã nguồn</a></nav>
 </header>
-<div class="stats"><span>22 CVNSS keywords</span><span>8 globals</span><span>24 members</span><span>11 JS passthrough bị từ chối</span></div>
-<div class="notice"><b>Phát hành song song:</b> Strict mới kiểm tra qua <code>compileStrict()</code>; legacy dùng <code>compileLegacy()</code> và CLI v4 không đổi. Chưa tự tạo từ khóa CVNSS cho các JS construct thiếu alias.</div>
-<div class="bar"><button id="strict">BIÊN DỊCH CVNSS STRICT</button><button class="secondary" id="legacy">BIÊN DỊCH V4 LEGACY</button><button class="secondary" id="save">LƯU JS</button></div>
-<div class="grid">
-<section class="card"><h2>01 · BILA SOURCE</h2><div class="hint">Thử chèn <code>typeof</code>, <code>async</code> hoặc <code>this</code> để kiểm tra chặn JS passthrough.</div>
-<textarea id="source" spellcheck="false">---bila:strict---
-haml_sob tong(a,b) {
-  trov_ved a+b;
-}
-bilb ds: Magz&lt;Sob&gt; = [1,2];
-ds.dayq(3);
-bilb ket_qua = tong(ds[0],ds[1]);</textarea></section>
-<section class="card"><h2>02 · CLEAN JAVASCRIPT</h2><pre id="output" aria-live="polite">Đang khởi tạo compiler…</pre><div id="status" role="status"></div></section>
-</div><p class="hint">Playground thực hiện biên dịch cục bộ, không tự chạy JavaScript và không phát giao dịch blockchain. Template có nội suy chưa hỗ trợ được từ chối minh bạch.</p>
-</main>
-<script type="module">
-import {compileStrict,compileLegacy} from "./src/strict.mjs";
-const input=document.getElementById("source"),out=document.getElementById("output"),status=document.getElementById("status");
-let js="";
-function build(legacy){
- try {const r=(legacy?compileLegacy:compileStrict)(input.value,{sourceMap:true});
-   js=r.code;out.textContent=js;status.textContent=(legacy?"Legacy v4":"Strict v5")+" · Thành công · "+js.length+" ký tự JS";
- } catch(e) {js="";out.textContent=e.message;status.textContent="Từ chối: "+(e.code||e.name);}
-}
-document.getElementById("strict").addEventListener("click",()=>build(false));
-document.getElementById("legacy").addEventListener("click",()=>build(true));
-document.getElementById("save").addEventListener("click",()=>{
- if(!js){status.textContent="Cần biên dịch thành công trước.";return;}
- const u=URL.createObjectURL(new Blob([js],{type:"text/javascript"}));const a=document.createElement("a");a.href=u;a.download="bila-output.mjs";a.click();URL.revokeObjectURL(u);
-});
-build(false);
-</script></body></html>
+<div class="shell">
+<aside aria-label="Danh sách 50 bài toán">
+  <div class="sidebar-title"><h2>Thư viện bài toán</h2><span id="count" class="count">50/50 bài</span></div>
+  <label for="search" class="block">Tìm bài theo tên hoặc chủ đề</label><input class="search" id="search" type="search" placeholder="Ví dụ: Fibonacci, GIS…" autocomplete="off">
+  <label for="category" class="block">Chủ đề</label><select class="category" id="category" aria-label="Lọc theo chủ đề"></select>
+  <div id="exercise-list" class="exercise-list"></div>
+</aside>
+<main class="workspace">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">CVNSS4.0 · BILA COMPILER · JS RUNTIME</div>
+      <h1>50 bài toán thực hành</h1>
+      <p>Chọn một bài, sửa mã CVNSS4.0 và chạy ngay. Mỗi ví dụ được biên dịch thật thành JavaScript, sau đó chạy thử trong Web Worker tách biệt.</p>
+    </div>
+    <div class="pills"><span class="pill">22 từ khóa đã khóa</span><span class="pill">Strict CVNSS4.0</span><span class="pill">Legacy v4 bảo toàn</span></div>
+  </div>
+  <div class="belt"><div><strong id="exercise-title">01. Cộng hai số</strong><span id="exercise-description" style="display:block">Tính tổng hai số</span></div><div id="status" data-state="idle">Sẵn sàng</div></div>
+  <div class="panels">
+    <section class="card" aria-label="Ô mã nguồn BilaScript">
+      <div class="card-header"><div class="card-heading"><span class="dot"></span> 01 · Mã nguồn CVNSS4.0</div><div class="card-info" id="editor-note">Đang nạp…</div></div>
+      <div class="editor-wrap"><label for="source" class="block" style="margin-top:0">Mã nguồn có thể chỉnh sửa · Hàm <code>bai()</code> là điểm chạy</label>
+        <textarea id="source" class="editor" spellcheck="false" aria-label="Mã nguồn bài toán CVNSS4.0" autocapitalize="off" autocomplete="off"></textarea>
+      </div>
+      <div class="run-controls">
+        <button class="btn primary" id="run" type="button">▶ Chạy bài toán</button>
+        <button class="btn" id="compile" type="button">Biên dịch</button>
+        <button class="btn quiet" id="reset" type="button">Khôi phục mẫu</button>
+        <button class="btn quiet" id="copy" type="button">Sao chép</button>
+      </div>
+      <div class="text-status" id="compile-status">Đang nạp compiler…</div>
+    </section>
+    <section class="card" aria-label="Ô kết quả chạy demo">
+      <div class="card-header"><div class="card-heading"><span class="dot" style="background:var(--mint)"></span> 02 · Kết quả chạy demo</div><div class="card-info" id="elapsed">—</div></div>
+      <div class="output-wrap">
+        <pre class="terminal idle" id="result" aria-live="polite">Nhấn ▶ Chạy để xem kết quả.</pre>
+        <div class="key-stats">
+          <div class="key-stat"><strong>KẾT QUẢ MONG ĐỢI</strong><pre id="expected">—</pre></div>
+          <div class="key-stat"><strong>MÔI TRƯỜNG THỰC THI</strong><pre>JavaScript engine
+Worker cô lập
+Giới hạn 2,5 giây</pre></div>
+        </div>
+        <div class="tip"><strong>Lưu ý:</strong> Đây là bài tập và mô phỏng cục bộ, không phải môi trường chạy code không tin cậy đạt chuẩn sản xuất. Không nhập khóa ví, seed phrase hay dữ liệu bí mật.</div>
+      </div>
+    </section>
+  </div>
+  <details class="details">
+    <summary>03 · Xem JavaScript được biên dịch</summary>
+    <div class="inner-text">Lõi JavaScript được giữ nguyên; compiler ánh xạ từ khóa CVNSS4.0 về JavaScript mà không chèn trình dịch ở runtime.</div>
+    <div class="run-controls"><button type="button" class="btn quiet" id="download">Tải mã JavaScript (.mjs)</button><button type="button" class="btn quiet" id="legacy">So sánh compiler legacy v4</button></div>
+    <pre id="jsoutput">Đang biên dịch…</pre>
+  </details>
+  <div class="footer">BilaScript 5.0 Alpha · 50 mẫu nghiêm ngặt CVNSS4.0 · Kết quả được tính thực, không hiển thị giả lập. Công cụ chạy ngoài chuỗi (off-chain).</div>
+</main></div>
+<script type="module" src="./playground.mjs"></script>
+</body></html>
