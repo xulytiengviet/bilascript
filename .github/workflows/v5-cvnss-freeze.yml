@@ -39,6 +39,14 @@ jobs:
           grep -F 'playground.mjs' v5/index.html
           grep -F 'runCompiled' v5/playground.mjs
           grep -F 'sandbox' v5/src/demo-runner.mjs
+      - name: Run Chromium browser smoke for actual CVNSS Web Worker output
+        shell: bash
+        working-directory: v5
+        run: |
+          npm install --no-save --no-package-lock playwright@1
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          node test/browser-smoke.mjs
       - name: Test unmodified BilaScript v4 suite
         working-directory: v4
         run: npm test
