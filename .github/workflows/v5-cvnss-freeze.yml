@@ -1,0 +1,42 @@
+name: BilaScript v5 — Frozen CVNSS4.0 Strict CI
+on:
+  push:
+    branches: [Babylscript1_7R2_BRANCH]
+    paths:
+      - 'v5/**'
+      - 'index.html'
+      - '.github/workflows/v5-cvnss-freeze.yml'
+  pull_request:
+    paths:
+      - 'v5/**'
+      - 'index.html'
+      - '.github/workflows/v5-cvnss-freeze.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cvnss-strict-and-v4-legacy:
+    name: Strict and backward compatibility (Node 22)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test v5 frozen CVNSS vocabulary and strict pass-through rejection
+        run: node --test v5/test/*.test.mjs
+      - name: Test unmodified BilaScript v4 suite
+        working-directory: v4
+        run: npm test
+      - name: Run unmodified v4 conformance
+        working-directory: v4
+        run: npm run conformance
+      - name: Verify Pages entrypoints
+        shell: bash
+        run: |
+          test -f index.html
+          test -f v5/index.html
+          grep -F 'MỞ PHÒNG THỬ V5' index.html
+          grep -F 'VOCABULARY_LOCK' v5/src/strict.mjs

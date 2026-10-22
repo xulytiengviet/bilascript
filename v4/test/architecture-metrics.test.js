@@ -19,9 +19,10 @@ test('architecture ownership model is internally valid', () => {
 });
 
 test('documented presets remain stable', () => {
-  assert.equal(computeArchitectureShare('equal').bilaPercent, 45);
-  assert.equal(computeArchitectureShare('languageCore').bilaPercent, 57);
-  assert.equal(computeArchitectureShare('runtimeHeavy').bilaPercent, 42);
+  for (const [preset, expected] of [['equal', 45], ['languageCore', 57], ['runtimeHeavy', 42]]) {
+    assert.ok(Math.abs(computeArchitectureShare(preset).bilaPercent - expected) < 1e-9,
+      `Architecture percentage mismatch: ${preset}`);
+  }
   for (const preset of Object.keys(ARCHITECTURE_PRESETS)) {
     const result = computeArchitectureShare(preset);
     assert.ok(Math.abs(result.bila + result.javascriptHost - 1) < 1e-12);
