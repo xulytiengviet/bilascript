@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BilaScript 5.0 Alpha | CVNSS4.0 Frozen Strict</title>
+<meta name="description" content="CVNSS4.0 vocabulary freeze, zero JS passthrough in strict, legacy v4 compatibility, clean JS backend.">
+<style>
+:root{color-scheme:dark;--bg:#001b33;--p:#002b52;--line:#31577a;--yellow:#ffd43b;--muted:#c1cfdb;--green:#7ee787}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font:15px/1.6 Consolas,"Courier New",monospace}
+main{max-width:1150px;margin:auto;padding:24px 16px 70px}header{border-bottom:2px solid var(--yellow);padding:10px 0 26px}
+h1{color:var(--yellow);font-size:clamp(28px,5vw,48px);line-height:1.13;margin:14px 0}h2{color:var(--yellow);font-size:19px}
+a{color:var(--yellow)}p{color:var(--muted)}.tag{color:var(--green);letter-spacing:.08em}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{padding:18px;background:var(--p);border:1px solid var(--line);min-width:0}.stats{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.stats span{padding:6px 10px;border:1px solid var(--line);color:var(--yellow)}
+textarea,pre{width:100%;display:block;min-height:300px;padding:14px;background:#001327;color:#fff;border:1px solid var(--line);font:14px/1.6 Consolas,"Courier New",monospace;white-space:pre;overflow:auto}
+textarea{resize:vertical}.bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:16px 0}button{background:var(--yellow);color:#00152a;cursor:pointer;border:0;padding:10px 13px;font:700 14px Consolas,monospace}
+button.secondary{background:transparent;border:1px solid var(--yellow);color:var(--yellow)}
+.notice{padding:13px;background:#001327;border-left:3px solid var(--yellow);margin:14px 0}.hint{font-size:12px;color:var(--muted)}#status{color:var(--green);min-height:26px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}textarea,pre{min-height:220px}}
+</style></head>
+<body><main><header><div class="tag">BILASCRIPT / CVNSS4.0 / VOCABULARY FREEZE</div>
+<h1>BilaScript 5.0 Alpha<br>CVNSS4.0 Strict</h1>
+<p>Đóng băng 22 từ khóa CVNSS4.0, từ chối 11 JavaScript passthrough trong strict. Giữ nguyên compiler v4 cho các dự án cũ; JavaScript vẫn là backend.</p>
+<a href="../">← Trang chủ BilaScript v4</a> · <a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v5">Mã nguồn v5</a> · <a href="./vocabulary-lock.json">Manifest từ vựng</a>
+</header>
+<div class="stats"><span>22 CVNSS keywords</span><span>8 globals</span><span>24 members</span><span>11 JS passthrough bị từ chối</span></div>
+<div class="notice"><b>Phát hành song song:</b> Strict mới kiểm tra qua <code>compileStrict()</code>; legacy dùng <code>compileLegacy()</code> và CLI v4 không đổi. Chưa tự tạo từ khóa CVNSS cho các JS construct thiếu alias.</div>
+<div class="bar"><button id="strict">BIÊN DỊCH CVNSS STRICT</button><button class="secondary" id="legacy">BIÊN DỊCH V4 LEGACY</button><button class="secondary" id="save">LƯU JS</button></div>
+<div class="grid">
+<section class="card"><h2>01 · BILA SOURCE</h2><div class="hint">Thử chèn <code>typeof</code>, <code>async</code> hoặc <code>this</code> để kiểm tra chặn JS passthrough.</div>
+<textarea id="source" spellcheck="false">---bila:strict---
+haml_sob tong(a,b) {
+  trov_ved a+b;
+}
+bilb ds: Magz&lt;Sob&gt; = [1,2];
+ds.dayq(3);
+bilb ket_qua = tong(ds[0],ds[1]);</textarea></section>
+<section class="card"><h2>02 · CLEAN JAVASCRIPT</h2><pre id="output" aria-live="polite">Đang khởi tạo compiler…</pre><div id="status" role="status"></div></section>
+</div><p class="hint">Playground thực hiện biên dịch cục bộ, không tự chạy JavaScript và không phát giao dịch blockchain. Template có nội suy chưa hỗ trợ được từ chối minh bạch.</p>
+</main>
+<script type="module">
+import {compileStrict,compileLegacy} from "./src/strict.mjs";
+const input=document.getElementById("source"),out=document.getElementById("output"),status=document.getElementById("status");
+let js="";
+function build(legacy){
+ try {const r=(legacy?compileLegacy:compileStrict)(input.value,{sourceMap:true});
+   js=r.code;out.textContent=js;status.textContent=(legacy?"Legacy v4":"Strict v5")+" · Thành công · "+js.length+" ký tự JS";
+ } catch(e) {js="";out.textContent=e.message;status.textContent="Từ chối: "+(e.code||e.name);}
+}
+document.getElementById("strict").addEventListener("click",()=>build(false));
+document.getElementById("legacy").addEventListener("click",()=>build(true));
+document.getElementById("save").addEventListener("click",()=>{
+ if(!js){status.textContent="Cần biên dịch thành công trước.";return;}
+ const u=URL.createObjectURL(new Blob([js],{type:"text/javascript"}));const a=document.createElement("a");a.href=u;a.download="bila-output.mjs";a.click();URL.revokeObjectURL(u);
+});
+build(false);
+</script></body></html>
