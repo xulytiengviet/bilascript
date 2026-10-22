@@ -350,7 +350,7 @@ export const EXERCISES = Object.freeze([
     "category": "Mảng",
     "title": "Loại phần tử trùng",
     "description": "Giữ thứ tự, loại giá trị lặp.",
-    "code": "---bila:strict---\n// Loại phần tử trùng\n// Giữ thứ tự, loại giá trị lặp.\nhaml_sob bai() {\n  bilb ds = [1, 2, 2, 3, 1, 4];\n  bilb ket_qua: Magz<Sob> = [];\n  vil (bilb i = 0; i < ds.dof_zail; i++) {\n    bilb da_co = sai;\n    vil (bilb j = 0; j < ket_qua.dof_zail; j++) {\n      neub (ket_qua[j] === ds[i]) { da_co = thatf; }\n    }\n    neub (!da_co) { ket_qua.dayq(ds[i]); }\n  }\n  trov_ved ket_qua;\n}\n",
+    "code": "---bila:strict---\n// Loại phần tử trùng\n// Giữ thứ tự, loại giá trị lặp.\nhaml_sob bai() {\n  bilb ds = [1, 2, 2, 3, 1, 4];\n  bilb ket_qua: Magz<Sob> = [];\n  vil (bilb i = 0; i < ds.dof_zail; i++) {\n    bilb da_co = 0;\n    vil (bilb j = 0; j < ket_qua.dof_zail; j++) {\n      neub (ket_qua[j] === ds[i]) { da_co = 1; }\n    }\n    neub (da_co === 0) { ket_qua.dayq(ds[i]); }\n  }\n  trov_ved ket_qua;\n}\n",
     "expected": [
       1,
       2,
