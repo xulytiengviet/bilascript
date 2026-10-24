@@ -24,6 +24,7 @@ jobs:
         env:
           WRITE_TOKEN_BUILD: '1'
           EMIT_TOKEN_BUILD_JSON: '0'
+          EMIT_STANDARD_JSON: '1'
         run: node v6/token/build-token.mjs
       - name: Install local Ethereum EVM executor
         uses: foundry-rs/foundry-toolchain@v1
