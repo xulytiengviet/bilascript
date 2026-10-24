@@ -55,6 +55,15 @@ export function normalizeNativeUpload(data,source,canonical){
  }else if(data?.artifact?.schema==="bilascript.native.cvnss40.reference-build.v1"){
   candidate=data.artifact;format="native-evidence-embedded-build";
   reproduceNativeSource(source,candidate);
+ }else if(data?.build?.schema==="bilascript.native.cvnss40.reference-build.v1"){
+  // Support exactly the 3-step proof JSON exported by this app.
+  // Its previous "verified" status is never trusted: step 3 re-queries Sepolia.
+  if(data.sourceBila!==source||
+     data.compiler!==canonical.compiler||
+     data.sourceTextKeccak256!==canonical.sourceTextKeccak256)
+   throw Error("JSON chứng cứ ba bước có nguồn .bila, compiler hoặc hash khác bản chuẩn.");
+  candidate=data.build;format="native-three-step-attestation-json";
+  reproduceNativeSource(source,candidate);
  }else if(data?.compilation?.creationBytecode&&data?.compilation?.runtimeBytecode&&data?.sourceBila){
   format="legacy-native-proof-json";
   if(data.sourceBila!==source)throw Error("JSON chứng cứ dùng mã nguồn .bila khác bản chính thức.");
