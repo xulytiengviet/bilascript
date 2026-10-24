@@ -73,13 +73,20 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
    <section class="card" id="testnet"><div class="head"><h2>04 · Ethereum Sepolia / Testnet</h2><small>Chain ID 11155111 · không hỗ trợ mainnet</small></div>
     <div class="inner">
      <p>Chỉ dùng ví EIP-1193 có mạng Sepolia. Hệ thống không nhận seed phrase hoặc private key, không tự ký. Cần có Sepolia ETH từ faucet để gửi giao dịch.</p>
+     <div class="field"><label for="expected-wallet">Ví dùng để ký triển khai và tạo bằng chứng công khai</label>
+     <input id="expected-wallet" class="input code" value="0x9858EfFD232B4033E47d90003D41EC34EcaEda94" spellcheck="false" autocomplete="off">
+     <p class="sub">Địa chỉ bạn cung cấp. Trình duyệt phải kết nối đúng ví này và đúng mạng Sepolia. Không nhập seed phrase hoặc private key.</p></div>
      <div class="controls"><button id="connect" class="primary">Kết nối ví Sepolia</button><button id="switch">Chuyển ví sang Sepolia</button></div>
+     <p class="sub"><a href="https://sepolia.etherscan.io/address/0x9858EfFD232B4033E47d90003D41EC34EcaEda94" target="_blank" rel="noopener">Xem địa chỉ ví trên Sepolia Etherscan ↗</a> · <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">Faucet Sepolia ETH ↗</a></p>
      <div class="field"><label for="address">Địa chỉ hợp đồng Sepolia (tự nhập hoặc sau deploy)</label><input id="address" class="input code" placeholder="0x... (40 ký tự hex)" autocomplete="off" spellcheck="false"></div>
      <div class="controls"><button id="estimate">Ước tính gas từ RPC</button><button id="deploy" class="safe">Triển khai creation bytecode lên Sepolia</button></div>
      <div class="field"><label for="method">Chọn hàm ABI để gọi</label><select id="method"></select></div>
      <p id="method-description"></p>
      <div class="field"><label id="argument-label" for="argument">Giá trị đầu vào uint256</label><input id="argument" class="input code" value="42" inputmode="numeric" placeholder="uint256"></div>
      <div class="controls"><button id="run" class="primary">Gọi / gửi giao dịch thật</button><button id="refresh">Đọc trạng thái on-chain</button><button id="verify">Đọc lại receipt</button></div>
+     <div class="field"><label for="return-data">Dữ liệu trả về từ eth_call</label><pre id="return-data">Chưa gọi hàm đọc</pre></div>
+     <div class="controls"><button id="download-proof" class="safe" disabled>Tải chứng cứ triển khai Sepolia JSON</button></div>
+     <p class="sub">Chỉ mở khóa tải chứng cứ khi RPC xác nhận đủ: chain 11155111, transaction.from đúng ví, receipt thành công, creation/runtime bytecode khớp và owner slot 0 đúng người triển khai.</p>
      <div class="fields"><div class="metric"><strong id="gas-estimate" style="font-size:14px">—</strong><small>Ước lượng trước ký, từ RPC</small></div><div class="metric"><strong id="gas-used" style="font-size:14px">—</strong><small>Gas thực tế sau xác nhận</small></div></div>
      <div class="links" style="margin-top:12px"><a id="explorer-tx" href="#" target="_blank" rel="noopener" hidden>Transaction</a><a id="explorer-contract" href="#" target="_blank" rel="noopener" hidden>Contract</a><a href="https://sepolia.etherscan.io/" target="_blank" rel="noopener">Sepolia Explorer ↗</a></div>
     </div>
