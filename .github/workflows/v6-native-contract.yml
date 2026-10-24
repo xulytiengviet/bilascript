@@ -1,0 +1,41 @@
+name: BilaScript Native CVNSS4.0 Contract Evidence
+on:
+  push:
+    paths:
+      - 'v6/contracts/**'
+      - 'v6/test/native-contracts*'
+      - '.github/workflows/v6-native-contract.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-cvnss-to-evm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native CVNSS.4 grammar, ABI and codegen tests (without Solc)
+        run: node --test v6/test/native-contracts.test.mjs
+      - name: Compile .bila directly to native EVM and produce immutable reference
+        env:
+          WRITE_NATIVE_BUILD: '1'
+          EMIT_NATIVE_BUILD: '1'
+        run: node v6/contracts/build-native.mjs
+      - name: Install Foundry to execute EVM state transitions
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Deploy and exercise 22 CVNSS functions on real local EVM
+        run: bash v6/test/native-contracts-anvil.sh
+      - name: Save reproducible native EVM build and source
+        uses: actions/upload-artifact@v4
+        with:
+          name: bila-cvnss40-native-contract-build
+          path: |
+            v6/contracts/Bila_CVNSS40_Native.bila
+            v6/contracts/Bila_CVNSS40_Native.build.json
+          if-no-files-found: error
+          retention-days: 30
