@@ -49,6 +49,24 @@ test("step 2: native official, historical UI JSON, and exported proof normalize 
  assert.equal(normalizeNativeUpload(proof,SOURCE,BUILD).format,"legacy-native-proof-json");
  assert.equal(normalizeNativeUpload({artifact:BUILD},SOURCE,BUILD).format,
  "native-evidence-embedded-build");
+ // This is the exact root shape of the user-exported BilaScript-Native-Sepolia...json.
+ const uploadedThreeStep={
+  schema:"bilascript.native.sepolia.three-step-attestation.v1",
+  verificationLevel:"NATIVE_CREATION_RUNTIME_OWNER_RECEIPT_VERIFIED",
+  etherscanSolidityVerified:false,compiler:BUILD.compiler,
+  sourceBila:SOURCE,sourceTextKeccak256:BUILD.sourceTextKeccak256,
+  build:BUILD,sepReceiptPair:check(),
+  onchain:{status:"EXACT_NATIVE_CREATION_RUNTIME_OWNER_AND_RECEIPT"}
+ };
+ const imported=normalizeNativeUpload(uploadedThreeStep,SOURCE,BUILD);
+ assert.equal(imported.format,"native-three-step-attestation-json");
+ assert.equal(imported.sourceRecompiled,true);
+ assert.equal(imported.abiFunctions,22);
+ assert.throws(()=>normalizeNativeUpload({...uploadedThreeStep,
+  build:{...BUILD,runtimeBytecode:"0x6000"}},SOURCE,BUILD),
+  /không tái biên dịch|không tái lập|khớp/);
+ assert.throws(()=>normalizeNativeUpload({...uploadedThreeStep,
+  sourceBila:SOURCE+"// changed"},SOURCE,BUILD),/khác bản chuẩn/);
 });
 test("step 2: Solidity JSON never pretends to be native artifact; reject corrupted bytecode",()=>{
  assert.throws(()=>normalizeNativeUpload({
