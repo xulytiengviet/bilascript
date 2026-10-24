@@ -238,6 +238,35 @@ async function estimateOnly(){
   $("gas-estimate").textContent=toBig(v).toLocaleString("vi-VN")+" gas · estimate hiện tại";
   writeLog("ok","eth_estimateGas trả "+toBig(v).toString()+" gas");
 }
+async function verifyPublicDeployment(){
+  if(!compiled)throw Error("Cần biên dịch chính xác source BilaScript trước khi đối chiếu");
+  const expected=assertSafeSepoliaWallet(expectedWallet.value.trim());
+  provider=getProvider();
+  const chainId=await assertSepolia();
+  const txHash=$("public-tx").value.trim();
+  if(!/^0x[0-9a-fA-F]{64}$/.test(txHash))throw Error("Transaction hash phải có 64 chữ số hex");
+  const [receipt,transaction]=await Promise.all([
+    rpc("eth_getTransactionReceipt",[txHash]),
+    rpc("eth_getTransactionByHash",[txHash])
+  ]);
+  if(!receipt||!transaction)throw Error("Chưa có transaction đã xác nhận trên Sepolia; kiểm tra explorer");
+  if(!receipt.contractAddress)throw Error("Đây không phải giao dịch triển khai hợp đồng");
+  const [code,ownerSlot]=await Promise.all([
+    rpc("eth_getCode",[receipt.contractAddress,"latest"]),
+    rpc("eth_getStorageAt",[receipt.contractAddress,"0x0","latest"])
+  ]);
+  deployEvidence=verifySepoliaDeploy({
+    expectedWallet:expected,chainId,receipt,transaction,code,ownerSlot,
+    compiled
+  });
+  addressInput.value=receipt.contractAddress;
+  linkContract(receipt.contractAddress);linkTransaction(txHash);
+  $("gas-used").textContent=toBig(receipt.gasUsed).toLocaleString("vi-VN")+" gas · receipt";
+  report.textContent=pretty(deployEvidence);
+  $("download-proof").disabled=false;
+  setStatus("Đã xác minh giao dịch Sepolia độc lập từ RPC","ok");
+  writeLog("ok","Bằng chứng Sepolia đã kiểm tra từ tx "+txHash);
+}
 async function verifyTransaction(){
   if(!lastTx)throw Error("Chưa có transaction hash từ phiên này");
   assertSigner();
@@ -260,6 +289,7 @@ $("run").addEventListener("click",guard(runCall));
 $("estimate").addEventListener("click",guard(estimateOnly));
 $("refresh").addEventListener("click",guard(refreshState));
 $("verify").addEventListener("click",guard(verifyTransaction));
+$("verify-public").addEventListener("click",guard(verifyPublicDeployment));
 methodSelect.addEventListener("change",changeMethod);
 $("copy").addEventListener("click",guard(async()=>{if(!compiled)throw Error("Chưa biên dịch");await navigator.clipboard.writeText(compiled.creationBytecode);writeLog("ok","Đã sao chép creation bytecode");}));
 $(`download`).addEventListener("click",()=>{if(compiled)saveJSON("bilascript-v6-evm-build.json",{compiler:compiled.compiler,abi:compiled.abi,creationBytecode:compiled.creationBytecode,runtimeBytecode:compiled.runtimeBytecode});});
