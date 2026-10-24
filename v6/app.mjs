@@ -1,5 +1,5 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
-import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs?v=6.0.2-wallet-879e";
 import {BrowserWallets,ensureSepolia,describeProviderError} from "./wallet-adapter.mjs";
 
 const $=id=>document.getElementById(id);
