@@ -305,9 +305,12 @@ async function inspectCompilerIdentity(){
       rpcSource:result.rpcSource,status:"REAL_RPC_SEPOLIA"};
     $("inspect-bytecode").value=candidate;
   }
-  const native=compileBila(source.value);
+  // Inspecting a Solidity contract must not fail merely because current .bila source is invalid.
+  let native=null;
+  try{native=compileBila(source.value);}catch{}
   const matched=classifyBytecode({
-    candidate,referenceBuild,nativeBuild:native,nativeSource:source.value
+    candidate,referenceBuild,nativeBuild:native,
+    nativeSource:native?source.value:null
   });
   setIdentityOutcome(matched,chainContext);
 }
