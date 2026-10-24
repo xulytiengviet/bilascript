@@ -1,6 +1,5 @@
-/* BilaScript v6 experimental EVM compiler. No Solidity, Solang, fake RPC or simulated receipts.
- * Grammar is intentionally narrow: uint256 storage, one-statement public functions,
- * get, set and checked increment by 1. Unsupported syntax is a hard error.
+/* BilaScript v6.0.1 experimental EVM compiler. No Solidity, Solang, fake RPC or simulated receipts.
+ * Checked uint256 subset: constructor owner, enforced chi_chu writes and nonpayable. Unsupported syntax is a hard error.
  * DO NOT use for assets or production contracts without an independent audit.
  */
 const MASK = (1n << 64n) - 1n;
@@ -48,7 +47,16 @@ export function keccak256(value) {
   return "0x"+out;
 }
 function fail(message){ throw new Error("BILA-EVM6: "+message); }
-const KEYWORDS = Object.freeze({hop_dong:"contract",haml_sob:"function",trov_ved:"return"});
+// Semantic IDs are stable and language spelling is deliberately not part of the EVM ABI type.
+const KEYWORDS = Object.freeze({
+  hop_dong:"contract",hoph_dogd:"contract",
+  haml_sob:"function",trov_ved:"return",
+  cogy_kai:"public",chiz_docr:"view",traz_ved:"returns",
+  sob_wyly_kogy_zaub_256:"uint256",
+  chi_chu:"owner_only"
+});
+const RESERVED=new Set(["contract","function","return","uint256","public","view","returns","owner_only","address"]);
+
 function tokenize(source) {
   if (typeof source!=="string" || source.length>50000) fail("Nguồn không hợp lệ hoặc quá 50 KB");
   const rx=/\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/|[a-zA-Z_][a-zA-Z_0-9]*|[0-9]+|[{}();=+]/y;
@@ -64,56 +72,108 @@ function tokenize(source) {
 }
 function parse(source) {
   const t=tokenize(source); let p=0;
-  const peek=()=>t[p], next=()=>t[p++];
-  const expect=(v)=>{if(next()!==v) fail("Mong đợi '"+v+"' tại token "+p);};
-  const ident=()=>{const n=next();if(!/^[a-zA-Z_][a-zA-Z_0-9]*$/.test(n||""))fail("Tên định danh sai ở token "+p);return n;};
+  const next=()=>t[p++], peek=()=>t[p];
+  const expect=(v)=>{const actual=next();if(actual!==v)fail("Mong đợi '"+v+"', nhận '"+actual+"' tại token "+p);};
+  const ident=()=>{
+    const n=next();
+    if(!/^[a-zA-Z_][a-zA-Z_0-9]*$/.test(n||"") || RESERVED.has(n))
+      fail("Định danh không hợp lệ hoặc trùng từ khóa: "+n);
+    return n;
+  };
+  const uintType=()=>{expect("uint256");return "uint256";};
+  function valueExpression(){
+    const v=next();
+    if(/^[0-9]+$/.test(v||""))return {kind:"literal",value:v};
+    if(!/^[a-zA-Z_][a-zA-Z_0-9]*$/.test(v||""))fail("Biểu thức không được hỗ trợ: "+v);
+    const left={kind:"identifier",name:v};
+    if(peek()==="+"){next();const right=next();if(!/^[0-9]+$/.test(right||""))fail("Vế cộng phải là số nguyên");return {kind:"add",left,right:{kind:"literal",value:right}};}
+    return left;
+  }
   expect("contract");const name=ident();expect("{");
   const state=[],functions=[];
   while(peek()!=="}" && peek()!==undefined) {
-    if(peek()==="uint256") {
-      next(); const n=ident();if(state.includes(n))fail("Biến storage trùng: "+n);
-      if(state.length>=32)fail("Tối đa 32 biến state uint256 trong v6.0");
+    if(peek()==="uint256"){
+      uintType();const n=ident();
+      if(state.includes(n))fail("Biến storage trùng: "+n);
+      if(state.length>=32)fail("Tối đa 32 biến uint256");
       state.push(n);expect(";");
-    } else if(peek()==="function"){
+    }else if(peek()==="function"){
       next();const fname=ident();expect("(");
       let param=null;
-      if(peek()!==")"){expect("uint256");param=ident();}
+      if(peek()!==")"){uintType();param=ident();}
       expect(")");expect("public");
-      let view=false, returns=false;
+      let ownerOnly=false,view=false,returns=false;
+      // CVNSS chi_chu is a compiler-enforced capability, not a Solidity modifier alias.
+      if(peek()==="owner_only"){next();ownerOnly=true;}
       if(peek()==="view"){next();view=true;}
-      if(peek()==="returns"){next();expect("(");expect("uint256");expect(")");returns=true;}
+      if(peek()==="returns"){next();expect("(");uintType();expect(")");returns=true;}
       expect("{");
-      let op=null, variable=null;
-      const target=next();
-      if(target==="return") {
-        variable=ident();expect(";");op="get";
-        if(!returns||!view||param) fail("Hàm return phải public view returns(uint256), không tham số");
-      } else {
-        variable=target;if(!state.includes(variable))fail("Biến storage không tồn tại: "+variable);
-        expect("=");
-        const sourceName=next();
-        if(param && sourceName===param && peek()===";") op="set";
-        else if(!param && sourceName===variable && peek()==="+"){
-          next();expect("1");op="inc";
-        } else fail("v6.0 chỉ cho phép gán từ tham số uint256 hoặc tăng đúng 1");
-        expect(";");
-        if(returns||view) fail("Hàm thay đổi state không thể view/returns");
+      const first=next();
+      let statement;
+      if(first==="return"){statement={kind:"return",expr:valueExpression()};expect(";");}
+      else{
+        if(!/^[a-zA-Z_][a-zA-Z_0-9]*$/.test(first||""))fail("Đích gán không hợp lệ");
+        expect("=");statement={kind:"assign",target:first,expr:valueExpression()};expect(";");
       }
       expect("}");
-      if(!state.includes(variable)) fail("Không đọc được biến state: "+variable);
-      if(functions.some(f=>f.name===fname)) fail("Tên hàm trùng trong v6.0: "+fname);
-      functions.push({name:fname,op,variable,param,view,returns});
-    } else fail("Cấu trúc không hỗ trợ ở token "+p+": "+peek());
+      if(functions.some(f=>f.name===fname))fail("Hàm công khai trùng: "+fname);
+      functions.push({name:fname,param,ownerOnly,view,returns,statement});
+      if(functions.length>24)fail("Tối đa 24 hàm");
+    }else fail("Cấu trúc chưa được hỗ trợ ở token "+p+": "+peek());
   }
   expect("}");
-  if(p!==t.length) fail("Có token dư sau hợp đồng");
-  if(!state.length||!functions.length) fail("Yêu cầu ít nhất 1 uint256 state và 1 public function");
-  if(functions.length>24) fail("Tối đa 24 hàm");
+  if(p!==t.length)fail("Có token thừa sau hợp đồng");
+  if(!state.length||!functions.length)fail("Cần ít nhất một biến uint256 và một hàm public");
   return {name,state,functions};
+}
+/** Typed semantic boundary: only proven uint256 state transitions enter codegen. */
+function analyze(ast) {
+  const layout=[{name:"__bila_owner",type:"address",slot:0,access:"deployment-caller"}];
+  ast.state.forEach((name,i)=>layout.push({name,type:"uint256",slot:i+1}));
+  for(const f of ast.functions){
+    if(f.param && ast.state.includes(f.param))fail("Tham số trùng biến state: "+f.param);
+    const vars=new Map(ast.state.map(n=>[n,{type:"uint256",location:"storage"}]));
+    if(f.param)vars.set(f.param,{type:"uint256",location:"calldata"});
+    function typeOf(expr){
+      if(expr.kind==="literal"){
+        const n=BigInt(expr.value);
+        if(n<0n||n>=1n<<256n)fail("Số ngoài phạm vi uint256");
+        return "uint256";
+      }
+      if(expr.kind==="identifier"){
+        const info=vars.get(expr.name);
+        if(!info)fail("Định danh chưa khai báo: "+expr.name);
+        return info.type;
+      }
+      if(expr.kind==="add"){
+        if(typeOf(expr.left)!=="uint256"||typeOf(expr.right)!=="uint256")fail("Toán hạng + phải là uint256");
+        return "uint256";
+      }
+      fail("Biểu thức chưa hỗ trợ");
+    }
+    if(typeOf(f.statement.expr)!=="uint256")fail("Kiểu trả về/gán phải là uint256");
+    if(f.statement.kind==="return"){
+      const expr=f.statement.expr;
+      if(!f.view||!f.returns||f.param||f.ownerOnly||expr.kind!=="identifier"||!ast.state.includes(expr.name))
+        fail("Hàm đọc phải public view returns(uint256), chỉ đọc một biến state");
+      f.op="get";f.variable=expr.name;
+    }else{
+      const {target,expr}=f.statement;
+      if(!ast.state.includes(target))fail("Chỉ được ghi biến state uint256 đã khai báo");
+      if(f.view||f.returns||!f.ownerOnly)fail("Hàm ghi yêu cầu public chi_chu, không được view/returns");
+      if(f.param && expr.kind==="identifier" && expr.name===f.param)f.op="set";
+      else if(!f.param&&expr.kind==="add"&&expr.left.kind==="identifier"&&expr.left.name===target&&expr.right.value==="1")f.op="inc";
+      else fail("Đã kiểm tra kiểu, nhưng codegen 6.0.1 chỉ hỗ trợ gán tham số hoặc tăng 1");
+      f.variable=target;
+    }
+    f.slot=ast.state.indexOf(f.variable)+1;
+    f.signature=f.name+"("+(f.param?"uint256":"")+")";
+  }
+  return {ast,storageLayout:layout,typeSystem:"checked-uint256-subset",effects:"owner-only-state-writes",defaultMutability:"nonpayable"};
 }
 const OPCODES={
   "00":"STOP","01":"ADD","03":"SUB","10":"LT","14":"EQ","15":"ISZERO",
-  "1c":"SHR","35":"CALLDATALOAD","36":"CALLDATASIZE","39":"CODECOPY",
+  "1c":"SHR","33":"CALLER","34":"CALLVALUE","35":"CALLDATALOAD","36":"CALLDATASIZE","39":"CODECOPY",
   "50":"POP","51":"MLOAD","52":"MSTORE","54":"SLOAD","55":"SSTORE",
   "56":"JUMP","57":"JUMPI","5b":"JUMPDEST","f3":"RETURN","fd":"REVERT"
 };
@@ -153,55 +213,71 @@ function assemble(items) {
 }
 function hex(bytes){return bytes.map(v=>v.toString(16).padStart(2,"0")).join("");}
 export function compileBila(source) {
-  const ast=parse(source),items=[];
+  const {ast,storageLayout,typeSystem,effects,defaultMutability}=analyze(parse(source));
+  const items=[];
   const op=(...v)=>items.push(v);
   const ref=(name)=>items.push({ref:name});
   const label=(name)=>items.push({label:name});
-  const u8=(v)=>{if(v<0||v>255)fail("Slot overflow");op(0x60,v);};
-  const abi=[];
-  // Selector dispatch. Calls shorter than 4 bytes are rejected unless selectors match.
+  const u8=(v)=>{if(v<0||v>255)fail("Giá trị PUSH1 ngoài phạm vi");op(0x60,v);};
+  const abi=[], seenSelectors=new Set();
+  // Solidity nonpayable semantics: a nonzero CALLVALUE reverts before dispatch.
+  op(0x34,0x15);ref("no_value");op(0x57);
+  u8(0);u8(0);op(0xfd);label("no_value");op(0x5b);
   u8(0);op(0x35);u8(224);op(0x1c);
   for(let i=0;i<ast.functions.length;i++){
     const f=ast.functions[i];
     const inputs=f.param?[{name:f.param,type:"uint256"}]:[];
     const outputs=f.returns?[{name:"",type:"uint256"}]:[];
-    const signature=f.name+"("+(f.param?"uint256":"")+")";
-    const selector=keccak256(signature).slice(2,10);
+    const selector=keccak256(f.signature).slice(2,10);
+    if(seenSelectors.has(selector))fail("Va chạm function selector 4 byte: "+f.signature);
+    seenSelectors.add(selector);
     f.selector="0x"+selector;
     abi.push({type:"function",name:f.name,inputs,outputs,stateMutability:f.view?"view":"nonpayable"});
     op(0x80,0x63,...selector.match(/../g).map(h=>parseInt(h,16)),0x14);
     ref("f"+i);op(0x57);
   }
   u8(0);u8(0);op(0xfd);
-  for(let i=0;i<ast.functions.length;i++) {
-    const f=ast.functions[i],slot=ast.state.indexOf(f.variable);
-    label("f"+i);op(0x5b,0x50); // JUMPDEST, discard selector
+  for(let i=0;i<ast.functions.length;i++){
+    const f=ast.functions[i],slot=f.slot;
+    label("f"+i);op(0x5b,0x50);
+    if(f.op!=="get"){
+      // owner is the deployer's CALLER, stored at slot zero by the constructor.
+      op(0x33);u8(0);op(0x54,0x14);
+      ref("authorized"+i);op(0x57);
+      u8(0);u8(0);op(0xfd);
+      label("authorized"+i);op(0x5b);
+    }
     if(f.op==="get"){
       u8(slot);op(0x54);u8(0);op(0x52);u8(32);u8(0);op(0xf3);
-    } else if(f.op==="set") {
-      u8(36);op(0x36,0x10);ref("bad");op(0x57); // calldatasize < 36
+    }else if(f.op==="set"){
+      u8(36);op(0x36,0x10);ref("bad");op(0x57);
       u8(4);op(0x35);u8(slot);op(0x55,0x00);
-    } else if(f.op==="inc") {
-      u8(slot);op(0x54,0x80); // load old, keep a copy
-      op(0x7f,...Array(32).fill(255),0x14); // old == maxuint256
+    }else if(f.op==="inc"){
+      u8(slot);op(0x54,0x80);
+      op(0x7f,...Array(32).fill(255),0x14);
       ref("bad");op(0x57);
       u8(1);op(0x01);u8(slot);op(0x55,0x00);
-    }
+    }else fail("Codegen chưa triển khai cho "+f.op);
   }
   label("bad");op(0x5b);u8(0);u8(0);op(0xfd);
-  const runtimeBytes=assemble(items);
-  const length=runtimeBytes.length;
-  if(length>65535)fail("Runtime quá dài");
-  const creation=[0x61,length>>8,length&255,0x61,0,15,0x60,0,0x39,0x61,length>>8,length&255,0x60,0,0xf3,...runtimeBytes];
-  const result={
-    compiler:"BilaScript-v6.0-native-evm-subset",
-    experimental:true,
-    ast, abi, runtimeBytecode:"0x"+hex(runtimeBytes),
-    creationBytecode:"0x"+hex(creation),
+  const runtimeBytes=assemble(items),length=runtimeBytes.length;
+  if(length>65535)fail("Runtime vượt 65535 bytes");
+  // Nonpayable deployment; initialize immutable-by-language owner in slot 0.
+  // Prefix length 16, copy/return stub length 15 -> runtime offset 31.
+  const prefix=[0x34,0x15,0x61,0,11,0x57,0x60,0,0x60,0,0xfd,0x5b,0x33,0x60,0,0x55];
+  const offset=prefix.length+15;
+  const creation=[...prefix,0x61,length>>8,length&255,0x61,offset>>8,offset&255,
+    0x60,0,0x39,0x61,length>>8,length&255,0x60,0,0xf3,...runtimeBytes];
+  return {
+    compiler:"BilaScript-v6.0.1-native-evm",
+    experimental:true,ast,storageLayout,typeSystem,effects,defaultMutability,
+    abi,runtimeBytecode:"0x"+hex(runtimeBytes),creationBytecode:"0x"+hex(creation),
     opcodes:disassemble("0x"+hex(runtimeBytes)),
-    methods:Object.fromEntries(ast.functions.map(f=>[f.name,{signature:f.name+"("+(f.param?"uint256":"")+")",selector:f.selector,operation:f.op,slot:ast.state.indexOf(f.variable),parameter:f.param}]))
+    methods:Object.fromEntries(ast.functions.map(f=>[f.name,{
+      signature:f.signature,selector:f.selector,operation:f.op,slot:f.slot,
+      parameter:f.param,ownerOnly:f.ownerOnly
+    }]))
   };
-  return result;
 }
 export function encodeCall(method,arg) {
   if(!method||!/^0x[0-9a-f]{8}$/i.test(method.selector))fail("Selector chưa có");
@@ -211,10 +287,10 @@ export function encodeCall(method,arg) {
   return method.selector+n.toString(16).padStart(64,"0");
 }
 export const EXAMPLE = [
-  "hop_dong BoDem {",
-  "  uint256 dem;",
-  "  haml_sob gan(uint256 giaTri) public { dem = giaTri; }",
-  "  haml_sob tang() public { dem = dem + 1; }",
-  "  haml_sob doc() public view returns (uint256) { trov_ved dem; }",
+  "hoph_dogd Bof_Demb {",
+  "  sob_wyly_kogy_zaub_256 demb;",
+  "  haml_sob ganj(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chi_chu { demb = jaj_trir; }",
+  "  haml_sob tago() cogy_kai chi_chu { demb = demb + 1; }",
+  "  haml_sob docr() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) { trov_ved demb; }",
   "}"
 ].join("\n");
