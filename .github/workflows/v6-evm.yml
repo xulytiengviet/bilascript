@@ -33,6 +33,7 @@ jobs:
           node --check v6/faucet.mjs
           node --check v6/deployment-ready.mjs
           node --check v6/token/token-lab.mjs
+          node --check v6/provenance.mjs
       - name: EIP-6963/EIP-1193 wallet adapter unit tests
         run: node --test v6/test/wallet-adapter.test.mjs
       - name: Sepolia faucet registry and fail-closed RPC tests
@@ -41,6 +42,8 @@ jobs:
         run: node --test v6/test/deployment-ready.test.mjs
       - name: ERC20 reference artifact and Sepolia proof validator tests
         run: node --test v6/token/token-lab.test.mjs
+      - name: Compiler provenance exact native-versus-Solc classification regression
+        run: node --test v6/test/provenance.test.mjs
       - name: Verify Sepolia evidence security checks (fixtures, not public deployment)
         run: node --test v6/test/sepolia-proof.test.mjs
       - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
