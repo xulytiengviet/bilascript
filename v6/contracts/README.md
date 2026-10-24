@@ -81,3 +81,25 @@ and optionally transaction+receipt+creation-input checks when a tx hash is suppl
 
 Independent command: node v6/contracts/probe-live-native-sepolia.mjs
 Regression tests: node --test v6/test/native-sepolia-verifier.test.mjs
+
+## Official independent BilaScript Native Source Viewer
+
+Open [BilaScript Native Source Verification](https://bila.js.org/v6/verify/?address=0x305eb44bb1ccd78618a79479270d113742dcb072)
+to view actual source .bila, native compiler ABI, runtime bytecode and a
+fresh read-only Ethereum Sepolia RPC verification of contract address
+`0x305eb44bb1ccd78618a79479270d113742dcb072`.
+
+**Do not upload** `Bila_CVNSS40_Native.build.json` or the exported proof
+JSON containing `artifactOrigin` to Etherscan's `Solidity (Standard JSON)`
+form. Solc does not compile the independent BilaScript CVNSS4.0 grammar.
+The Etherscan `Unknown key "artifactOrigin"` warning is expected for
+this incorrect file format. Removing this key cannot make native EVM
+bytecode reproducible by Solidity. The source verifier is independently
+maintained by the BilaScript project; it is **not** an Etherscan-verified
+Solidity contract badge, official Etherscan compiler support, or a
+security audit.
+
+The native viewer starts with no proof status until it has successfully
+recompiled the current source and queried the Sepolia RPC. Its exported
+JSON includes compiler reference build and freshly retrieved on-chain
+evidence, enabling independent re-verification.
