@@ -10,7 +10,7 @@ import {BrowserWallets,ensureSepolia,describeProviderError} from "../wallet-adap
 import {checkDeploymentReady} from "../deployment-ready.mjs";
 import {publicSepoliaRpc,verifyNativeSepoliaAddress,NATIVE_ROOT_WALLET,reproduceNativeSource} from "./verify-native-sepolia.mjs";
 import {validateDeploymentPair,normalizeNativeUpload,buildThreeStepProof,
- ETHERSCAN_SOLIDITY_REFERENCE,NATIVE_DEPLOYMENT_EXAMPLE} from "./verification-wizard-core.mjs";
+ ETHERSCAN_SOLIDITY_REFERENCE,NATIVE_DEPLOYMENT_EXAMPLE} from "./verification-wizard-core.mjs?v=2-reimport-native-proof";
 const $=id=>document.getElementById(id);
 const ROOT=NATIVE_ROOT_WALLET;
 const SOURCE="../contracts/Bila_CVNSS40_Native.bila?v=1";
