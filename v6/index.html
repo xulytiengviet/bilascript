@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071c33">
+<meta name="description" content="BilaScript v6: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
+<title>BilaScript v6 · Native EVM Compiler · Real Testnet Laboratory</title>
+<style>
+:root{color-scheme:dark;--bg:#061827;--top:#071e34;--panel:#0b2944;--deep:#041420;--line:#2b5069;--text:#edf6fe;--muted:#afc5d6;--gold:#e7c365;--mint:#70e9bc;--red:#ff9195;--blue:#72c8ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
+.top{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--top);display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.brand{font:900 21px Consolas,monospace;letter-spacing:-.03em}.brand b{color:var(--gold)}.tag{padding:4px 10px;border:1px solid #5d9c97;border-radius:30px;color:var(--mint);font:12px Consolas,monospace}.nav{margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:wrap}.nav a{font-size:12px;color:var(--muted)}.nav a:hover{color:var(--gold)}
+main{max-width:1600px;margin:auto;padding:27px 24px 80px}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.eyebrow{font:700 11px Consolas,monospace;letter-spacing:.16em;color:var(--mint)}
+h1{font-size:clamp(29px,4vw,49px);letter-spacing:-.04em;line-height:1.1;margin:9px 0 10px}h1 span{color:var(--gold)}h2{font-size:20px;margin:0 0 7px}h3{font-size:16px;margin:0 0 9px}p{margin:7px 0;color:var(--muted)}small,.sub{color:var(--muted);font-size:12px}
+.notice{margin:20px 0;background:#17334a;border:1px solid #57748b;border-left:4px solid var(--gold);border-radius:9px;padding:12px 16px;color:#d9e9fa}.notice strong{color:var(--gold)}
+.features{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.features span{border:1px solid var(--line);padding:5px 9px;border-radius:99px;background:#123249;color:var(--muted);font:11px Consolas,monospace}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0}.metric,.card{border:1px solid var(--line);background:var(--panel);border-radius:11px;min-width:0}.metric{padding:17px}.metric strong{display:block;color:var(--gold);font:700 22px Consolas,monospace}.metric small{font-size:11px}
+.layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:14px;align-items:start}.card{overflow:hidden;margin-bottom:14px}.card .head{padding:14px 17px;background:#102f48;border-bottom:1px solid var(--line);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.card .inner{padding:15px 17px}.head h2{margin:0;font-size:16px}
+textarea,.input,select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--deep);color:var(--text);padding:12px;outline:none}textarea:focus,.input:focus,select:focus{border-color:var(--gold)}textarea{font:12px/1.58 Consolas,"Cascadia Code",monospace;resize:vertical;min-height:200px}.code{font:12px/1.5 Consolas,monospace;overflow-wrap:anywhere}.source{min-height:254px}
+button{background:#193c56;color:#eff8fe;border:1px solid #406d84;padding:10px 13px;border-radius:8px;font-weight:650}button:hover{background:#254f6d}.primary{background:var(--gold);color:#14283a;border-color:var(--gold)}.primary:hover{background:#ffd982}.safe{border-color:#3b9e89;color:var(--mint)}.danger{border-color:#a66063;color:#ffb3b5}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:block;min-width:0}.field label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px}
+pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radius:8px;color:#dbeefa;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 Consolas,monospace;max-height:330px;overflow:auto;margin:0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tabs textarea{min-height:140px}
+.tablebox{max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;font:12px Consolas,monospace}th{text-align:left;color:var(--gold);background:#122f45;position:sticky;top:0}td,th{padding:8px 10px;border-bottom:1px solid #29445a}td:last-child{overflow-wrap:anywhere}
+#status{border:1px solid var(--line);color:var(--muted);padding:8px 11px;border-radius:9px;font-size:12px}#status[data-tone="ok"]{color:var(--mint);border-color:#348974}#status[data-tone="error"]{color:var(--red);border-color:#985a60}#status[data-tone="pending"]{color:var(--gold)}
+.log{font:12px/1.45 Consolas,monospace;border-bottom:1px solid #244358;padding:8px 5px;overflow-wrap:anywhere}.log.ok{color:var(--mint)}.log.error{color:var(--red)}.logs{max-height:255px;overflow:auto}
+.links{display:flex;flex-wrap:wrap;gap:13px}.links a{font-size:12px}
+.footer{padding:24px 0;border-top:1px solid var(--line);margin-top:22px;font-size:12px;color:var(--muted)}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.nav{margin-left:0}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){main{padding:18px 12px 55px}.top{padding:12px}.metrics,.fields,.tabs{grid-template-columns:1fr}.source{min-height:270px}.nav{gap:10px}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="brand">BILA<b>SCRIPT</b> / V6</div>
+ <span class="tag">NATIVE EVM · EXPERIMENTAL</span>
+ <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#testnet">Sepolia</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
+</header>
+<main>
+ <section class="hero">
+  <div><div class="eyebrow">PHÒNG THÍ NGHIỆM BYTECODE / OPCODE / GAS / TRẠNG THÁI EVM THỰC</div><h1>Ngôn ngữ <span>BilaScript</span>.<br>Bytecode EVM độc lập.</h1><p>Biên dịch CVNSS4.0 trực tiếp thành EVM bytecode, kết nối ví để triển khai thử nghiệm trên <b>Ethereum Sepolia</b>, xem giao dịch và đối chiếu trạng thái on-chain. Không cần Solidity hoặc Solang.</p></div>
+  <div id="status" role="status" aria-live="polite">Chưa biên dịch</div>
+ </section>
+ <div class="notice"><strong>Giới hạn v6.0:</strong> compiler thử nghiệm chỉ hỗ trợ biến trạng thái <code>uint256</code>, hàm đọc, gán và tăng 1 có kiểm tra tràn. <strong>Không có dữ liệu giả lập.</strong> Sepolia là blockchain testnet thực; thao tác deploy phải được người dùng xác nhận trên ví. Chưa được audit, không dùng hợp đồng này để giữ tài sản và không hỗ trợ mainnet.</div>
+ <div class="features"><span>CVNSS4.0 semantic aliases</span><span>No Solidity frontend</span><span>No Solang</span><span>Native creation/runtime</span><span>EIP-1193 Wallet</span><span>Sepolia chain 11155111</span><span>Receipt &amp; gasUsed</span><span>eth_getCode / eth_getStorageAt</span></div>
+ <div class="metrics">
+  <div class="metric"><strong id="n-bytes">—</strong><small>Bytecode tạo hợp đồng (bytes)</small></div>
+  <div class="metric"><strong id="n-opcodes">—</strong><small>Lệnh disassembly</small></div>
+  <div class="metric"><strong id="n-methods">—</strong><small>Hàm ABI biên dịch</small></div>
+  <div class="metric"><strong id="wallet" style="font-size:14px">Chưa kết nối</strong><small>Địa chỉ ví Sepolia</small></div>
+ </div>
+ <div class="layout">
+  <div>
+   <section class="card" id="compiler"><div class="head"><h2>01 · Trình biên dịch BilaScript-EVM</h2><small>.bila → AST → bytecode</small></div>
+    <div class="inner">
+     <p>Nhập mã BilaScript; từ khóa <code>hop_dong</code>, <code>haml_sob</code>, <code>trov_ved</code> là token nguồn. Mọi cấu trúc ngoài ngữ pháp giới hạn bị từ chối, không tự động bỏ qua.</p>
+     <label class="sub" for="source">MÃ NGUỒN .BILA</label><textarea id="source" class="source" spellcheck="false" aria-label="Mã nguồn BilaScript"></textarea>
+     <div class="controls"><button id="compile" class="primary">Biên dịch bytecode</button><button id="reset">Phục hồi nguồn mẫu</button><button id="copy">Sao chép bytecode</button><button id="download">Tải build JSON</button></div>
+     <div class="fields"><div class="field"><label for="output">Creation bytecode · dùng cho deploy</label><textarea id="output" class="code" readonly aria-label="Creation bytecode"></textarea></div>
+      <div class="field"><label for="runtime">Runtime bytecode · đối chiếu eth_getCode</label><textarea id="runtime" class="code" readonly aria-label="Runtime bytecode"></textarea></div></div>
+     <div class="tabs" style="margin-top:12px"><div><label class="sub" for="abi">ABI JSON</label><textarea id="abi" readonly></textarea></div><div><label class="sub" for="ast">AST / compiler output</label><textarea id="ast" readonly></textarea></div></div>
+    </div></section>
+   <section class="card" id="opcode"><div class="head"><h2>02 · Opcode Lab</h2><small>Disassembly từ bytecode mới biên dịch (không phải execution trace)</small></div>
+    <div class="inner"><div class="tablebox"><table><thead><tr><th>PC</th><th>HEX</th><th>OPCODE</th><th>Immediate</th></tr></thead><tbody id="opcodes"></tbody></table></div><p>Opcode từ chính compiler v6. Để có trace thực từng bước từ node cần RPC hỗ trợ <code>debug_traceTransaction</code>; ví Sepolia thông thường không bắt buộc cung cấp phương thức này.</p></div>
+   </section>
+   <section class="card"><div class="head"><h2>03 · Hệ sinh thái nghiên cứu</h2><small>Tham khảo, không gắn nhãn tích hợp sẵn</small></div>
+    <div class="inner"><p>Hướng dài hạn: học từ Fe (ngôn ngữ thay thế), Act (đặc tả), Hevm (symbolic execution), Ethdebug (debug data), Sourcify (verification) và Solidity/Yul. V6 hiện chưa có tích hợp Act/Hevm/Ethdebug/Sourcify.</p><div class="links"><a href="https://www.argot.org/" target="_blank" rel="noopener">Argot Collective ↗</a><a href="https://github.com/argotorg/fe" target="_blank" rel="noopener">Fe ↗</a><a href="https://github.com/argotorg/solidity" target="_blank" rel="noopener">Solidity ↗</a><a href="https://evm.codes/" target="_blank" rel="noopener">evm.codes ↗</a><a href="https://ethereum.org/en/developers/docs/evm/opcodes/" target="_blank" rel="noopener">Ethereum Opcode ↗</a><a href="https://ethereum.github.io/yellowpaper/paper.pdf" target="_blank" rel="noopener">Yellow Paper ↗</a></div></div>
+   </section>
+  </div>
+  <div>
+   <section class="card" id="testnet"><div class="head"><h2>04 · Ethereum Sepolia / Testnet</h2><small>Chain ID 11155111 · không hỗ trợ mainnet</small></div>
+    <div class="inner">
+     <p>Chỉ dùng ví EIP-1193 có mạng Sepolia. Hệ thống không nhận seed phrase hoặc private key, không tự ký. Cần có Sepolia ETH từ faucet để gửi giao dịch.</p>
+     <div class="controls"><button id="connect" class="primary">Kết nối ví Sepolia</button><button id="switch">Chuyển ví sang Sepolia</button></div>
+     <div class="field"><label for="address">Địa chỉ hợp đồng Sepolia (tự nhập hoặc sau deploy)</label><input id="address" class="input code" placeholder="0x... (40 ký tự hex)" autocomplete="off" spellcheck="false"></div>
+     <div class="controls"><button id="estimate">Ước tính gas từ RPC</button><button id="deploy" class="safe">Triển khai creation bytecode lên Sepolia</button></div>
+     <div class="field"><label for="method">Chọn hàm ABI để gọi</label><select id="method"></select></div>
+     <p id="method-description"></p>
+     <div class="field"><label id="argument-label" for="argument">Giá trị đầu vào uint256</label><input id="argument" class="input code" value="42" inputmode="numeric" placeholder="uint256"></div>
+     <div class="controls"><button id="run" class="primary">Gọi / gửi giao dịch thật</button><button id="refresh">Đọc trạng thái on-chain</button><button id="verify">Đọc lại receipt</button></div>
+     <div class="fields"><div class="metric"><strong id="gas-estimate" style="font-size:14px">—</strong><small>Ước lượng trước ký, từ RPC</small></div><div class="metric"><strong id="gas-used" style="font-size:14px">—</strong><small>Gas thực tế sau xác nhận</small></div></div>
+     <div class="links" style="margin-top:12px"><a id="explorer-tx" href="#" target="_blank" rel="noopener" hidden>Transaction</a><a id="explorer-contract" href="#" target="_blank" rel="noopener" hidden>Contract</a><a href="https://sepolia.etherscan.io/" target="_blank" rel="noopener">Sepolia Explorer ↗</a></div>
+    </div>
+   </section>
+   <section class="card" id="evidence"><div class="head"><h2>05 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
+    <div class="inner"><div class="fields"><div class="metric"><strong id="chain-code" style="font-size:14px">—</strong><small>eth_getCode</small></div><div class="metric"><strong id="bytecode-match" style="font-size:14px">—</strong><small>So sánh runtime</small></div></div>
+     <p>Block mới nhất: <b id="last-block">—</b></p>
+     <h3>Storage slots · eth_getStorageAt</h3><pre id="storage">Chưa truy vấn blockchain</pre>
+     <h3 style="margin-top:13px">Receipt / chứng cứ triển khai</h3><pre id="evidence">Chưa có bằng chứng mạng.</pre>
+     <p>Kết quả receipt <code>status=1</code> chỉ chứng minh giao dịch được thực thi thành công, chưa chứng minh hợp đồng không có lỗi. Khi deploy phải so sánh <code>eth_getCode</code> với runtime bytecode, không so sánh creation bytecode.</p>
+    </div></section>
+   <section class="card"><div class="head"><h2>06 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
+  </div>
+ </div>
+ <footer class="footer">BilaScript v6.0 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
