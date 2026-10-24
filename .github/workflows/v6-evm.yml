@@ -30,8 +30,11 @@ jobs:
           node --check v6/app.mjs
           node --check v6/sepolia-proof.mjs
           node --check v6/wallet-adapter.mjs
+          node --check v6/faucet.mjs
       - name: EIP-6963/EIP-1193 wallet adapter unit tests
         run: node --test v6/test/wallet-adapter.test.mjs
+      - name: Sepolia faucet registry and fail-closed RPC tests
+        run: node --test v6/test/faucet.test.mjs
       - name: Verify Sepolia evidence security checks (fixtures, not public deployment)
         run: node --test v6/test/sepolia-proof.test.mjs
       - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
