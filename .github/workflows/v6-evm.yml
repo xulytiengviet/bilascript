@@ -26,6 +26,8 @@ jobs:
         run: node --test v6/test/compiler.test.mjs
       - name: Native CVNSS4.0 research contract · 22 methods / 8 state variables
         run: node --test v6/test/native-contracts.test.mjs
+      - name: Native Sepolia source and onchain bytecode verifier (no Solidity)
+        run: node --test v6/test/native-sepolia-verifier.test.mjs
       - name: Recompile CVNSS.4 native reference artifact byte-for-byte without Solc
         env:
           VERIFY_NATIVE_BUILD: '1'
