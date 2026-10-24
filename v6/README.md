@@ -73,7 +73,7 @@ Project is rooted at \`/\` and has a \`CNAME\` set to \`bila.js.org\`. Keep Page
 
 ## Sepolia wallet and first public proof (2026-10-24)
 
-Requested test signer: `0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB`. This is a **selected address, not proof that the browser controls it**. The browser must connect that exact EIP-1193 account. An earlier public BIP-39 test-vector address remains blocked by `assertSafeSepoliaWallet`.
+Requested test signer: `0x879E22703E2E432257334Db400Fbf9115aeD93Cf`. This is a **selected address, not proof that the browser controls it**. The browser must connect that exact EIP-1193 account. An earlier public BIP-39 test-vector address remains blocked by `assertSafeSepoliaWallet`.
 
 In [the v6 testnet lab](https://bila.js.org/v6/):
 
