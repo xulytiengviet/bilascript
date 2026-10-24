@@ -1,0 +1,31 @@
+name: Verify Native BilaScript Contract on Sepolia
+on:
+  push:
+    paths:
+      - 'v6/contracts/verify-native-sepolia.mjs'
+      - 'v6/contracts/probe-live-native-sepolia.mjs'
+      - '.github/workflows/v6-native-sepolia.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-sepolia-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact native compilation + real public Sepolia runtime and owner comparison
+        run: node v6/contracts/probe-live-native-sepolia.mjs
+      - name: Publish public chain verification result (including errors)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilascript-native-sepolia-public-proof
+          path: v6/test-results/native-sepolia-verification.json
+          if-no-files-found: warn
+          retention-days: 30
