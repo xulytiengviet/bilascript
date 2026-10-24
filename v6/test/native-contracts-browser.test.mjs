@@ -14,6 +14,7 @@ async function waitFor(predicate){
 }
 test("native HỢP ĐỒNG page actually compiles .bila and enables only funded correct-wallet deploy",async()=>{
  const html=file("../hop-dong/index.html"),source=file("../contracts/Bila_CVNSS40_Native.bila");
+ const artifact=JSON.parse(file("../contracts/Bila_CVNSS40_Native.build.json"));
  const dom=new JSDOM(html,{url:"https://bila.js.org/v6/hop-dong/",runScripts:"outside-only"});
  const {window}=dom;
  const prev={window:globalThis.window,document:globalThis.document,fetch:globalThis.fetch};
@@ -30,7 +31,9 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
    if(method==="eth_getBalance")return balance;
    if(method==="eth_gasPrice")return "0x3b9aca00";
    if(method==="eth_estimateGas")return "0x100000";
-   if(method==="eth_getCode")return "0x";
+   if(method==="eth_getCode")return artifact.runtimeBytecode;
+   if(method==="eth_getStorageAt")return "0x"+BigInt(ORIGIN).toString(16);
+   if(method==="eth_blockNumber")return "0xb6d12f";
    throw Error("Unexpected fake browser RPC "+method);
   }
  };
@@ -40,6 +43,8 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
  globalThis.fetch=async(url)=>{
   if(String(url).includes("Bila_CVNSS40_Native.bila"))
    return {ok:true,text:async()=>source};
+  if(String(url).includes("Bila_CVNSS40_Native.build.json"))
+   return {ok:true,json:async()=>structuredClone(artifact)};
   throw Error("Unexpected URL "+url);
  };
  try{
@@ -84,6 +89,18 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
   await waitFor(()=>window.document.getElementById("metric-func").textContent==="22"&&
    window.document.getElementById("method-run").disabled===false);
   assert.equal(window.document.getElementById("deploy-native").disabled,true);
+  window.document.getElementById("native-restore").click();
+  await waitFor(()=>window.document.getElementById("native-source").value===source);
+  window.document.getElementById("load-canonical-build").click();
+  await waitFor(()=>window.document.getElementById("verify-build-state").textContent.includes("Đã nạp artifact chuẩn"));
+  assert.equal(window.document.getElementById("contract-address").value,
+   "0x305eb44bb1ccd78618a79479270d113742dcb072");
+  window.document.getElementById("verify-address").click();
+  await waitFor(()=>window.document.getElementById("download-proof").disabled===false);
+  assert.match(window.document.getElementById("proof").textContent,/EXACT_NATIVE_RUNTIME_AND_OWNER/);
+  assert.match(window.document.getElementById("verify-build-state").textContent,/ĐÃ XÁC MINH/);
+  assert.match(window.document.getElementById("proof").textContent,/"etherscanSolidityVerification": false/);
+  assert.equal(called.includes("eth_sendTransaction"),false);
  }finally{
   dom.window.close();
   globalThis.window=prev.window;globalThis.document=prev.document;globalThis.fetch=prev.fetch;
