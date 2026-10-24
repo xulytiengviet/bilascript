@@ -30,8 +30,8 @@ export function ethAmount(wei){
  const n=BigInt(wei);
  if(n<0n)throw Error("Số dư không hợp lệ");
  const whole=n/1000000000000000000n;
- const fractions=(n%1000000000000000000n).toString().padStart(18,"0").slice(0,9);
- return whole.toString()+"."+fractions.replace(/0+$/,"").padEnd(1,"0");
+ const fractions=(n%1000000000000000000n).toString().padStart(18,"0").replace(/0+$/,"");
+ return whole.toString()+"."+(fractions||"0");
 }
 export function faucetUrl(id){
  const v=FAUCET_SOURCES.find(x=>x.id===id);
