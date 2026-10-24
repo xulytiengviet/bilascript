@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071c33">
-<meta name="description" content="BilaScript v6.0.1: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
-<title>BilaScript v6 · Native EVM Compiler · Real Testnet Laboratory</title>
+<meta name="description" content="BilaScript v6.0.2: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
+<title>BilaScript v6.0.2 · Kết nối Sepolia · Native EVM Compiler</title>
 <style>
 :root{color-scheme:dark;--bg:#061827;--top:#071e34;--panel:#0b2944;--deep:#041420;--line:#2b5069;--text:#edf6fe;--muted:#afc5d6;--gold:#e7c365;--mint:#70e9bc;--red:#ff9195;--blue:#72c8ff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
@@ -76,7 +76,12 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <div class="field"><label for="expected-wallet">Ví dùng để ký triển khai và tạo bằng chứng công khai</label>
      <input id="expected-wallet" class="input code" value="0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB" spellcheck="false" autocomplete="off">
      <p class="sub">Đã chọn ví thử nghiệm 0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB. Hãy kết nối đúng tài khoản này trên MetaMask ở Sepolia. Không chia sẻ seed phrase/private key; dữ liệu mạng chỉ được hiển thị từ RPC thật.</p></div>
-     <div class="controls"><button id="connect" class="primary">Kết nối ví Sepolia</button><button id="switch">Chuyển ví sang Sepolia</button></div>
+     <div class="field"><label for="wallet-provider">Chọn nhà cung cấp ví (MetaMask, Rabby hoặc ví EIP-6963)</label>
+      <select id="wallet-provider" aria-label="Chọn tiện ích ví EVM" disabled><option>Đang dò tìm tiện ích ví…</option></select>
+      <p class="sub" id="wallet-detector" aria-live="polite">Đang dò tìm ví EIP-6963 và ví trình duyệt…</p>
+     </div>
+     <div class="controls"><button id="wallet-refresh">Quét lại các ví</button><button id="connect" class="primary">Kết nối ví Sepolia</button><button id="switch">Chuyển / thêm Sepolia</button></div>
+     <p class="sub">Bấm <strong>Kết nối</strong> để cấp quyền tài khoản trước. Nếu ví ở mạng khác, website sẽ yêu cầu xác nhận chuyển sang Sepolia. Khi có nhiều ví, chọn đúng MetaMask trong danh sách thay vì dùng ví mặc định của trình duyệt.</p>
      <div class="controls"><button id="wallet-check" class="safe">Đọc số dư và nonce Sepolia từ RPC</button><a href="https://sepolia.etherscan.io/address/0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB" target="_blank" rel="noopener">Xem ví đã chọn trên Etherscan ↗</a></div>
      <div class="fields"><div class="metric"><strong id="wallet-balance" style="font-size:14px">Chưa truy vấn</strong><small>Sepolia ETH thử nghiệm</small></div><div class="metric"><strong id="wallet-nonce" style="font-size:14px">—</strong><small>Transaction count; block <span id="wallet-check-block">—</span></small></div></div>
      <p class="sub"><strong style="color:var(--red)">Cảnh báo:</strong> 0x9858EfFD232B4033E47d90003D41EC34EcaEda94 là địa chỉ của test vector BIP-39 công khai, không thể dùng làm bằng chứng quyền sở hữu riêng và không an toàn để triển khai. <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">Faucet Sepolia cho ví thử nghiệm mới ↗</a></p>
@@ -106,7 +111,7 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
    <section class="card"><div class="head"><h2>06 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
   </div>
  </div>
- <footer class="footer">BilaScript v6.0.1 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
+ <footer class="footer">BilaScript v6.0.2 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
 </main>
 <script type="module" src="./app.mjs"></script>
 </body>
