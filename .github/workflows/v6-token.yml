@@ -1,0 +1,38 @@
+name: Bila (Bitlang) Sepolia Reference ERC20
+on:
+  push:
+    paths:
+      - 'v6/token/**'
+      - '.github/workflows/v6-token.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  token-reference-anvil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install exact reference compilers and libraries
+        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30 @openzeppelin/contracts@5.6.1
+      - name: Generate pinned reference ERC20 creation/runtime bytes
+        env:
+          WRITE_TOKEN_BUILD: '1'
+          EMIT_TOKEN_BUILD_JSON: '1'
+        run: node v6/token/build-token.mjs
+      - name: Install local Ethereum EVM executor
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Check real ERC20 transfer and allowance with Anvil
+        run: bash v6/token/test-token-anvil.sh
+      - name: Retain deterministic token artifact for GitHub Pages review
+        uses: actions/upload-artifact@v4
+        with:
+          name: bila-bitlang-reference-build
+          path: v6/token/BilaBitlang.build.json
+          if-no-files-found: error
+          retention-days: 30
