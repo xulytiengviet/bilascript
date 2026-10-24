@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071c33">
 <meta name="description" content="BilaScript v6.0.3: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
-<title>BilaScript v6.0.4 · BILA Token Sepolia · Native EVM Compiler</title>
+<title>BilaScript v6 · Native EVM · Hợp đồng CVNSS4.0</title>
 <style>
 :root{color-scheme:dark;--bg:#061827;--top:#071e34;--panel:#0b2944;--deep:#041420;--line:#2b5069;--text:#edf6fe;--muted:#afc5d6;--gold:#e7c365;--mint:#70e9bc;--red:#ff9195;--blue:#72c8ff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
@@ -43,13 +43,21 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
 <header class="top">
  <div class="brand">BILA<b>SCRIPT</b> / V6</div>
  <span class="tag">NATIVE EVM · EXPERIMENTAL</span>
- <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#token-bila">BILA ERC-20</a><a href="#provenance">Bytecode Identity</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
+ <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="./hop-dong/" style="color:var(--gold);font-weight:800">HỢP ĐỒNG ↗</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#token-bila">BILA ERC-20</a><a href="#provenance">Bytecode Identity</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
 </header>
 <main>
  <section class="hero">
   <div><div class="eyebrow">PHÒNG THÍ NGHIỆM BYTECODE / OPCODE / GAS / TRẠNG THÁI EVM THỰC</div><h1>Ngôn ngữ <span>BilaScript</span>.<br>Bytecode EVM độc lập.</h1><p>Biên dịch CVNSS4.0 trực tiếp thành EVM bytecode, kết nối ví để triển khai thử nghiệm trên <b>Ethereum Sepolia</b>, xem giao dịch và đối chiếu trạng thái on-chain. Không cần Solidity hoặc Solang.</p></div>
   <div id="status" role="status" aria-live="polite">Chưa biên dịch</div>
  </section>
+ <section class="card" style="border-color:#669c94;background:linear-gradient(110deg,#0f3543,#0d2641);margin:10px 0 18px">
+ <div class="inner" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center">
+ <div style="max-width:900px"><div class="eyebrow">MỤC MỚI · 100% NATIVE BILASCRIPT EVM</div>
+ <h2 style="font-size:23px;margin:5px 0">HỢP ĐỒNG · CVNSS4.0 / CHỨNG CỨ ON-CHAIN</h2>
+ <p>Mã nguồn hợp đồng 8 biến và 22 hàm được biên dịch trực tiếp bởi BilaScript thành EVM bytecode, không sử dụng Solidity/Solc. Khám phá ABI, opcode, storage, kiểm tra gas và triển khai thử nghiệm bằng ví Sepolia.</p>
+ <p class="sub">Hợp đồng sổ chỉ số nghiên cứu, không phải ERC-20; chưa có triển khai công khai cho đến khi MetaMask ký và RPC xác nhận receipt.</p></div>
+ <a href="./hop-dong/" style="display:inline-block;padding:13px 18px;border-radius:9px;background:var(--gold);color:#14283a;font-weight:900">MỞ PHÒNG HỢP ĐỒNG NATIVE ↗</a>
+ </div></section>
  <div class="notice"><strong>Giới hạn v6.0.1:</strong> compiler thử nghiệm thực thi <code>chi_chu</code> bằng kiểm tra <code>CALLER</code> và từ chối <code>CALLVALUE</code>; chỉ hỗ trợ biến trạng thái <code>uint256</code>, hàm đọc, gán và tăng 1 có kiểm tra tràn. <strong>Không có dữ liệu giả lập.</strong> Sepolia là blockchain testnet thực; thao tác deploy phải được người dùng xác nhận trên ví. Chưa được audit, không dùng hợp đồng này để giữ tài sản và không hỗ trợ mainnet.</div>
  <div class="features"><span>CVNSS4.0 semantic aliases</span><span>CVNSS4.0 guarded writes</span><span>nonpayable enforced</span><span>No Solidity frontend</span><span>No Solang</span><span>Native creation/runtime</span><span>EIP-1193 Wallet</span><span>Sepolia chain 11155111</span><span>Receipt &amp; gasUsed</span><span>eth_getCode / eth_getStorageAt</span></div>
  <div class="metrics">
