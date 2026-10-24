@@ -29,4 +29,14 @@ INC_JSON=$(cast send "$ADDR" "tang()" --rpc-url "$RPC" --private-key "$PK" --jso
 node -e 'if(BigInt(JSON.parse(process.argv[1]).status)!==1n)process.exit(1)' "$INC_JSON"
 NEXT=$(cast storage "$ADDR" 0 --rpc-url "$RPC")
 test "$(cast to-dec "$NEXT")" = "43"
-echo "ANVIL PASS: chain=$CHAIN contract=$ADDR initial=42 incremented=43 runtime-bytecode=match"
+# Reproduce a real EVM revert when uint256 addition would overflow.
+MAX_UINT256="115792089237316195423570985008687907853269984665640564039457584007913129639935"
+OVERFLOW_SETUP=$(cast send "$ADDR" "gan(uint256)" "$MAX_UINT256" --rpc-url "$RPC" --private-key "$PK" --json)
+node -e 'if(BigInt(JSON.parse(process.argv[1]).status)!==1n)process.exit(1)' "$OVERFLOW_SETUP"
+if cast call "$ADDR" "tang()" --rpc-url "$RPC" >/tmp/bila-overflow.out 2>/tmp/bila-overflow.err; then
+  echo "ERROR: expected checked increment to REVERT at max uint256" >&2
+  exit 1
+fi
+STILL_MAX=$(cast storage "$ADDR" 0 --rpc-url "$RPC")
+test "$(cast to-dec "$STILL_MAX")" = "$MAX_UINT256"
+echo "ANVIL PASS: chain=$CHAIN contract=$ADDR initial=42 incremented=43 overflow=revert runtime-bytecode=match"
