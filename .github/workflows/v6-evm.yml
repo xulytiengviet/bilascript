@@ -36,3 +36,19 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: Anvil EVM deploy and state transition (no mock)
         run: bash v6/test/anvil.sh
+      - name: Differential fuzzing — BilaScript vs Solc on real Anvil
+        id: differential
+        env:
+          FUZZ_START: '20261024'
+          FUZZ_SEEDS: '24'
+          FUZZ_STEPS: '14'
+        run: bash v6/test/differential-anvil.sh
+      - name: Retain reproducible seeds, state traces and failure counterexamples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilascript-v6-differential-evidence
+          path: v6/test-results/differential-fuzz.json
+          if-no-files-found: warn
+          retention-days: 30
+
