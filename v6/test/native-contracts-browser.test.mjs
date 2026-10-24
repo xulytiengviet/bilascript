@@ -32,6 +32,12 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
    if(method==="eth_gasPrice")return "0x3b9aca00";
    if(method==="eth_estimateGas")return "0x100000";
    if(method==="eth_getCode")return artifact.runtimeBytecode;
+   if(method==="eth_getTransactionByHash")return {
+    hash:"0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d",
+    from:ORIGIN,to:null,input:artifact.creationBytecode,value:"0x0"};
+   if(method==="eth_getTransactionReceipt")return {
+    status:"0x1",contractAddress:"0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6",
+    blockNumber:"0x10",gasUsed:"0x1530"};
    if(method==="eth_getStorageAt")return "0x"+BigInt(ORIGIN).toString(16);
    if(method==="eth_blockNumber")return "0xb6d12f";
    throw Error("Unexpected fake browser RPC "+method);
@@ -94,7 +100,17 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
   window.document.getElementById("load-canonical-build").click();
   await waitFor(()=>window.document.getElementById("verify-build-state").textContent.includes("Đã nạp artifact chuẩn"));
   assert.equal(window.document.getElementById("contract-address").value,
+   "0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6");
+  window.document.getElementById("verify-address").click();
+  await waitFor(()=>window.document.getElementById("download-proof").disabled===false);
+  assert.match(window.document.getElementById("proof").textContent,/EXACT_NATIVE_CREATION_RUNTIME_OWNER_AND_RECEIPT/);
+  const preset=window.document.getElementById("deployment-preset");
+  preset.value="earlier";
+  preset.dispatchEvent(new window.Event("change"));
+  assert.equal(window.document.getElementById("contract-address").value,
    "0x305eb44bb1ccd78618a79479270d113742dcb072");
+  assert.equal(window.document.getElementById("tx-hash").value,"");
+  assert.equal(window.document.getElementById("download-proof").disabled,true);
   window.document.getElementById("verify-address").click();
   await waitFor(()=>window.document.getElementById("download-proof").disabled===false);
   assert.match(window.document.getElementById("proof").textContent,/EXACT_NATIVE_RUNTIME_AND_OWNER/);
