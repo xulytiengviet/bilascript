@@ -25,7 +25,8 @@ footer{font-size:12px;color:var(--muted);margin-top:18px;padding:17px 0;border-t
 <div class="warning"><strong>Không phải Etherscan Verified Source.</strong> Etherscan Solidity (Standard JSON Input) không biên dịch ngôn ngữ BilaScript. Dòng <code>Unknown key "artifactOrigin"</code> có nghĩa bạn đã gửi nhầm JSON chứng cứ của BilaScript cho Solc. Hãy sử dụng công cụ riêng bên dưới, không tiếp tục tải JSON native lên biểu mẫu Solidity. <a href="https://kb.etherscan.com/how-to-verify-contracts" target="_blank" rel="noopener noreferrer">Giải thích xác minh Etherscan ↗</a></div>
 </section>
 <section class="panel"><div class="head"><h2>01 · ĐỊA CHỈ VÀ KẾT QUẢ XÁC MINH</h2><span id="state" class="pill" data-state="pending" role="status" aria-live="polite">Đang nạp mã nguồn…</span></div>
-<div class="body"><label for="address">Hợp đồng Ethereum Sepolia — Chain ID 11155111</label><input id="address" class="address" value="0x305eb44bb1ccd78618a79479270d113742dcb072" spellcheck="false" autocomplete="off">
+<div class="body"><label for="address">Hợp đồng Ethereum Sepolia — Chain ID 11155111</label><input id="address" class="address" value="0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6" spellcheck="false" autocomplete="off">
+<p class="sub">Hai hợp đồng cùng bản build native: <a href="?address=0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6">Bản 2 · 0xd4fc… (đã xác minh cả creation transaction)</a> · <a href="?address=0x305eb44bb1ccd78618a79479270d113742dcb072">Bản 1 · 0x305e… (runtime và owner)</a>. Giao dịch 0x0070f826… chỉ tạo bản 2.</p>
 <div class="controls"><button id="verify" class="primary">Xác minh bằng BilaScript + RPC Sepolia</button><button id="copy-address">Sao chép địa chỉ</button><button id="save-proof" disabled>Tải chứng cứ JSON</button></div>
 <p id="info" class="sub" role="status" aria-live="polite">Chưa thực hiện xác minh RPC trong phiên này.</p>
 <div class="grid"><div class="metric"><strong id="code-status">—</strong><small>Đối chiếu native runtime</small></div><div class="metric"><strong id="owner-status">—</strong><small>Owner storage slot 0</small></div><div class="metric"><strong id="runtime-size">—</strong><small>Runtime bytes on-chain</small></div><div class="metric"><strong id="block">—</strong><small>Block số liệu RPC</small></div></div>
@@ -53,8 +54,8 @@ footer{font-size:12px;color:var(--muted);margin-top:18px;padding:17px 0;border-t
 </table></div></section>
 <section class="panel"><div class="head"><h2>04 · BLOCKCHAIN &amp; BẰNG CHỨNG</h2></div><div class="body"><p>Chỉ xác minh nguồn gốc bytecode thực thi và owner từ RPC; giao dịch triển khai/creator chỉ được chứng minh nếu đối chiếu thêm hash giao dịch khởi tạo.</p>
 <pre id="details" class="code" style="max-height:340px">Chưa có báo cáo Sepolia.</pre>
-<div class="controls"><a href="https://sepolia.etherscan.io/address/0x305eb44bb1ccd78618a79479270d113742dcb072#code" target="_blank" rel="noopener noreferrer">Xem bytecode Etherscan ↗</a><a href="https://github.com/xulytiengviet/bilascript/actions/runs/40065720805" target="_blank" rel="noopener noreferrer">Kết quả xác minh RPC CI ↗</a><a href="../hop-dong/#chung-cu">Kiểm tra cả tx hash ↗</a></div>
+<div class="controls"><a href="https://sepolia.etherscan.io/address/0x305eb44bb1ccd78618a79479270d113742dcb072#code" target="_blank" rel="noopener noreferrer">Xem bytecode Etherscan ↗</a><a href="https://github.com/xulytiengviet/bilascript/actions/runs/40068255656" target="_blank" rel="noopener noreferrer">Bằng chứng native đầy đủ creation + receipt ↗</a><a href="../hop-dong/#chung-cu">Kiểm tra cả tx hash ↗</a></div>
 </div></section></div></div>
 <footer><strong>BilaScript Native Source Verification</strong> — độc lập với Etherscan Solidity Verified, không thu thập thông tin ví, không tự gửi giao dịch, không hứa hẹn sự tương đương đầy đủ với Solidity.</footer>
-</main><script type="module" src="../contracts/contract-source-viewer.mjs?v=1"></script>
+</main><script type="module" src="../contracts/contract-source-viewer.mjs?v=2-contract-identity"></script>
 </body></html>
