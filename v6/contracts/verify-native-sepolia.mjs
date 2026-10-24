@@ -108,14 +108,27 @@ export async function verifyNativeSepoliaAddress({
    request("eth_getTransactionReceipt",[transactionHash])
   ]);
   if(!tx||!receipt)throw Error("Không tìm thấy transaction hoặc receipt trên Sepolia.");
-  const validTx=asNumber(receipt.status)===1n&&lower(receipt.contractAddress)===lower(address)&&
-   lower(tx.hash)===lower(transactionHash)&&
-   lower(tx.from)===lower(NATIVE_ROOT_WALLET)&&tx.to===null&&
-   lower(tx.input||tx.data)===lower(built.creationBytecode)&&
-   asNumber(tx.value??"0x0")===0n&&bytecodeExact&&ownerExact;
+  const transactionChecks={
+   receiptSuccess:asNumber(receipt.status)===1n,
+   receiptContractMatches:lower(receipt.contractAddress)===lower(address),
+   hashMatches:lower(tx.hash)===lower(transactionHash),
+   deployerMatchesRoot:lower(tx.from)===lower(NATIVE_ROOT_WALLET),
+   contractCreationTransaction:tx.to===null,
+   creationBytecodeMatches:lower(tx.input||tx.data)===lower(built.creationBytecode),
+   zeroValue:asNumber(tx.value??"0x0")===0n,
+   runtimeMatches:bytecodeExact,
+   ownerMatches:ownerExact
+  };
+  const validTx=Object.values(transactionChecks).every(Boolean);
   result.transactionHash=transactionHash;
   result.transactionMatchesCreation=validTx;
+  result.transactionChecks=transactionChecks;
   result.transactionFrom=tx.from;
+  result.transactionTo=tx.to;
+  result.receiptContractAddress=receipt.contractAddress;
+  result.transactionInputBytes=/^0x(?:[0-9a-fA-F]{2})*$/.test(tx.input||tx.data||"")?
+   ((tx.input||tx.data).length-2)/2:null;
+  result.expectedCreationBytes=(built.creationBytecode.length-2)/2;
   result.transactionBlock=asNumber(receipt.blockNumber).toString();
   result.gasUsed=asNumber(receipt.gasUsed).toString();
   if(validTx)result.status="EXACT_NATIVE_CREATION_RUNTIME_OWNER_AND_RECEIPT";
