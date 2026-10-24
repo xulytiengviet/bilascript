@@ -2,15 +2,28 @@ import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
 import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs?v=6.0.2-wallet-879e";
 import {BrowserWallets,ensureSepolia,describeProviderError} from "./wallet-adapter.mjs";
 import {selectedRecipient,readFaucetBalance} from "./faucet.mjs";
+import {checkDeploymentReady} from "./deployment-ready.mjs";
+import {loadBilaArtifact,verifyBilaToken} from "./token/token-lab.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
 const logBox=$("events"), report=$("evidence"), status=$("status");
 const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument");
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
+let bilaBuild=null,bilaTokenProof=null;
 const walletCatalog=new BrowserWallets(window);
 let providerSubscription=null;
+function resetDeploymentChecks(){
+  $("deploy").disabled=true;
+  $("deploy-eth").textContent="Chưa kiểm tra";
+  $("deploy-cost").textContent="—";
+  $("deploy-readiness").textContent="Cần kiểm tra số dư và gas từ Sepolia trước khi ký.";
+  $("bila-deploy").disabled=true;
+  $("bila-eth").textContent="Chưa kiểm tra";
+  $("bila-estimate").textContent="—";
+}
 function clearAccount(message){
+  resetDeploymentChecks();
   account="";
   $("wallet").textContent="Chưa kết nối";
   if(message)setStatus(message,"neutral");
@@ -39,6 +52,7 @@ if(expectedWallet.value.toLowerCase()===PUBLIC_TEST_VECTOR_ADDRESS.toLowerCase()
 }
 function assertSigner(){return matchWallet(account,expectedWallet.value.trim());}
 function syncFaucetRecipient(){
+  resetDeploymentChecks();
   const recipient=expectedWallet.value.trim();
   $("faucet-recipient").textContent=recipient||"Chưa có địa chỉ nhận";
   $("faucet-eth").textContent="Chưa kiểm tra";
@@ -125,6 +139,7 @@ function changeMethod(){
 function compile(){
   try{
     compiled=compileBila(source.value);
+    resetDeploymentChecks();
     deployEvidence=null;
     $("download-proof").disabled=true;
     output.value=compiled.creationBytecode;
@@ -235,11 +250,88 @@ function linkContract(address){
   const a=$("explorer-contract");a.href="https://sepolia.etherscan.io/address/"+address;
   a.textContent=address.slice(0,12)+"…"+address.slice(-8);a.hidden=false;
 }
+async function checkNativeDeployment(){
+  requireReady();
+  await assertSepolia();
+  await assertLiveSigner();
+  const result=await checkDeploymentReady({
+    provider:getProvider(),from:account,creationBytecode:compiled.creationBytecode
+  });
+  $("deploy-eth").textContent=result.balanceEth+" Sepolia ETH";
+  $("deploy-cost").textContent=result.estimatedCostEth===null?"Không ước tính được":result.estimatedCostEth+" ETH";
+  $("deploy-readiness").textContent=result.reason+
+    (result.estimatedGas?" · gas="+result.estimatedGas+" · gasPrice="+result.gasPriceWei+" wei":"");
+  $("deploy").disabled=!result.covered;
+  if(result.covered)writeLog("ok","Preflight ETH/gas đạt qua RPC Sepolia thật. Đã mở nút deploy.");
+  else writeLog("error","Preflight chưa đạt: "+result.reason);
+  return result;
+}
+async function loadTokenBuild(){
+  bilaBuild=await loadBilaArtifact();
+  bilaTokenProof=null;
+  $("bila-proof").disabled=true;
+  $("bila-deploy").disabled=true;
+  $("bila-backend").textContent="Solc 0.8.30 · OZ 5.6.1";
+  $("bila-stage").textContent="Đã nạp artifact BILA gồm creation/runtime EVM, ABI và mã băm source. Kết nối ví gốc và kiểm tra gas để tiếp tục. Backend: Solc/OpenZeppelin, CHƯA phải native BilaScript.";
+  writeLog("ok","BILA artifact nạp thành công: "+bilaBuild.symbol+" · "+bilaBuild.initialTokens+" · "+bilaBuild.backend);
+}
+async function checkTokenDeployment(){
+  if(!bilaBuild)throw Error("Chưa nạp build BILA; bấm Nạp creation bytecode ERC-20 trước.");
+  if(!account)throw Error("Chưa kết nối ví. Cần ví gốc để ký token.");
+  await assertLiveSigner();
+  if(account.toLowerCase()!==bilaBuild.genesisWallet.toLowerCase())
+    throw Error("Chỉ cho phép ví gốc BILA ký triển khai.");
+  const ready=await checkDeploymentReady({
+    provider:getProvider(),from:account,creationBytecode:bilaBuild.creationBytecode
+  });
+  $("bila-eth").textContent=ready.balanceEth+" ETH";
+  $("bila-estimate").textContent=ready.estimatedCostEth===null?"Không tính được":ready.estimatedCostEth+" ETH";
+  $("bila-stage").textContent=(ready.covered?"Đã đủ Sepolia ETH để thử deploy. ":"Chưa đủ điều kiện. ")+ready.reason+
+    ". Build Solc/OZ tham chiếu; ví gốc nhận 1.000.000 BILA.";
+  $("bila-deploy").disabled=!ready.covered;
+  writeLog(ready.covered?"ok":"error","BILA preflight: "+ready.reason);
+  return ready;
+}
+async function verifyBilaFromInput(){
+  if(!bilaBuild)await loadTokenBuild();
+  const hash=$("bila-tx").value.trim();
+  const proof=await verifyBilaToken({provider:getProvider(),build:bilaBuild,transactionHash:hash});
+  bilaTokenProof=proof;
+  $("bila-evidence").textContent=pretty(proof);
+  $("bila-proof").disabled=false;
+  $("bila-stage").textContent="ĐÃ XÁC MINH trên Sepolia: "+proof.tokenContract+
+    " · toàn bộ 1.000.000 BILA ban đầu thuộc ví gốc; không có chức năng mint thêm.";
+  writeLog("ok","BILA ERC-20 được xác minh độc lập: "+proof.contractUrl);
+  return proof;
+}
+async function deployBilaToken(){
+  if(!bilaBuild)throw Error("Cần nạp bản build BILA đã biên dịch trước");
+  requireReady();
+  await assertLiveSigner();
+  const ready=await checkTokenDeployment();
+  if(!ready.covered)throw Error("Chưa đủ Sepolia ETH hoặc không ước tính được phí triển khai.");
+  const msg="Triển khai token thử nghiệm Bila (Bitlang) BILA trên Ethereum Sepolia?"+
+    "\nBackend: Solidity 0.8.30 + OpenZeppelin 5.6.1 (KHÔNG phải compiler native BilaScript)."+
+    "\nTổng cung cố định: 1.000.000 BILA; 18 decimals; ví gốc "+bilaBuild.genesisWallet+
+    ".\nPhí tối đa ước tính hiện tại: "+ready.estimatedCostEth+" Sepolia ETH. MetaMask sẽ yêu cầu ký.";
+  if(!window.confirm(msg))return;
+  $("bila-stage").textContent="Đang yêu cầu chữ ký MetaMask để triển khai ERC-20 trên Sepolia…";
+  const tx=await rpc("eth_sendTransaction",[{from:account,
+    data:bilaBuild.creationBytecode,value:"0x0"}]);
+  $("bila-tx").value=tx;
+  linkTransaction(tx);
+  $("bila-stage").textContent="Đã phát tx thật "+tx+". Đang kiểm tra receipt…";
+  const result=await receipt(tx);
+  if(BigInt(result.status)!==1n)throw Error("Triển khai BILA revert: "+tx);
+  await verifyBilaFromInput();
+  resetDeploymentChecks();
+}
+
 async function deploy(){
   requireReady();await assertSepolia();
   await assertLiveSigner();
-  const balance=BigInt(await rpc("eth_getBalance",[account,"latest"]));
-  if(balance<=0n)throw Error("Ví có 0 Sepolia ETH. Hãy mở mục Ethereum Sepolia Faucet, nhận ETH thử nghiệm và kiểm tra số dư trước khi triển khai.");
+  const readiness=await checkNativeDeployment();
+  if(!readiness.covered)throw Error("Ví chưa đủ ETH hoặc chưa xác minh gas trên Sepolia. Hãy nhận test ETH và kiểm tra lại.");
   const build=compiled;
   const creation=build.creationBytecode;
   const estimated=await rpc("eth_estimateGas",[{from:account,data:creation}]);
@@ -381,7 +473,15 @@ $("connect").addEventListener("click",guard(async()=>{
 }));
 $("switch").addEventListener("click",guard(changeChain));
 $("wallet-check").addEventListener("click",guard(checkWalletOnSepolia));
+$("deploy-check").addEventListener("click",guard(checkNativeDeployment));
 $("deploy").addEventListener("click",guard(deploy));
+$("bila-load").addEventListener("click",guard(loadTokenBuild));
+$("bila-check").addEventListener("click",guard(checkTokenDeployment));
+$("bila-deploy").addEventListener("click",guard(deployBilaToken));
+$("bila-verify").addEventListener("click",guard(verifyBilaFromInput));
+$("bila-proof").addEventListener("click",()=>{
+  if(bilaTokenProof)saveJSON("bila-bitlang-sepolia-proof-"+bilaTokenProof.transactionHash+".json",bilaTokenProof);
+});
 $("run").addEventListener("click",guard(runCall));
 $("estimate").addEventListener("click",guard(estimateOnly));
 $("refresh").addEventListener("click",guard(refreshState));
