@@ -86,3 +86,28 @@ export function runBilaFuzz({seed=20261024,programs=12,mutationsPerProgram=5}={}
   samples,failures
  };
 }
+
+/** Mutation tests against EXACT user source. Each applicable mutation must be rejected. */
+export function runTargetedFuzz(source){
+ const baseline=analyzeBilaSource(source);
+ const candidates=[
+  ["replace-contract-keyword",source.replace("hoph_dogd","contract")],
+  ["replace-cvnss-type",source.replace("sob_wyly_kogy_zaub_256","uint256")],
+  ["insert-bidi-override",source.replace("hoph_dogd","hoph\u202Edogd")],
+  ["remove-first-owner-guard",source.replace("cogy_kai chi_chu","cogy_kai")],
+  ["replace-first-public",source.replace("cogy_kai","public")],
+  ["inject-unknown-op",source.replace("hoph_dogd","foo_keyword hoph_dogd")]
+ ];
+ const cases=[],failures=[];
+ for(const [mutation,mutant] of candidates){
+  if(mutant===source)continue;
+  const analysis=analyzeBilaSource(mutant);
+  const caught=!isDeploymentEligible(analysis);
+  cases.push({mutation,caught,detector:analysis.issues.find(x=>x.severity==="error")?.code||null});
+  if(!caught)failures.push({mutation,source:mutant,issues:analysis.issues});
+ }
+ return {schema:"bilaguard.targeted-mutations.v0.1",baselineAccepted:isDeploymentEligible(baseline),
+  mutationCount:cases.length,caught:cases.filter(x=>x.caught).length,
+  passed:isDeploymentEligible(baseline)&&cases.length>=4&&failures.length===0,
+  cases,failures,scope:"Targeted negative compiler/source mutations. Not EVM runtime execution."};
+}
