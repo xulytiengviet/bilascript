@@ -1,0 +1,34 @@
+name: BilaScript Native Sepolia Creation Proof
+on:
+  push:
+    paths:
+      - '.github/workflows/v6-native-tx-proof.yml'
+      - 'v6/contracts/probe-live-native-sepolia.mjs'
+      - 'v6/contracts/verify-native-sepolia.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prove-creation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove sender, exact creation input, receipt, runtime, and owner on Sepolia
+        env:
+          NATIVE_SEPOLIA_ADDRESS: '0x305eb44bb1ccd78618a79479270d113742dcb072'
+          NATIVE_DEPLOY_TX_HASH: '0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d'
+        run: node v6/contracts/probe-live-native-sepolia.mjs
+      - name: Archive independent receipt/creation-bytecode verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bilascript-native-sepolia-creation-proof
+          path: v6/test-results/native-sepolia-verification.json
+          if-no-files-found: warn
+          retention-days: 60
