@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="BilaScript Native Source Verification: tái biên dịch CVNSS4.0, đối chiếu bytecode Sepolia và owner bằng RPC độc lập. Không phải Etherscan Solidity Verified.">
+<meta name="theme-color" content="#07182b">
+<title>BilaScript Native Source Verification · Ethereum Sepolia</title>
+<style>
+:root{color-scheme:dark;--bg:#07182b;--card:#10263e;--main:#163149;--line:#314b68;--text:#edf5fc;--muted:#a9c2d7;--good:#73e4bd;--gold:#f8d682;--bad:#ff9aa0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input{font:inherit}button{background:#22465e;border:1px solid #57768b;color:var(--text);border-radius:8px;padding:11px 14px;cursor:pointer;font-weight:700}button:hover{background:#315973}button:disabled{opacity:.45;cursor:not-allowed}.primary{color:#17334a;background:var(--gold);border-color:var(--gold)}header{background:#10283d;border-bottom:1px solid var(--line);padding:13px max(18px,calc((100vw - 1350px)/2));display:flex;gap:18px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:4}header strong{font:900 21px Consolas,monospace;letter-spacing:-.04em}header strong b{color:var(--gold)}header nav{display:flex;gap:15px;flex-wrap:wrap;margin-left:auto}header nav a{font-size:12px;color:var(--muted)}
+main{max-width:1350px;margin:auto;padding:22px 18px 55px}.eyebrow{color:var(--good);font:700 11px Consolas,monospace;letter-spacing:.16em}h1{font-size:clamp(26px,4vw,45px);letter-spacing:-.04em;line-height:1.15;margin:5px 0 10px}h2{font-size:16px;margin:0}h3{font-size:14px;margin:0 0 8px}p{color:var(--muted);margin:8px 0}.sub,small{font-size:12px;color:var(--muted)}.pill{font:700 11px Consolas,monospace;border:1px solid #4e8a84;color:var(--good);border-radius:50px;padding:5px 9px}.warning{border-left:4px solid var(--gold);background:#26374a;padding:12px 17px;border-radius:8px;margin:17px 0}.warning strong{color:var(--gold)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}.head{background:#1b354c;border-bottom:1px solid var(--line);padding:14px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.body{padding:17px}.controls{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.metric{background:#071d30;border:1px solid var(--line);border-radius:9px;padding:12px;min-width:0}.metric strong{display:block;overflow-wrap:anywhere;color:var(--gold);font:700 18px Consolas,monospace}.metric small{display:block}
+#state[data-state="ok"]{border-color:#417f72;color:var(--good)}#state[data-state="error"]{border-color:#9a5760;color:var(--bad)}#state[data-state="pending"]{border-color:#ad9261;color:var(--gold)}
+.address{width:100%;background:#081b2b;border:1px solid var(--line);padding:12px;color:var(--text);border-radius:8px;font:13px Consolas,monospace}.code{font:12px/1.55 Consolas,"Cascadia Code",monospace;background:#051624;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;max-height:530px}.smallcode{font:12px Consolas,monospace;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;font:12px/1.55 Consolas,monospace}th,td{padding:9px;text-align:left;border-bottom:1px solid #2e455c}th{color:var(--gold)}.scroll{overflow:auto;max-height:460px}.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.tabs button[aria-selected="true"]{background:var(--gold);color:#163047;border-color:var(--gold)}[hidden]{display:none!important}
+footer{font-size:12px;color:var(--muted);margin-top:18px;padding:17px 0;border-top:1px solid var(--line)}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){main{padding:15px 10px 45px}header{padding:12px}.controls button{width:100%}.grid{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<header><a href="../" aria-label="BilaScript v6"><strong>BILA<b>SCRIPT</b></strong></a><span class="pill">NATIVE SOURCE VERIFIER</span>
+<nav><a href="../">Phòng thí nghiệm v6</a><a href="../hop-dong/">HỢP ĐỒNG</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6/contracts" target="_blank" rel="noopener noreferrer">Repository ↗</a></nav></header>
+<main>
+<section>
+<div class="eyebrow">MÃ NGUỒN CVNSS4.0 / BIÊN DỊCH LẠI / BYTECODE / TRẠNG THÁI SEPOLIA</div>
+<h1>BilaScript Native <span style="color:var(--gold)">Source Verification</span></h1>
+<p>Hệ thống đối chiếu mã nguồn .bila, bản build compiler native và runtime bytecode được đọc từ Ethereum Sepolia. Mã nguồn CVNSS4.0 được tái biên dịch trong trình duyệt, không gửi khóa riêng và không dùng Solidity/Solc.</p>
+<div class="warning"><strong>Không phải Etherscan Verified Source.</strong> Etherscan Solidity (Standard JSON Input) không biên dịch ngôn ngữ BilaScript. Dòng <code>Unknown key "artifactOrigin"</code> có nghĩa bạn đã gửi nhầm JSON chứng cứ của BilaScript cho Solc. Hãy sử dụng công cụ riêng bên dưới, không tiếp tục tải JSON native lên biểu mẫu Solidity. <a href="https://kb.etherscan.com/how-to-verify-contracts" target="_blank" rel="noopener noreferrer">Giải thích xác minh Etherscan ↗</a></div>
+</section>
+<section class="panel"><div class="head"><h2>01 · ĐỊA CHỈ VÀ KẾT QUẢ XÁC MINH</h2><span id="state" class="pill" data-state="pending" role="status" aria-live="polite">Đang nạp mã nguồn…</span></div>
+<div class="body"><label for="address">Hợp đồng Ethereum Sepolia — Chain ID 11155111</label><input id="address" class="address" value="0x305eb44bb1ccd78618a79479270d113742dcb072" spellcheck="false" autocomplete="off">
+<div class="controls"><button id="verify" class="primary">Xác minh bằng BilaScript + RPC Sepolia</button><button id="copy-address">Sao chép địa chỉ</button><button id="save-proof" disabled>Tải chứng cứ JSON</button></div>
+<p id="info" class="sub" role="status" aria-live="polite">Chưa thực hiện xác minh RPC trong phiên này.</p>
+<div class="grid"><div class="metric"><strong id="code-status">—</strong><small>Đối chiếu native runtime</small></div><div class="metric"><strong id="owner-status">—</strong><small>Owner storage slot 0</small></div><div class="metric"><strong id="runtime-size">—</strong><small>Runtime bytes on-chain</small></div><div class="metric"><strong id="block">—</strong><small>Block số liệu RPC</small></div></div>
+<p class="sub">Phiên bản compiler chỉ được xác nhận khi nguồn .bila được tái biên dịch khớp hoàn toàn với bản build. Kết quả RPC on-chain là kiểm tra riêng. Để xác minh giao dịch đã tạo hợp đồng cần thêm tx hash triển khai.</p>
+</div></section>
+<div class="layout">
+<div><section class="panel"><div class="head"><h2>02 · SOURCE CODE CVNSS4.0</h2><span class="pill">BilaScript-v6.0.1-native-evm</span></div><div class="body">
+<div class="tabs" role="tablist"><button id="tab-source" role="tab" aria-selected="true">Source .bila</button><button id="tab-abi" role="tab" aria-selected="false">ABI · 22 hàm</button><button id="tab-bytecode" role="tab" aria-selected="false">Runtime bytecode</button></div>
+<div id="pane-source" role="tabpanel"><pre id="source-code" class="code">Đang nạp mã nguồn…</pre></div>
+<div id="pane-abi" role="tabpanel" hidden><div class="scroll"><table><thead><tr><th>Hàm</th><th>Selector</th><th>Mutability</th></tr></thead><tbody id="abi-table"></tbody></table></div></div>
+<div id="pane-bytecode" role="tabpanel" hidden><pre id="bytecode" class="code">Đang nạp bytecode…</pre></div>
+<div class="controls"><a href="../contracts/Bila_CVNSS40_Native.bila" download class="pill">Nguồn .bila ↗</a><a href="../contracts/Bila_CVNSS40_Native.build.json" download class="pill">Bila_CVNSS40_Native.build.json ↗</a></div>
+</div></section></div>
+<div><section class="panel"><div class="head"><h2>03 · THÔNG TIN BIÊN DỊCH</h2><span class="pill">Independent EVM</span></div><div class="body"><table>
+<tr><th>Trường</th><th>Giá trị</th></tr>
+<tr><td>Contract</td><td>Bila_CVNSS40_Native</td></tr>
+<tr><td>Ngôn ngữ</td><td>BilaScript / CVNSS4.0 EVM Profile</td></tr>
+<tr><td>Compiler</td><td>BilaScript-v6.0.1-native-evm</td></tr>
+<tr><td>Solc / Solidity</td><td>Không dùng</td></tr>
+<tr><td>ABI functions</td><td>22</td></tr>
+<tr><td>State variables</td><td>8 × uint256</td></tr>
+<tr><td>Creation bytes</td><td>1.058</td></tr>
+<tr><td>Runtime bytes</td><td>1.027</td></tr>
+<tr><td>Source Keccak-256</td><td><span id="source-hash" class="smallcode">—</span></td></tr>
+</table></div></section>
+<section class="panel"><div class="head"><h2>04 · BLOCKCHAIN &amp; BẰNG CHỨNG</h2></div><div class="body"><p>Chỉ xác minh nguồn gốc bytecode thực thi và owner từ RPC; giao dịch triển khai/creator chỉ được chứng minh nếu đối chiếu thêm hash giao dịch khởi tạo.</p>
+<pre id="details" class="code" style="max-height:340px">Chưa có báo cáo Sepolia.</pre>
+<div class="controls"><a href="https://sepolia.etherscan.io/address/0x305eb44bb1ccd78618a79479270d113742dcb072#code" target="_blank" rel="noopener noreferrer">Xem bytecode Etherscan ↗</a><a href="https://github.com/xulytiengviet/bilascript/actions/runs/40065720805" target="_blank" rel="noopener noreferrer">Kết quả xác minh RPC CI ↗</a><a href="../hop-dong/#chung-cu">Kiểm tra cả tx hash ↗</a></div>
+</div></section></div></div>
+<footer><strong>BilaScript Native Source Verification</strong> — độc lập với Etherscan Solidity Verified, không thu thập thông tin ví, không tự gửi giao dịch, không hứa hẹn sự tương đương đầy đủ với Solidity.</footer>
+</main><script type="module" src="../contracts/contract-source-viewer.mjs?v=1"></script>
+</body></html>
