@@ -55,7 +55,14 @@ test("native HỢP ĐỒNG page actually compiles .bila and enables only funded 
   assert.equal(window.document.getElementById("deploy-native").disabled,true);
   assert.equal(window.document.getElementById("wallet-provider").disabled,false);
   window.document.getElementById("wallet-connect").click();
-  await waitFor(()=>window.document.getElementById("wallet-state").textContent.includes("Đã kết nối"));
+  try{
+   await waitFor(()=>window.document.getElementById("wallet-state").textContent.includes("Đã kết nối"));
+  }catch(e){
+   throw Error("Wallet state: "+window.document.getElementById("wallet-state").textContent+
+    " | Status: "+window.document.getElementById("state").textContent+
+    " | Log: "+window.document.getElementById("logs").textContent.slice(0,550)+
+    " | RPC: "+called.join(",")+" | Cause: "+e.message);
+  }
   assert.equal(chain,"0xaa36a7");
   assert.ok(called.indexOf("eth_requestAccounts")<called.indexOf("eth_chainId"));
   window.document.getElementById("check-gas").click();
