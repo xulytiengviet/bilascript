@@ -9,7 +9,7 @@ import {readFileSync} from "node:fs";
 import {JSDOM} from "jsdom";
 import {fileURLToPath} from "node:url";
 const html=fileURLToPath(new URL("../index.html",import.meta.url));
-const EXPECTED="0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB";
+const EXPECTED="0x879E22703E2E432257334Db400Fbf9115aeD93Cf";
 const waitFor=async(predicate)=>{
   for(let i=0;i<90;i++){
     if(predicate())return;
@@ -44,6 +44,7 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
  try{
   await import("../app.mjs?browser_smoke_v6");
   assert.match(window.document.getElementById("source").value,/hoph_dogd/);
+  assert.equal(window.document.getElementById("expected-wallet").value,EXPECTED);
   assert.ok(window.document.getElementById("output").value.startsWith("0x"));
   assert.equal(window.document.getElementById("wallet-provider").disabled,false);
   assert.equal(window.document.getElementById("wallet-provider").options.length,1);
