@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {compileBila,encodeCall,keccak256,disassemble,EXAMPLE} from "../compiler.mjs";
+import {EVM_VOCABULARY,EVM_KEYWORDS} from "../vocabulary-evm.mjs";
 
 test("Ethereum Keccak-256 reference vectors",()=>{
   assert.equal(keccak256(""),"0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
@@ -65,4 +66,15 @@ test("reject unguarded writes, view writes, unknown vars, unsupported types and 
   for(const s of invalid)assert.throws(()=>compileBila(s),/BILA-EVM6/,s);
   assert.throws(()=>encodeCall(compileBila(EXAMPLE).methods.ganj,"-1"),/BILA-EVM6/);
   assert.throws(()=>encodeCall(compileBila(EXAMPLE).methods.ganj,1n<<256n),/BILA-EVM6/);
+});
+
+test("CVNSS4.0 EVM vocabulary has unique semantic IDs and exact canonical aliases",()=>{
+  assert.equal(EVM_VOCABULARY.status,"PROVISIONAL_UNDER_AUDIT");
+  assert.equal(EVM_VOCABULARY.records.length,8);
+  assert.equal(new Set(EVM_VOCABULARY.records.map(r=>r.id)).size,EVM_VOCABULARY.records.length);
+  for(const r of EVM_VOCABULARY.records)assert.equal(EVM_KEYWORDS[r.primary],r.semantic);
+  assert.equal(EVM_KEYWORDS.haml_sob,"function");
+  assert.equal(EVM_KEYWORDS.trov_ved,"return");
+  assert.equal(EVM_KEYWORDS.chi_chu,"owner_only");
+  assert.equal(compileBila(EXAMPLE).vocabulary,"bila:evm@6.0.1");
 });
