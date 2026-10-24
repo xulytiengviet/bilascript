@@ -91,12 +91,12 @@ export function runBilaFuzz({seed=20261024,programs=12,mutationsPerProgram=5}={}
 export function runTargetedFuzz(source){
  const baseline=analyzeBilaSource(source);
  const candidates=[
-  ["replace-contract-keyword",source.replace("hoph_dogd","contract")],
-  ["replace-cvnss-type",source.replace("sob_wyly_kogy_zaub_256","uint256")],
-  ["insert-bidi-override",source.replace("hoph_dogd","hoph\u202Edogd")],
+  ["replace-contract-keyword",source.replace(/hoph_dogd(?=\\s+[a-zA-Z_][a-zA-Z_0-9]*\\s*\\{)/,"contract")],
+  ["replace-cvnss-type",source.replace(/sob_wyly_kogy_zaub_256(?=\\s+[a-zA-Z_][a-zA-Z_0-9]*\\s*;)/,"uint256")],
+  ["insert-bidi-override",source.replace(/hoph_dogd(?=\\s+[a-zA-Z_][a-zA-Z_0-9]*\\s*\\{)/,"hoph\u202Edogd")],
   ["remove-first-owner-guard",source.replace("cogy_kai chi_chu","cogy_kai")],
   ["replace-first-public",source.replace("cogy_kai","public")],
-  ["inject-unknown-op",source.replace("hoph_dogd","foo_keyword hoph_dogd")]
+  ["inject-unknown-op",source.replace(/hoph_dogd(?=\\s+[a-zA-Z_][a-zA-Z_0-9]*\\s*\\{)/,"foo_keyword hoph_dogd")]
  ];
  const cases=[],failures=[];
  for(const [mutation,mutant] of candidates){
