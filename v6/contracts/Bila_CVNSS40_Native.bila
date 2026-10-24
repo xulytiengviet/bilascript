@@ -1,0 +1,102 @@
+/*
+ * BilaScript Native EVM · CVNSS4.0 EVM PROFILE (PROVISIONAL)
+ * HopDong_BilaCVNSS40 — a research registry for software and test evidence.
+ *
+ * ALL executable source syntax is BilaScript/CVNSS4.0:
+ * hoph_dogd = contract, sob_wyly_kogy_zaub_256 = uint256,
+ * haml_sob = function, cogy_kai = public, chi_chu = owner-only,
+ * chiz_docr = view, traz_ved = returns, trov_ved = return.
+ *
+ * Variables and function names are user-defined ABI identifiers.
+ *
+ * Real EVM semantics: CALLER owner gate, nonpayable CALLVALUE gate,
+ * checked uint256 increment, persistent storage slots, standard ABI selectors.
+ *
+ * Designed for Sepolia experiments. NOT an ERC20, NFT, token, identity
+ * certificate, external oracle, or blockchain timestamp attestation.
+ * Numeric fields are owner-entered values; the chain only proves the writes
+ * occurred, not that the underlying claims are true.
+ */
+hoph_dogd Bila_CVNSS40_Native {
+    // Version label and reference for compiler/research datasets
+    sob_wyly_kogy_zaub_256 phien_ban;
+    sob_wyly_kogy_zaub_256 ma_bo_du_lieu;
+    sob_wyly_kogy_zaub_256 so_mau;
+    sob_wyly_kogy_zaub_256 so_kiem_dinh;
+    sob_wyly_kogy_zaub_256 so_xac_nhan;
+    sob_wyly_kogy_zaub_256 diem_chat_luong;
+    sob_wyly_kogy_zaub_256 phien_thu;
+    sob_wyly_kogy_zaub_256 ma_bang_chung;
+
+    // Each state write is guarded by a native CALLER == slot0 owner check.
+    haml_sob dat_phien_ban(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        phien_ban = gia_tri;
+    }
+    haml_sob dat_bo_du_lieu(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        ma_bo_du_lieu = gia_tri;
+    }
+    haml_sob dat_so_mau(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        so_mau = gia_tri;
+    }
+    haml_sob dat_kiem_dinh(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        so_kiem_dinh = gia_tri;
+    }
+    haml_sob dat_xac_nhan(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        so_xac_nhan = gia_tri;
+    }
+    haml_sob dat_chat_luong(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        diem_chat_luong = gia_tri;
+    }
+    haml_sob dat_phien_thu(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        phien_thu = gia_tri;
+    }
+    haml_sob dat_bang_chung(sob_wyly_kogy_zaub_256 gia_tri) cogy_kai chi_chu {
+        ma_bang_chung = gia_tri;
+    }
+
+    // View calls read real storage. They cannot change chain state.
+    haml_sob doc_phien_ban() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved phien_ban;
+    }
+    haml_sob doc_bo_du_lieu() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved ma_bo_du_lieu;
+    }
+    haml_sob doc_so_mau() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved so_mau;
+    }
+    haml_sob doc_kiem_dinh() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved so_kiem_dinh;
+    }
+    haml_sob doc_xac_nhan() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved so_xac_nhan;
+    }
+    haml_sob doc_chat_luong() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved diem_chat_luong;
+    }
+    haml_sob doc_phien_thu() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved phien_thu;
+    }
+    haml_sob doc_bang_chung() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved ma_bang_chung;
+    }
+
+    // Six separate increment paths; each reverts on uint256 overflow.
+    haml_sob tang_phien_ban() cogy_kai chi_chu {
+        phien_ban = phien_ban + 1;
+    }
+    haml_sob tang_so_mau() cogy_kai chi_chu {
+        so_mau = so_mau + 1;
+    }
+    haml_sob tang_kiem_dinh() cogy_kai chi_chu {
+        so_kiem_dinh = so_kiem_dinh + 1;
+    }
+    haml_sob tang_xac_nhan() cogy_kai chi_chu {
+        so_xac_nhan = so_xac_nhan + 1;
+    }
+    haml_sob tang_phien_thu() cogy_kai chi_chu {
+        phien_thu = phien_thu + 1;
+    }
+    haml_sob tang_bang_chung() cogy_kai chi_chu {
+        ma_bang_chung = ma_bang_chung + 1;
+    }
+}
