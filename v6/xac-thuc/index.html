@@ -13,6 +13,7 @@ main{max-width:1430px;margin:auto;padding:27px 18px 60px}.eyebrow{font:700 11px 
 <nav><a href="../">Phòng thí nghiệm</a><a href="../hop-dong/">HỢP ĐỒNG</a><a href="../verify/">Native Source Viewer</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6/contracts" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav></header>
 <main><div class="hero"><div><div class="eyebrow">BILASCRIPT CVNSS4.0 / SEPOLIA / TRANSACTION / JSON / RPC</div><h1>Quy trình <span>XÁC THỰC HỢP ĐỒNG</span></h1>
 <p>Chỉ ba bước: tạo/kiểm tra giao dịch Sepolia, nạp JSON build, tái biên dịch CVNSS4.0 và đối chiếu bytecode on-chain. Hỗ trợ hợp đồng Bila_CVNSS40_Native hiện tại; người sở hữu ví ký trực tiếp bằng MetaMask.</p></div><span id="overall" class="tag">Chưa bắt đầu</span></div>
+<div class="banner" style="border-color:#ad5d67;border-left-color:#ff9daa;background:#3a2737"><strong style="color:#ffd7dc">LỖI ETHERSCAN “Unknown key build”:</strong> Bạn đang tải hồ sơ JSON native của BilaScript vào trình xác minh <b>Solidity</b>. Đây không phải file <code>Solidity Standard JSON Input</code>. <strong style="color:#ffd7dc">Không gửi các file build.json / proof.json native lên Etherscan Solc.</strong> Hợp đồng và giao dịch vẫn có thể được kiểm chứng chính xác tại tab này bằng compiler BilaScript cùng RPC Sepolia. <a href="../verify/?address=0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6">Mở bằng chứng nguồn native ↗</a></div>
 <div class="banner"><strong>Phân biệt hai compiler:</strong> hợp đồng .bila được tạo bằng <b>BilaScript-v6.0.1-native-evm</b>. Cấu hình Etherscan <b>STANDARD JSON-INPUT / v0.8.30+commit.73712a01</b> là mặc định <b>cho Solidity tham chiếu</b>, không dùng Solc để xác minh mã native BilaScript.</div>
 <div class="grid">
 <section class="card" id="buoc-1"><div class="head"><h2><span class="step-number">1</span> KÝ / KIỂM TRA TX</h2><span id="s1-badge" class="tag">CHƯA KIỂM TRA</span></div>
@@ -24,17 +25,22 @@ main{max-width:1430px;margin:auto;padding:27px 18px 60px}.eyebrow{font:700 11px 
 <label for="wallet">Ví EIP-6963 / MetaMask (khi triển khai mới)</label><select class="input" id="wallet"><option>Chưa phát hiện ví</option></select>
 <div id="s1-message" class="msg" data-state="pending" role="status" aria-live="polite">Chưa đọc transaction/receipt từ Sepolia.</div></div></section>
 <section class="card" id="buoc-2"><div class="head"><h2><span class="step-number">2</span> TẢI MÃ JSON</h2><span id="s2-badge" class="tag">CHƯA NẠP</span></div>
-<div class="inside"><p>Chọn JSON từ máy hoặc dùng bản build chuẩn từ GitHub. Compiler native sẽ kiểm tra đủ ABI, creation/runtime bytecode và nguồn CVNSS4.0.</p>
+<div class="inside"><p>Chọn JSON từ máy hoặc dùng bản build chuẩn từ GitHub. <strong>Chấp nhận chính tệp “BilaScript-Native-Sepolia-...json” mà bạn đã xuất</strong> (trường <code>build</code>) và mọi kết quả cũ sẽ phải xác minh lại qua RPC; không tin trạng thái “Verified” lưu sẵn.</p>
 <label for="json-file">Chọn tệp JSON từ máy</label><input id="json-file" class="input" type="file" accept=".json,application/json">
 <div class="buttons"><button class="primary" id="load-json">Dùng JSON chuẩn từ GitHub</button><a class="soft-link" href="../contracts/Bila_CVNSS40_Native.build.json" download>Tải build JSON ↓</a></div>
 <div id="s2-message" class="msg" data-state="pending" role="status" aria-live="polite">Chưa kiểm chứng tệp native JSON.</div>
-<div class="separator"></div><h3>Preset mặc định Etherscan · Solidity tham chiếu</h3>
-<div class="summary"><div class="stat"><strong style="font-size:11px">STANDARD JSON-INPUT</strong><small>Compiler Type</small></div><div class="stat"><strong style="font-size:11px">v0.8.30+commit.73712a01</strong><small>Compiler Version</small></div></div>
-<p class="sub">Chỉ dùng preset này với bản BILA ERC-20 Solidity, không gửi file BilaScript native sang Solc. <a href="../token/BilaBitlang.standard-json.json" target="_blank" rel="noopener noreferrer">Xem Solidity JSON hợp lệ ↗</a></p>
+<div class="separator"></div>
+<h3>Compiler thực tế của hợp đồng đang xác thực</h3>
+<div class="msg" data-state="ok"><strong>BilaScript-v6.0.1-native-evm</strong> · nguồn CVNSS4.0 (.bila) → EVM trực tiếp, không dùng Solc</div>
+<details style="margin-top:13px;border:1px solid var(--border);padding:11px;border-radius:9px">
+<summary style="cursor:pointer;color:var(--gold);font-weight:700">Cấu hình STANDARD JSON-INPUT / Solc 0.8.30 (chỉ tham chiếu Solidity)</summary>
+<div class="summary" style="margin-top:12px"><div class="stat"><strong style="font-size:11px">STANDARD JSON-INPUT</strong><small>Compiler Type mặc định cho Solidity</small></div><div class="stat"><strong style="font-size:11px">v0.8.30+commit.73712a01</strong><small>Compiler Version mặc định cho Solidity</small></div></div>
+<p class="sub">Không dùng các giá trị này để xác minh hợp đồng native 0xd4fc8f28… trên Etherscan. Chúng chỉ áp dụng cho hợp đồng BILA ERC-20 <b>Solidity</b> được biên dịch bằng Solc 0.8.30. <a href="../token/BilaBitlang.standard-json.json" target="_blank" rel="noopener noreferrer">Xem Standard JSON Solidity đúng chuẩn ↗</a></p>
+</details>
 </div></section>
 <section class="card" id="buoc-3"><div class="head"><h2><span class="step-number">3</span> XÁC THỰC NATIVE</h2><span id="s3-badge" class="tag">CHƯA XÁC MINH</span></div>
 <div class="inside"><p>Biên dịch lại nguồn .bila rồi đối chiếu creation input, receipt, runtime và owner slot 0 trên Ethereum Sepolia RPC thật.</p>
-<div class="buttons"><button class="primary" id="verify" disabled>XÁC THỰC VỚI SEPOLIA</button><button id="download" disabled>Tải chứng cứ JSON</button></div>
+<div class="buttons"><button class="primary" id="verify" disabled>XÁC THỰC VỚI SEPOLIA</button><button id="download" disabled>Tải chứng cứ BilaScript JSON</button></div>
 <div class="summary"><div class="stat"><strong id="runtime-result">—</strong><small>Runtime</small></div><div class="stat"><strong id="creation-result">—</strong><small>Creation / receipt</small></div><div class="stat"><strong id="owner-result">—</strong><small>Owner slot 0</small></div><div class="stat"><strong id="block-result">—</strong><small>Block</small></div></div>
 <p id="s3-message" class="msg" data-state="pending" role="status" aria-live="polite">Hoàn tất bước 1 và 2 để bật xác minh.</p></div></section>
 </div>
@@ -44,4 +50,4 @@ main{max-width:1430px;margin:auto;padding:27px 18px 60px}.eyebrow{font:700 11px 
 <a id="contract-link" class="soft-link" href="https://sepolia.etherscan.io/address/0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6" target="_blank" rel="noopener noreferrer">Contract Sepolia ↗</a>
 <a class="soft-link" href="../verify/?address=0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6">Native Source Viewer ↗</a></div></div></section>
 <footer>Quy trình: nguồn .bila → native compiler → creation bytecode → MetaMask/Sepolia → JSON → xác minh RPC. Không thu thập seed phrase/private key. Bộ từ khóa EVM CVNSS4.0 còn đang kiểm định; chứng cứ độc lập không tương đương huy hiệu Etherscan Solidity.</footer>
-</main><script type="module" src="../contracts/verification-wizard.mjs?v=1"></script></body></html>
+</main><script type="module" src="../contracts/verification-wizard.mjs?v=2-proof-upload"></script></body></html>
