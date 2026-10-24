@@ -48,3 +48,36 @@ Etherscan's familiar "Solidity (Standard JSON)" code tab is **not currently a Bi
 ## Distinction from reference BILA ERC-20
 
 Reference BILA token at https://sepolia.etherscan.io/address/0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758 is **Solidity 0.8.30 / OpenZeppelin**. The new research registry is **native BilaScript/CVNSS4.0**, but **not ERC-20**. A separate native token requires mapping, address, events and allowances plus robust audit, not a UI label change.
+
+## Sepolia native contract verified — 24 October 2026
+
+**Contract:** https://sepolia.etherscan.io/address/0x305eb44bb1ccd78618a79479270d113742dcb072
+
+GitHub Actions run https://github.com/xulytiengviet/bilascript/actions/runs/40065720805
+queried real Ethereum Sepolia RPC at block **11,981,679** and confirmed
+**1,027 runtime bytes exactly matching** the committed BilaScript native compiler build,
+plus **owner storage slot 0** equal to 0x879E22703E2E432257334Db400Fbf9115aeD93Cf.
+The input .bila source was independently recompiled by compiler.mjs — **not Solidity/Solc**.
+
+**Important distinction:** the public RPC check proves runtime-bytecode identity and
+owner-slot value, not Etherscan's Solidity Verified Source badge. Creation transaction
+sender and input require the actual deployment transaction hash. Paste that hash into
+the HỢP ĐỒNG page for stronger receipt/input/creation verification.
+
+### Why the Etherscan Solidity form rejects Bila_CVNSS40_Native.build.json
+
+The canonical JSON is **native BilaScript output**, not a Solidity Standard JSON input.
+Etherscan's Solidity verifier cannot use Solc to recompile a .bila contract.
+The old webpage's Tải build JSON button produced a larger **session snapshot**
+(embedded source, AST, ABI and bytecode), potentially ~25KB, rather than the
+committed canonical build artifact. Differences in file size alone do not imply
+differences in EVM runtime. Do not fake Solidity source or select a Solc version
+for a native BilaScript contract.
+
+The corrected https://bila.js.org/v6/hop-dong/ page offers a direct canonical
+build JSON download, source recompilation, validation of uploaded old or new JSON,
+read-only Ethereum Sepolia runtime+owner verification for the live address,
+and optionally transaction+receipt+creation-input checks when a tx hash is supplied.
+
+Independent command: node v6/contracts/probe-live-native-sepolia.mjs
+Regression tests: node --test v6/test/native-sepolia-verifier.test.mjs
