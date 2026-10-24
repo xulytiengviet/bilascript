@@ -77,6 +77,8 @@ jobs:
         run: node --test v6/test/native-source-viewer.test.mjs
       - name: XÁC THỰC · 3-step real-shaped Sepolia RPC browser workflow
         run: node --test v6/test/verification-wizard-browser.test.mjs
+      - name: XÁC THỰC · MetaMask signing guard and zero-ETH refusal browser regression
+        run: node --test v6/test/verification-wizard-sign.test.mjs
       - name: Install real Foundry EVM toolchain
         uses: foundry-rs/foundry-toolchain@v1
       - name: Anvil EVM deploy and state transition (no mock)
