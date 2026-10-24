@@ -50,7 +50,8 @@ test("proof validator requires chain/from/input/code/owner/receipt",()=>{
 });
 
 test("user-selected Sepolia wallet is accepted; another signer cannot impersonate it",()=>{
- assert.equal(SELECTED_SEPOLIA_WALLET.toLowerCase(),"0xf4eed1f0589e2cd7cf29cce5f6f45e1ed65594ab");
+ assert.equal(SELECTED_SEPOLIA_WALLET,"0x879E22703E2E432257334Db400Fbf9115aeD93Cf");
+ assert.equal(SELECTED_SEPOLIA_WALLET.toLowerCase(),"0x879e22703e2e432257334db400fbf9115aed93cf");
  assert.equal(matchWallet(SELECTED_SEPOLIA_WALLET,SELECTED_SEPOLIA_WALLET),SELECTED_SEPOLIA_WALLET);
  assert.throws(()=>matchWallet(FRESH_FIXTURE,SELECTED_SEPOLIA_WALLET),/khác địa chỉ/);
  assert.throws(()=>verifySepoliaDeploy({...evidence,expectedWallet:SELECTED_SEPOLIA_WALLET}),/không được ký/);
