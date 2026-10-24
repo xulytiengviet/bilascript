@@ -66,11 +66,13 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 <p>Chỉ xác nhận sau khi receipt thành công, transaction.from và input khớp, runtime khớp, owner slot 0 trùng ví gốc. Nguồn, bytecode, ABI và storage được xuất thành hồ sơ để tái biên dịch.</p>
 <div class="notice" style="margin:8px 0 16px">
 <strong>Đã phát hiện hợp đồng native trên Sepolia</strong>
-<p>Địa chỉ 0x305eb44bb1ccd78618a79479270d113742dcb072 đã được kiểm tra qua RPC công khai: runtime 1.027 byte trùng với compiler BilaScript và owner slot 0 trùng ví gốc. Đây là xác minh nguồn/bytecode riêng, <strong>không phải nhãn Solidity Verified trên Etherscan</strong>.</p>
-<div class="buttons"><a class="buttonLink" href="../verify/?address=0x305eb44bb1ccd78618a79479270d113742dcb072" style="background:#f8d682;color:#092c41;font-weight:900">MỞ BILASCRIPT SOURCE VERIFIER ↗</a><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="https://github.com/xulytiengviet/bilascript/actions/runs/40065720805">Bằng chứng RPC công khai ↗</a><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="../contracts/Bila_CVNSS40_Native.build.json">Tải lại Bila_CVNSS40_Native.build.json ↗</a></div>
+<p>Đã xác thực hai lần triển khai BilaScript native: <strong>0x305eb44b…</strong> khớp runtime và owner; <strong>0xd4fc8f28…</strong> khớp cả creation transaction, receipt, runtime và owner. Chọn đúng cặp địa chỉ + transaction hash bên dưới. <strong>Không phải nhãn Solidity Verified trên Etherscan.</strong></p>
+<div class="buttons"><a class="buttonLink" href="../verify/?address=0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6" style="background:#f8d682;color:#092c41;font-weight:900">MỞ BILASCRIPT SOURCE VERIFIER ↗</a><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="https://github.com/xulytiengviet/bilascript/actions/runs/40068255656">Chứng cứ đầy đủ creation + runtime + owner ↗</a><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="../contracts/Bila_CVNSS40_Native.build.json">Tải lại build native chuẩn ↗</a></div>
 </div>
-<label for="contract-address">Địa chỉ hợp đồng Sepolia cần xác minh</label><input id="contract-address" class="field code" value="0x305eb44bb1ccd78618a79479270d113742dcb072" autocomplete="off">
-<label for="tx-hash">Transaction hash có thể dán lại</label><input id="tx-hash" class="field code" placeholder="0x... · chờ MetaMask" autocomplete="off">
+<label for="deployment-preset">Chọn cặp hợp đồng / giao dịch đã triển khai (tránh ghép nhầm)</label><select id="deployment-preset" class="field"><option value="latest">Bản 2 · 0xd4fc8f28… · Có bằng chứng creation tx</option><option value="earlier">Bản 1 · 0x305eb44b… · Runtime + owner</option><option value="custom">Hợp đồng khác · nhập địa chỉ và tx thủ công</option></select>
+<label for="contract-address">Địa chỉ hợp đồng Sepolia cần xác minh</label><input id="contract-address" class="field code" value="0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6" autocomplete="off">
+<label for="tx-hash">Transaction hash (phải đúng hợp đồng trong receipt)</label><input id="tx-hash" class="field code" value="0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d" placeholder="0x... · tùy chọn cho kiểm tra runtime" autocomplete="off">
+<p class="sub">Lỗi trước đây: hash 0x0070f826… tạo hợp đồng 0xd4fc8f28…, không phải 0x305eb44b…. Nếu không có hash của bản 1, có thể xác minh runtime/owner nhưng chưa xác minh được creation.</p>
 <label for="local-build">Tải lại file build JSON (chấp nhận file tải xuống hoặc file đang có trong máy)</label>
 <input id="local-build" class="field" type="file" accept=".json,application/json">
 <div class="buttons"><button id="load-canonical-build">Nạp lại build native chuẩn từ repository</button><button id="verify-address" class="primary">XÁC THỰC HỢP ĐỒNG BẰNG BILASCRIPT</button></div>
@@ -78,7 +80,7 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 <div class="buttons"><button id="verify-native">Xác minh đầy đủ receipt + compiler native (cần tx hash)</button><button id="download-proof" disabled>Tải chứng cứ JSON</button></div>
 <pre id="proof">CHƯA TẢI CHỨNG CỨ RPC TRONG PHIÊN NÀY · Địa chỉ hợp đồng đã có, hãy nhấn XÁC THỰC HỢP ĐỒNG BẰNG BILASCRIPT để kiểm tra trực tiếp.</pre>
 <div class="buttons"><a id="tx-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Giao dịch Etherscan ↗</a><a id="contract-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Hợp đồng Etherscan ↗</a></div>
-<p class="sub"><strong>Lỗi “Unknown key artifactOrigin”:</strong> Bạn đã đưa báo cáo của BilaScript vào Solidity JSON verifier. Cần ngừng gửi file .bila/build/proof JSON vào biểu mẫu đó. Công cụ <a href="../verify/?address=0x305eb44bb1ccd78618a79479270d113742dcb072">BilaScript Source Verifier</a> mới hỗ trợ tái biên dịch native và RPC trực tiếp.</p>
+<p class="sub"><strong>Lỗi “Unknown key artifactOrigin”:</strong> Bạn đã đưa báo cáo của BilaScript vào Solidity JSON verifier. Cần ngừng gửi file .bila/build/proof JSON vào biểu mẫu đó. Công cụ <a href="../verify/?address=0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6">BilaScript Source Verifier</a> mới hỗ trợ tái biên dịch native và RPC trực tiếp.</p>
 <p class="sub"><strong>Lưu ý Etherscan:</strong> Không chọn Solidity Compiler để tải file này. <code>Bila_CVNSS40_Native.build.json</code> chứa ABI và bytecode của compiler độc lập, <strong>không phải</strong> Solidity Standard JSON Input; Etherscan sẽ không tạo lại bytecode bằng Solc. Hãy dùng công cụ xác thực native trên trang này, hoặc cung cấp transaction hash để kiểm tra cả creation input/receipt.</p>
 </div></section>
 <section class="panel"><div class="head"><h2>06 · NHẬT KÝ BIÊN DỊCH / RPC</h2><small>Truy vết theo phiên</small></div><div class="inner"><div id="logs" aria-live="polite">Chưa thực hiện thao tác.</div></div></section>
@@ -91,5 +93,5 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 <a class="buttonLink" href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/contracts/Bila_CVNSS40_Native.bila" target="_blank" rel="noopener noreferrer">Nguồn hợp đồng .bila trên GitHub ↗</a></div></section>
 </div></div>
 <footer class="sub" style="padding-top:22px;border-top:1px solid var(--line);margin-top:20px">BilaScript Native EVM · CVNSS4.0 EVM profile thử nghiệm · Anvil và Sepolia phân biệt rõ · Không dùng mainnet / tài sản thật.</footer>
-</main><script type="module" src="../contracts/native-lab.mjs?v=6.0.7-native-sepolia-verify"></script>
+</main><script type="module" src="../contracts/native-lab.mjs?v=6.0.8-two-contracts"></script>
 </body></html>
