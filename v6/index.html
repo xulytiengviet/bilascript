@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071c33">
-<meta name="description" content="BilaScript v6.0.2: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
-<title>BilaScript v6.0.2 · Kết nối Sepolia · Native EVM Compiler</title>
+<meta name="description" content="BilaScript v6.0.3: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
+<title>BilaScript v6.0.3 · Faucet Sepolia · Native EVM Compiler</title>
 <style>
 :root{color-scheme:dark;--bg:#061827;--top:#071e34;--panel:#0b2944;--deep:#041420;--line:#2b5069;--text:#edf6fe;--muted:#afc5d6;--gold:#e7c365;--mint:#70e9bc;--red:#ff9195;--blue:#72c8ff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
@@ -27,6 +27,13 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
 #status{border:1px solid var(--line);color:var(--muted);padding:8px 11px;border-radius:9px;font-size:12px}#status[data-tone="ok"]{color:var(--mint);border-color:#348974}#status[data-tone="error"]{color:var(--red);border-color:#985a60}#status[data-tone="pending"]{color:var(--gold)}
 .log{font:12px/1.45 Consolas,monospace;border-bottom:1px solid #244358;padding:8px 5px;overflow-wrap:anywhere}.log.ok{color:var(--mint)}.log.error{color:var(--red)}.logs{max-height:255px;overflow:auto}
 .links{display:flex;flex-wrap:wrap;gap:13px}.links a{font-size:12px}
+.faucet-panel{border:1px solid #3b7c80;background:#0a283d;border-radius:10px;padding:13px;margin-bottom:13px}
+.faucet-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.faucet-item{display:flex;flex-direction:column;gap:6px;background:var(--deep);border:1px solid var(--line);border-radius:9px;padding:13px;min-width:0}
+.faucet-item strong{color:var(--text);font-size:13px}.faucet-item a{margin-top:auto;display:block;border:1px solid #467c8d;border-radius:7px;padding:9px 11px;text-align:center;font-weight:700}
+.faucet-item small{font-size:11px}.faucet-address{font:12px/1.6 Consolas,monospace;overflow-wrap:anywhere;color:var(--gold)}
+@media(max-width:560px){.faucet-grid{grid-template-columns:1fr}}
+
 .footer{padding:24px 0;border-top:1px solid var(--line);margin-top:22px;font-size:12px;color:var(--muted)}
 @media(max-width:980px){.layout{grid-template-columns:1fr}.nav{margin-left:0}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){main{padding:18px 12px 55px}.top{padding:12px}.metrics,.fields,.tabs{grid-template-columns:1fr}.source{min-height:270px}.nav{gap:10px}}
@@ -36,7 +43,7 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
 <header class="top">
  <div class="brand">BILA<b>SCRIPT</b> / V6</div>
  <span class="tag">NATIVE EVM · EXPERIMENTAL</span>
- <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#testnet">Sepolia</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
+ <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
 </header>
 <main>
  <section class="hero">
@@ -70,7 +77,31 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
    </section>
   </div>
   <div>
-   <section class="card" id="testnet"><div class="head"><h2>04 · Ethereum Sepolia / Testnet</h2><small>Chain ID 11155111 · không hỗ trợ mainnet</small></div>
+   <section class="card" id="faucet"><div class="head">
+     <h2>04 · Ethereum Sepolia Faucet</h2><small>ETH testnet thực · không cần seed phrase</small>
+    </div><div class="inner">
+     <p>Để triển khai và gọi hợp đồng trên Sepolia, ví cần có ETH thử nghiệm trả gas. BilaScript là website tĩnh nên <strong>không tự cấp ETH</strong>: yêu cầu cấp được xử lý tại trang faucet chuyên dụng của từng nhà cung cấp.</p>
+     <div class="faucet-panel">
+      <div class="field"><label>Địa chỉ sẽ nhận Sepolia ETH (đồng bộ với ví đã chọn)</label>
+       <div id="faucet-recipient" class="faucet-address">0x879E22703E2E432257334Db400Fbf9115aeD93Cf</div>
+      </div>
+      <div class="controls"><button id="faucet-copy" class="primary">Sao chép địa chỉ nhận ETH</button><button id="faucet-balance">Kiểm tra số dư Sepolia từ RPC</button></div>
+      <div class="fields">
+       <div class="metric"><strong id="faucet-eth" style="font-size:17px">Chưa kiểm tra</strong><small>Số dư ETH · truy vấn RPC thực</small></div>
+       <div class="metric"><strong id="faucet-block" style="font-size:14px">—</strong><small>Block Sepolia được xác minh</small></div>
+      </div>
+      <p id="faucet-feedback" class="sub" role="status" aria-live="polite">Có thể yêu cầu faucet mà chưa kết nối MetaMask. Sau khi faucet chuyển ETH, nhấn “Kiểm tra số dư” để xác minh.</p>
+     </div>
+     <div class="faucet-grid">
+      <div class="faucet-item"><strong>Sepolia PoW Faucet · pk910</strong><small>Nhập địa chỉ, thực hiện Proof-of-Work ngay trong trang faucet. Không yêu cầu số dư ETH mainnet.</small><a href="https://sepolia-faucet.pk910.de/" target="_blank" rel="noopener noreferrer">Mở PoW Faucet ↗</a></div>
+      <div class="faucet-item"><strong>Google Cloud Web3 Faucet</strong><small>Đăng nhập Google; tiếp tục yêu cầu Sepolia ETH theo hướng dẫn của dịch vụ.</small><a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank" rel="noopener noreferrer">Mở Google Faucet ↗</a></div>
+      <div class="faucet-item"><strong>Alchemy Ethereum Sepolia Faucet</strong><small>0,1 Sepolia ETH/24 giờ với ví đủ điều kiện: số dư mainnet, lịch sử hoạt động và hạn mức faucet.</small><a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener noreferrer">Mở Alchemy Faucet ↗</a></div>
+      <div class="faucet-item"><strong>QuickNode Ethereum Sepolia Faucet</strong><small>Nhập ví hoặc kết nối MetaMask. Giới hạn 12 giờ/lần, có thể cần số dư mainnet theo quy định.</small><a href="https://faucet.quicknode.com/ethereum/sepolia" target="_blank" rel="noopener noreferrer">Mở QuickNode Faucet ↗</a></div>
+     </div>
+     <p class="sub"><strong>Khắc phục lỗi NEXT_PUBLIC_FAUCET_SERVER_URL:</strong> lỗi này phát sinh ở một trang faucet Next.js thiếu cấu hình máy chủ. Nếu gặp lỗi đó, chuyển sang một trong các dịch vụ trên; không nhập khóa riêng, không nạp ETH mainnet để “kích hoạt” faucet. BilaScript không dùng biến này và không hiển thị kết quả cấp tiền giả.</p>
+     <p class="sub"><a href="https://sepolia.etherscan.io/address/0x879E22703E2E432257334Db400Fbf9115aeD93Cf" target="_blank" rel="noopener noreferrer">Xem giao dịch/số dư ví trên Sepolia Etherscan ↗</a></p>
+    </div></section>
+   <section class="card" id="testnet"><div class="head"><h2>05 · Ethereum Sepolia / Testnet</h2><small>Chain ID 11155111 · không hỗ trợ mainnet</small></div>
     <div class="inner">
      <p>Chỉ dùng ví EIP-1193 có mạng Sepolia. Hệ thống không nhận seed phrase hoặc private key, không tự ký. Cần có Sepolia ETH từ faucet để gửi giao dịch.</p>
      <div class="field"><label for="expected-wallet">Ví dùng để ký triển khai và tạo bằng chứng công khai</label>
@@ -101,18 +132,18 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <div class="links" style="margin-top:12px"><a id="explorer-tx" href="#" target="_blank" rel="noopener" hidden>Transaction</a><a id="explorer-contract" href="#" target="_blank" rel="noopener" hidden>Contract</a><a href="https://sepolia.etherscan.io/" target="_blank" rel="noopener">Sepolia Explorer ↗</a></div>
     </div>
    </section>
-   <section class="card" id="evidence"><div class="head"><h2>05 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
+   <section class="card" id="evidence"><div class="head"><h2>06 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
     <div class="inner"><div class="fields"><div class="metric"><strong id="chain-code" style="font-size:14px">—</strong><small>eth_getCode</small></div><div class="metric"><strong id="bytecode-match" style="font-size:14px">—</strong><small>So sánh runtime</small></div></div>
      <p>Block mới nhất: <b id="last-block">—</b></p>
      <h3>Storage slots · eth_getStorageAt</h3><pre id="storage">Chưa truy vấn blockchain</pre>
      <h3 style="margin-top:13px">Receipt / chứng cứ triển khai</h3><pre id="evidence">Chưa có bằng chứng mạng.</pre>
      <p>Kết quả receipt <code>status=1</code> chỉ chứng minh giao dịch được thực thi thành công, chưa chứng minh hợp đồng không có lỗi. Khi deploy phải so sánh <code>eth_getCode</code> với runtime bytecode, không so sánh creation bytecode.</p>
     </div></section>
-   <section class="card"><div class="head"><h2>06 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
+   <section class="card"><div class="head"><h2>07 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
   </div>
  </div>
  <footer class="footer">BilaScript v6.0.2 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
 </main>
-<script type="module" src="./app.mjs?v=6.0.2-wallet-879e"></script>
+<script type="module" src="./app.mjs?v=6.0.3-faucet"></script>
 </body>
 </html>
