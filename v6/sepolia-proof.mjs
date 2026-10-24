@@ -4,20 +4,27 @@
  * Does not construct a transaction or invent receipt fields.
  */
 export const SEPOLIA_CHAIN_ID="0xaa36a7";
-export const STUDY_WALLET="0x9858EfFD232B4033E47d90003D41EC34EcaEda94";
+export const PUBLIC_TEST_VECTOR_ADDRESS="0x9858EfFD232B4033E47d90003D41EC34EcaEda94";
 const addressPattern=/^0x[0-9a-fA-F]{40}$/;
 function hexEq(a,b){return typeof a==="string"&&typeof b==="string"&&a.toLowerCase()===b.toLowerCase();}
 export function validWallet(value){
  if(!addressPattern.test(value||""))throw Error("Cần một địa chỉ ví EVM gồm 40 chữ số hex");
  return value;
 }
+export function assertSafeSepoliaWallet(wallet){
+ validWallet(wallet);
+ if(hexEq(wallet,PUBLIC_TEST_VECTOR_ADDRESS))
+  throw Error("Địa chỉ này là test vector BIP-39 công khai, không an toàn cho triển khai Sepolia. Hãy tạo ví thử nghiệm riêng.");
+ return wallet;
+}
 export function matchWallet(connected,required){
- validWallet(connected);validWallet(required);
+ validWallet(connected);assertSafeSepoliaWallet(required);
+ assertSafeSepoliaWallet(connected);
  if(!hexEq(connected,required))throw Error("Ví được kết nối khác địa chỉ nghiên cứu: "+required);
  return connected;
 }
 export function verifySepoliaDeploy({expectedWallet,chainId,receipt,transaction,code,ownerSlot,compiled}){
- validWallet(expectedWallet);
+ assertSafeSepoliaWallet(expectedWallet);
  if(!hexEq(chainId,SEPOLIA_CHAIN_ID))throw Error("Không phải Ethereum Sepolia chain 11155111");
  if(!compiled?.runtimeBytecode||!compiled?.creationBytecode)throw Error("Thiếu bytecode nguồn do BilaScript biên dịch");
  if(!receipt||BigInt(receipt.status)!==1n||!addressPattern.test(receipt.contractAddress||""))
