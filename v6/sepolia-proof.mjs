@@ -5,7 +5,7 @@
  */
 export const SEPOLIA_CHAIN_ID="0xaa36a7";
 export const PUBLIC_TEST_VECTOR_ADDRESS="0x9858EfFD232B4033E47d90003D41EC34EcaEda94";
-export const SELECTED_SEPOLIA_WALLET="0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB";
+export const SELECTED_SEPOLIA_WALLET="0x879E22703E2E432257334Db400Fbf9115aeD93Cf";
 const addressPattern=/^0x[0-9a-fA-F]{40}$/;
 function hexEq(a,b){return typeof a==="string"&&typeof b==="string"&&a.toLowerCase()===b.toLowerCase();}
 export function validWallet(value){
