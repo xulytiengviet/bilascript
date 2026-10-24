@@ -1,0 +1,505 @@
+{
+  "schema": "bilascript.native.cvnss40.reference-build.v1",
+  "warning": "Testnet research registry, NOT ERC20 and NOT compiled by Solc.",
+  "source": "v6/contracts/Bila_CVNSS40_Native.bila",
+  "sourceTextKeccak256": "0x2d87c3d3a60a1cd0707d4d16f99ed4fbe771dbfd0599696686f3a86186f651ff",
+  "sourceLanguage": "BilaScript / CVNSS4.0 EVM profile (provisional)",
+  "compiler": "BilaScript-v6.0.1-native-evm",
+  "vocabulary": "bila:evm@6.0.1",
+  "codegen": "native EVMBYTECODE, no Solidity intermediate",
+  "contractName": "Bila_CVNSS40_Native",
+  "stateCount": 8,
+  "functionCount": 22,
+  "storageLayout": [
+    {
+      "name": "__bila_owner",
+      "type": "address",
+      "slot": 0,
+      "access": "deployment-caller"
+    },
+    {
+      "name": "phien_ban",
+      "type": "uint256",
+      "slot": 1
+    },
+    {
+      "name": "ma_bo_du_lieu",
+      "type": "uint256",
+      "slot": 2
+    },
+    {
+      "name": "so_mau",
+      "type": "uint256",
+      "slot": 3
+    },
+    {
+      "name": "so_kiem_dinh",
+      "type": "uint256",
+      "slot": 4
+    },
+    {
+      "name": "so_xac_nhan",
+      "type": "uint256",
+      "slot": 5
+    },
+    {
+      "name": "diem_chat_luong",
+      "type": "uint256",
+      "slot": 6
+    },
+    {
+      "name": "phien_thu",
+      "type": "uint256",
+      "slot": 7
+    },
+    {
+      "name": "ma_bang_chung",
+      "type": "uint256",
+      "slot": 8
+    }
+  ],
+  "abi": [
+    {
+      "type": "function",
+      "name": "dat_phien_ban",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_bo_du_lieu",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_so_mau",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_kiem_dinh",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_xac_nhan",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_chat_luong",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_phien_thu",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "dat_bang_chung",
+      "inputs": [
+        {
+          "name": "gia_tri",
+          "type": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "doc_phien_ban",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_bo_du_lieu",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_so_mau",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_kiem_dinh",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_xac_nhan",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_chat_luong",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_phien_thu",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "doc_bang_chung",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "tang_phien_ban",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "tang_so_mau",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "tang_kiem_dinh",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "tang_xac_nhan",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "tang_phien_thu",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "tang_bang_chung",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    }
+  ],
+  "methods": {
+    "dat_phien_ban": {
+      "signature": "dat_phien_ban(uint256)",
+      "selector": "0x7094023e",
+      "operation": "set",
+      "slot": 1,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_bo_du_lieu": {
+      "signature": "dat_bo_du_lieu(uint256)",
+      "selector": "0xe13d5612",
+      "operation": "set",
+      "slot": 2,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_so_mau": {
+      "signature": "dat_so_mau(uint256)",
+      "selector": "0x22a960b6",
+      "operation": "set",
+      "slot": 3,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_kiem_dinh": {
+      "signature": "dat_kiem_dinh(uint256)",
+      "selector": "0x5dbbdfc4",
+      "operation": "set",
+      "slot": 4,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_xac_nhan": {
+      "signature": "dat_xac_nhan(uint256)",
+      "selector": "0x1937d1a1",
+      "operation": "set",
+      "slot": 5,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_chat_luong": {
+      "signature": "dat_chat_luong(uint256)",
+      "selector": "0x596b4ece",
+      "operation": "set",
+      "slot": 6,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_phien_thu": {
+      "signature": "dat_phien_thu(uint256)",
+      "selector": "0xda1ad3c6",
+      "operation": "set",
+      "slot": 7,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "dat_bang_chung": {
+      "signature": "dat_bang_chung(uint256)",
+      "selector": "0x5b1430a8",
+      "operation": "set",
+      "slot": 8,
+      "parameter": "gia_tri",
+      "ownerOnly": true
+    },
+    "doc_phien_ban": {
+      "signature": "doc_phien_ban()",
+      "selector": "0x5ffcf29f",
+      "operation": "get",
+      "slot": 1,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_bo_du_lieu": {
+      "signature": "doc_bo_du_lieu()",
+      "selector": "0x2afe4aee",
+      "operation": "get",
+      "slot": 2,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_so_mau": {
+      "signature": "doc_so_mau()",
+      "selector": "0xbe7ea099",
+      "operation": "get",
+      "slot": 3,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_kiem_dinh": {
+      "signature": "doc_kiem_dinh()",
+      "selector": "0x0b56c654",
+      "operation": "get",
+      "slot": 4,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_xac_nhan": {
+      "signature": "doc_xac_nhan()",
+      "selector": "0x0b095d57",
+      "operation": "get",
+      "slot": 5,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_chat_luong": {
+      "signature": "doc_chat_luong()",
+      "selector": "0x0bbd36ca",
+      "operation": "get",
+      "slot": 6,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_phien_thu": {
+      "signature": "doc_phien_thu()",
+      "selector": "0x8189b37d",
+      "operation": "get",
+      "slot": 7,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "doc_bang_chung": {
+      "signature": "doc_bang_chung()",
+      "selector": "0x69d5bf65",
+      "operation": "get",
+      "slot": 8,
+      "parameter": null,
+      "ownerOnly": false
+    },
+    "tang_phien_ban": {
+      "signature": "tang_phien_ban()",
+      "selector": "0x4df36fb9",
+      "operation": "inc",
+      "slot": 1,
+      "parameter": null,
+      "ownerOnly": true
+    },
+    "tang_so_mau": {
+      "signature": "tang_so_mau()",
+      "selector": "0x5c0b99e4",
+      "operation": "inc",
+      "slot": 3,
+      "parameter": null,
+      "ownerOnly": true
+    },
+    "tang_kiem_dinh": {
+      "signature": "tang_kiem_dinh()",
+      "selector": "0x694a0090",
+      "operation": "inc",
+      "slot": 4,
+      "parameter": null,
+      "ownerOnly": true
+    },
+    "tang_xac_nhan": {
+      "signature": "tang_xac_nhan()",
+      "selector": "0x3909a5e0",
+      "operation": "inc",
+      "slot": 5,
+      "parameter": null,
+      "ownerOnly": true
+    },
+    "tang_phien_thu": {
+      "signature": "tang_phien_thu()",
+      "selector": "0x92c42807",
+      "operation": "inc",
+      "slot": 7,
+      "parameter": null,
+      "ownerOnly": true
+    },
+    "tang_bang_chung": {
+      "signature": "tang_bang_chung()",
+      "selector": "0xb574472f",
+      "operation": "inc",
+      "slot": 8,
+      "parameter": null,
+      "ownerOnly": true
+    }
+  },
+  "creationBytecode": "0x341561000b5760006000fd5b3360005561040361001f6000396104036000f3341561000b5760006000fd5b60003560e01c80637094023e14610109578063e13d56121461012957806322a960b6146101495780635dbbdfc4146101695780631937d1a114610189578063596b4ece146101a9578063da1ad3c6146101c95780635b1430a8146101e95780635ffcf29f146102095780632afe4aee14610216578063be7ea099146102235780630b56c654146102305780630b095d571461023d5780630bbd36ca1461024a5780638189b37d1461025757806369d5bf65146102645780634df36fb9146102715780635c0b99e4146102b3578063694a0090146102f55780633909a5e01461033757806392c4280714610379578063b574472f146103bb5760006000fd5b5033600054146101195760006000fd5b602436106103fd57600435600155005b5033600054146101395760006000fd5b602436106103fd57600435600255005b5033600054146101595760006000fd5b602436106103fd57600435600355005b5033600054146101795760006000fd5b602436106103fd57600435600455005b5033600054146101995760006000fd5b602436106103fd57600435600555005b5033600054146101b95760006000fd5b602436106103fd57600435600655005b5033600054146101d95760006000fd5b602436106103fd57600435600755005b5033600054146101f95760006000fd5b602436106103fd57600435600855005b5060015460005260206000f35b5060025460005260206000f35b5060035460005260206000f35b5060045460005260206000f35b5060055460005260206000f35b5060065460005260206000f35b5060075460005260206000f35b5060085460005260206000f35b5033600054146102815760006000fd5b600154807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600155005b5033600054146102c35760006000fd5b600354807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600355005b5033600054146103055760006000fd5b600454807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600455005b5033600054146103475760006000fd5b600554807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600555005b5033600054146103895760006000fd5b600754807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600755005b5033600054146103cb5760006000fd5b600854807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600855005b60006000fd",
+  "runtimeBytecode": "0x341561000b5760006000fd5b60003560e01c80637094023e14610109578063e13d56121461012957806322a960b6146101495780635dbbdfc4146101695780631937d1a114610189578063596b4ece146101a9578063da1ad3c6146101c95780635b1430a8146101e95780635ffcf29f146102095780632afe4aee14610216578063be7ea099146102235780630b56c654146102305780630b095d571461023d5780630bbd36ca1461024a5780638189b37d1461025757806369d5bf65146102645780634df36fb9146102715780635c0b99e4146102b3578063694a0090146102f55780633909a5e01461033757806392c4280714610379578063b574472f146103bb5760006000fd5b5033600054146101195760006000fd5b602436106103fd57600435600155005b5033600054146101395760006000fd5b602436106103fd57600435600255005b5033600054146101595760006000fd5b602436106103fd57600435600355005b5033600054146101795760006000fd5b602436106103fd57600435600455005b5033600054146101995760006000fd5b602436106103fd57600435600555005b5033600054146101b95760006000fd5b602436106103fd57600435600655005b5033600054146101d95760006000fd5b602436106103fd57600435600755005b5033600054146101f95760006000fd5b602436106103fd57600435600855005b5060015460005260206000f35b5060025460005260206000f35b5060035460005260206000f35b5060045460005260206000f35b5060055460005260206000f35b5060065460005260206000f35b5060075460005260206000f35b5060085460005260206000f35b5033600054146102815760006000fd5b600154807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600155005b5033600054146102c35760006000fd5b600354807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600355005b5033600054146103055760006000fd5b600454807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600455005b5033600054146103475760006000fd5b600554807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600555005b5033600054146103895760006000fd5b600754807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600755005b5033600054146103cb5760006000fd5b600854807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff146103fd57600101600855005b60006000fd",
+  "creationBytes": 1058,
+  "runtimeBytes": 1027,
+  "opcodeCount": 521,
+  "opcodeSummary": {
+    "CALLVALUE": 1,
+    "ISZERO": 1,
+    "PUSH2": 51,
+    "JUMPI": 51,
+    "PUSH1": 124,
+    "REVERT": 17,
+    "JUMPDEST": 38,
+    "CALLDATALOAD": 9,
+    "SHR": 1,
+    "DUP1": 28,
+    "PUSH4": 22,
+    "EQ": 42,
+    "POP": 22,
+    "CALLER": 14,
+    "SLOAD": 28,
+    "CALLDATASIZE": 8,
+    "LT": 8,
+    "SSTORE": 14,
+    "STOP": 14,
+    "MSTORE": 8,
+    "RETURN": 8,
+    "PUSH32": 6,
+    "ADD": 6
+  }
+}
