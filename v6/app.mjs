@@ -59,7 +59,9 @@ async function checkFaucetBalance(){
   btn.disabled=true;
   $("faucet-feedback").textContent="Đang đọc Sepolia RPC công khai; không sử dụng dữ liệu mô phỏng…";
   try{
-    const result=await readFaucetBalance(recipient);
+    let walletProvider=null;
+    try{walletProvider=walletCatalog.current();}catch{}
+    const result=await readFaucetBalance(recipient,{walletProvider});
     if(expectedWallet.value.trim().toLowerCase()!==recipient.toLowerCase())
       throw Error("Địa chỉ nhận đã thay đổi khi truy vấn. Kiểm tra lại số dư.");
     $("faucet-eth").textContent=result.eth+" ETH";
@@ -236,6 +238,8 @@ function linkContract(address){
 async function deploy(){
   requireReady();await assertSepolia();
   await assertLiveSigner();
+  const balance=BigInt(await rpc("eth_getBalance",[account,"latest"]));
+  if(balance<=0n)throw Error("Ví có 0 Sepolia ETH. Hãy mở mục Ethereum Sepolia Faucet, nhận ETH thử nghiệm và kiểm tra số dư trước khi triển khai.");
   const build=compiled;
   const creation=build.creationBytecode;
   const estimated=await rpc("eth_estimateGas",[{from:account,data:creation}]);
