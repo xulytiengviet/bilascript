@@ -7,12 +7,15 @@ import {compileBila,keccak256,encodeCall} from "../compiler.mjs";
 import {BrowserWallets,ensureSepolia,describeProviderError} from "../wallet-adapter.mjs";
 import {checkDeploymentReady} from "../deployment-ready.mjs";
 import {verifySepoliaDeploy,SELECTED_SEPOLIA_WALLET} from "../sepolia-proof.mjs";
+import {verifyNativeSepoliaAddress,reproduceNativeSource,NATIVE_ADDRESS} from "./verify-native-sepolia.mjs";
 const $=id=>document.getElementById(id);
 const ROOT=SELECTED_SEPOLIA_WALLET;
 const SOURCE_URL="../contracts/Bila_CVNSS40_Native.bila?v=1";
 const explorer="https://sepolia.etherscan.io";
 const wallets=new BrowserWallets(window);
 let wallet=null,account="",compiled=null,compiledSource="",lastProof=null;
+let canonicalBuild=null,buildToVerify=null,buildOrigin="chưa nạp";
+const CANONICAL_BUILD_URL="../contracts/Bila_CVNSS40_Native.build.json?v=20261024-native";
 let watcher=null,manualProvider=false,busy=false;
 const j=v=>JSON.stringify(v,(_,x)=>typeof x==="bigint"?x.toString():x,2);
 const same=(a,b)=>String(a||"").toLowerCase()===String(b||"").toLowerCase();
@@ -145,6 +148,108 @@ async function fetchSource(){
   throw Error("Nguồn tải về không phải hợp đồng CVNSS4.0 đã chọn.");
  $("native-source").value=source;compileSource();
 }
+
+function rejectIfInvalidBuild(source,file){
+ if(!file||typeof file!=="object")throw Error("Không đọc được build JSON.");
+ if(file.schema==="bilascript.native.cvnss40.reference-build.v1"){
+  reproduceNativeSource(source,file);
+  return {artifact:file,format:"canonical"};
+ }
+ // Backwards compatibility: early UI exported a 25KB session snapshot
+ // (source+AST+ABI) without a schema. Never feed it to Etherscan as Solidity.
+ if(file.compiler==="BilaScript-v6.0.1-native-evm"&&
+   typeof file.source==="string"&&file.creationBytecode&&file.runtimeBytecode){
+  if(file.source!==source)throw Error("JSON cũ chứa nguồn CVNSS4.0 khác file đang mở. Nạp đúng bản .bila rồi so khớp.");
+  const build=compileBila(source);
+  if(!same(file.creationBytecode,build.creationBytecode)||
+     !same(file.runtimeBytecode,build.runtimeBytecode)||
+     JSON.stringify(file.abi)!==JSON.stringify(build.abi)||
+     JSON.stringify(file.storageLayout)!==JSON.stringify(build.storageLayout))
+   throw Error("JSON phiên làm việc không khớp bytecode/ABI/storage biên dịch lại từ .bila.");
+  if(!canonicalBuild)throw Error("Chưa nạp artifact chuẩn để xác định nguồn gốc của JSON cũ.");
+  reproduceNativeSource(source,canonicalBuild);
+  return {artifact:canonicalBuild,format:"legacy-ui-export-reproduced-and-matched-canonical"};
+ }
+ throw Error("Không phải BilaScript Native JSON hợp lệ. Không thể đưa JSON này vào Solidity verifier.");
+}
+async function loadCanonicalBuild(){
+ const b=assertCompileCurrent();
+ const response=await fetch(CANONICAL_BUILD_URL,{cache:"no-store"});
+ if(!response.ok)throw Error("Không tải được artifact chuẩn từ GitHub Pages: HTTP "+response.status);
+ const obj=await response.json();
+ reproduceNativeSource(compiledSource,obj);
+ canonicalBuild=obj;
+ buildToVerify=obj;
+ buildOrigin="canonical-github-pages";
+ $("local-build").value="";
+ $("verify-build-state").textContent="Đã nạp artifact chuẩn và tái biên dịch trùng 100%: "+
+  obj.contractName+" · "+obj.runtimeBytes+" runtime bytes · "+
+  obj.functionCount+" hàm. Đây là BilaScript JSON, KHÔNG phải Solidity Standard JSON.";
+ log("Artifact native chuẩn tái lập khớp nguồn: "+obj.sourceTextKeccak256);
+ return obj;
+}
+async function loadLocalBuild(){
+ assertCompileCurrent();
+ const file=$("local-build").files?.[0];
+ if(!file)return;
+ if(file.size>3_000_000)throw Error("File JSON lớn bất thường, tối đa 3MB.");
+ if(!canonicalBuild)await loadCanonicalBuild();
+ // Do not auto-reset a user-selected local file in loadCanonicalBuild.
+ const data=JSON.parse(await file.text());
+ const checked=rejectIfInvalidBuild(compiledSource,data);
+ buildToVerify=checked.artifact;
+ buildOrigin=checked.format+" · "+file.name+" · "+file.size+" bytes";
+ $("verify-build-state").textContent=
+  checked.format==="canonical"?
+   "Tệp "+file.name+" đã trùng source/ABI/bytecode compiler native. Có thể xác minh Sepolia.":
+   "Tệp cũ "+file.name+" ("+file.size+" byte) có cấu trúc xuất từ UI đời trước; đã tái biên dịch khớp nguồn và artifact chuẩn. Dùng nút Tải build JSON để lấy tệp chuẩn.";
+ log("Đã kiểm tra tệp JSON tải lên: "+buildOrigin);
+}
+async function verifyAddressOnly(){
+ assertCompileCurrent();
+ newProofState();
+ const address=assertAddress($("contract-address").value.trim());
+ const artifact=buildToVerify||await loadCanonicalBuild();
+ reproduceNativeSource(compiledSource,artifact);
+ let provider=null;
+ try{provider=wallets.current();}catch{}
+ status("Đang xác minh Sepolia RPC…","pending");
+ const result=await verifyNativeSepoliaAddress({
+   address,source:compiledSource,artifact,provider,
+   transactionHash:$("tx-hash").value.trim()||null
+ });
+ const success=(result.status==="EXACT_NATIVE_RUNTIME_AND_OWNER"||
+  result.status==="EXACT_NATIVE_CREATION_RUNTIME_OWNER_AND_RECEIPT");
+ const report={
+  schema:"bilascript.native.source-and-chain-verifier.v1",
+  status:result.status,verified:success,
+  warning:"Đây KHÔNG phải Etherscan Solidity Verified Source. Để kiểm chứng creation transaction phải có hash xác thực.",
+  canonicalArtifactName:"Bila_CVNSS40_Native.build.json",artifactOrigin:buildOrigin,
+  sourceBila:compiledSource,
+  compilation:{compiler:compiled.compiler,vocabulary:compiled.vocabulary,
+   sourceHash:keccak256(compiledSource),abi:compiled.abi,
+   creationBytecode:compiled.creationBytecode,runtimeBytecode:compiled.runtimeBytecode,
+   storageLayout:compiled.storageLayout},
+  onchain:result,verifiedAt:new Date().toISOString()
+ };
+ $("proof").textContent=j(report);
+ $("verify-build-state").textContent=success?
+  "ĐÃ XÁC MINH: "+result.deployedRuntimeBytes+" runtime byte trùng compiler native, owner đúng ví gốc. "+
+  (result.transactionMatchesCreation?"Đã kiểm tra cả creation transaction.":"Chưa có creation transaction để xác minh.") :
+  "KHÔNG KHỚP: "+result.status+" · kiểm tra lại địa chỉ/source/build.json.";
+ $("download-proof").disabled=!success;
+ lastProof=success?report:null;
+ $("native-storage").textContent=j({ownerSlot0:result.ownerSlot0,
+  onchainCodeBytes:result.deployedRuntimeBytes,block:result.blockNumber,
+  rpcSource:result.rpcSource});
+ if(success)blockFrom("contract-link",address);
+ if(result.transactionMatchesCreation)txFrom("tx-link",result.transactionHash);
+ status(success?"Native code khớp Sepolia RPC":"Không khớp bản build",""+(success?"ok":"error"));
+ log("Xác minh địa chỉ "+address+": "+result.status+" · block "+result.blockNumber+
+  " · runtime byte "+result.deployedRuntimeBytes,success?"ok":"error");
+ return report;
+}
+
 function refreshProviders(entries){
  const select=$("wallet-provider");
  const before=select.value||wallets.selected;
@@ -332,7 +437,7 @@ async function runMethod(){
 }
 function startup(){
  $("native-source").addEventListener("input",()=>{
-  compiled=null;compiledSource="";newProofState();invalidateFunding();
+  compiled=null;compiledSource="";canonicalBuild=null;buildToVerify=null;buildOrigin="nguồn đã thay đổi";newProofState();invalidateFunding();
   $("method-run").disabled=true;$("native-refresh").disabled=true;
   status("Mã nguồn đã sửa · cần biên dịch lại","neutral");
  });
@@ -341,14 +446,11 @@ function startup(){
  $("native-download").addEventListener("click",guarded(()=>{
   exportFile("Bila_CVNSS40_Native.bila","text/plain;charset=utf-8",$("native-source").value);
  }));
- $("download-build").addEventListener("click",guarded(()=>{
-  const b=assertCompileCurrent();
-  exportFile("Bila_CVNSS40_Native.build.json","application/json",j({
-   source:compiledSource,sourceTextKeccak256:keccak256(compiledSource),
-   compiler:b.compiler,vocabulary:b.vocabulary,abi:b.abi,
-   ast:b.ast,storageLayout:b.storageLayout,
-   creationBytecode:b.creationBytecode,runtimeBytecode:b.runtimeBytecode
-  }));
+ $("download-build").addEventListener("click",guarded(async()=>{
+  const artifact=canonicalBuild||await loadCanonicalBuild();
+  exportFile("Bila_CVNSS40_Native.build.json","application/json",
+    JSON.stringify(artifact,null,2)+"\n");
+  log("Đã tải đúng file build chuẩn (không phải session snapshot hoặc Solidity JSON).");
  }));
  $("copy-creation").addEventListener("click",guarded(async()=>{
   await navigator.clipboard.writeText(assertCompileCurrent().creationBytecode);
@@ -366,10 +468,15 @@ function startup(){
  $("wallet-connect").addEventListener("click",guarded(connect));
  $("check-gas").addEventListener("click",guarded(checkGas));
  $("deploy-native").addEventListener("click",guarded(deploy));
+ $("load-canonical-build").addEventListener("click",guarded(loadCanonicalBuild));
+ $("local-build").addEventListener("change",guarded(loadLocalBuild));
+ $("verify-address").addEventListener("click",guarded(verifyAddressOnly));
  $("verify-native").addEventListener("click",guarded(verifyDeploy));
  $("download-proof").addEventListener("click",guarded(()=>{
   if(!lastProof)throw Error("Chưa có bằng chứng Sepolia đã xác minh.");
-  exportFile("BilaScript-native-Sepolia-"+lastProof.verified.transactionHash+".json",
+  const hash=lastProof?.verified?.transactionHash||
+    lastProof?.onchain?.transactionHash||"address-"+$("contract-address").value.trim();
+  exportFile("BilaScript-native-Sepolia-"+hash+".json",
    "application/json",j(lastProof));
  }));
  wallets.start();
