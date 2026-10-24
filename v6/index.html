@@ -43,7 +43,7 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
 <header class="top">
  <div class="brand">BILA<b>SCRIPT</b> / V6</div>
  <span class="tag">NATIVE EVM · EXPERIMENTAL</span>
- <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#token-bila">BILA ERC-20</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
+ <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#token-bila">BILA ERC-20</a><a href="#provenance">Bytecode Identity</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
 </header>
 <main>
  <section class="hero">
@@ -160,18 +160,57 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <p class="sub">Bằng chứng hợp lệ gồm: receipt thành công, người triển khai đúng ví gốc, bytecode trùng build tham chiếu, sự kiện <code>Transfer</code> ban đầu từ địa chỉ 0 tới ví gốc, <code>totalSupply=10²⁴</code> và <code>decimals=18</code>. Không có bằng chứng giao dịch thì không hiển thị thành công.</p>
      <p class="sub"><a href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.sol" target="_blank" rel="noopener">Nguồn hợp đồng ERC-20 ↗</a> · <a href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.build.json" target="_blank" rel="noopener">Build tham chiếu (JSON) ↗</a></p>
     </div></section>
-      <section class="card" id="evidence"><div class="head"><h2>07 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
+   
+   <section class="card" id="provenance">
+    <div class="head"><h2>07 · BilaScript Compiler &amp; Bytecode Identity</h2><small>Nhận diện compiler · kiểm chứng nguồn · Etherscan</small></div>
+    <div class="inner">
+     <p>Đối chiếu bytecode theo từng byte với bản build có nguồn và compiler xác định. <strong>ERC-20 BILA hiện có nguồn Solidity/Solc.</strong> Native BilaScript chỉ được xác nhận nếu kết quả khớp mã nguồn CVNSS4.0 được biên dịch lại.</p>
+     <div class="fields">
+      <div class="field"><label for="inspect-address">Địa chỉ hợp đồng trên Ethereum Sepolia</label>
+       <input id="inspect-address" class="input code" value="0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758" spellcheck="false" autocomplete="off" />
+      </div>
+      <div class="field"><label for="inspect-type">Chế độ kiểm tra bytecode</label>
+       <select id="inspect-type"><option value="chain">RPC · bytecode từ hợp đồng</option><option value="runtime">Bytecode được dán · runtime</option><option value="creation">Bytecode được dán · creation</option></select>
+      </div>
+     </div>
+     <div class="field"><label for="inspect-bytecode">Dán bytecode cần đối chiếu (không cần đối với chế độ RPC)</label>
+      <textarea id="inspect-bytecode" class="code" placeholder="0x60806040… · EVM bytecode đầy đủ" style="min-height:125px"></textarea>
+     </div>
+     <div class="controls"><button class="primary" id="inspect-run">Đối chiếu Bytecode + Compiler</button><button id="inspect-native">Kiểm tra compiler BilaScript native</button><button id="inspect-proof">Tải chứng cứ nguồn gốc JSON</button></div>
+     <div class="fields">
+      <div class="metric"><strong style="font-size:14px" id="inspect-identity">Chưa kiểm chứng</strong><small>Ngôn ngữ nguồn / trình biên dịch</small></div>
+      <div class="metric"><strong style="font-size:14px" id="inspect-match">—</strong><small>Kết quả so sánh chính xác</small></div>
+     </div>
+     <p id="inspect-note" class="sub" role="status" aria-live="polite">Kiểm tra RPC hoặc dán bytecode. Giống selector không đủ để xác nhận nguồn gốc.</p>
+     <pre id="inspect-evidence">Chưa có chứng cứ kiểm tra nguồn hoặc blockchain.</pre>
+     <div class="faucet-panel" style="margin-top:12px">
+      <h3>Verify and Publish · Etherscan / Sourcify</h3>
+      <p>Hợp đồng BILA hiện là Solidity 0.8.30 + OpenZeppelin 5.6.1; optimizer 200 runs, EVM Cancun, <code>metadata.bytecodeHash=none</code>. Dùng Standard JSON Input chứa mọi thư viện và địa chỉ hợp đồng mới, không dùng địa chỉ ví gốc.</p>
+      <div class="controls">
+       <button id="inspect-source">Xem nguồn BILA .sol</button>
+       <button id="inspect-build">Tải bản build &amp; ABI</button>
+       <button id="inspect-standard">Tải Standard JSON xác minh Etherscan</button>
+      </div>
+      <div class="links">
+       <a id="inspect-etherscan" href="https://sepolia.etherscan.io/verifyContract?a=0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758" target="_blank" rel="noopener noreferrer">Verify and Publish · Etherscan ↗</a>
+       <a href="https://verify.sourcify.dev/" target="_blank" rel="noopener noreferrer">Sourcify · Standard JSON ↗</a>
+       <a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6/token" target="_blank" rel="noopener noreferrer">Repository và mã nguồn token ↗</a>
+      </div>
+     </div>
+    </div>
+   </section>
+   <section class="card" id="evidence"><div class="head"><h2>08 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
     <div class="inner"><div class="fields"><div class="metric"><strong id="chain-code" style="font-size:14px">—</strong><small>eth_getCode</small></div><div class="metric"><strong id="bytecode-match" style="font-size:14px">—</strong><small>So sánh runtime</small></div></div>
      <p>Block mới nhất: <b id="last-block">—</b></p>
      <h3>Storage slots · eth_getStorageAt</h3><pre id="storage">Chưa truy vấn blockchain</pre>
      <h3 style="margin-top:13px">Receipt / chứng cứ triển khai</h3><pre id="evidence">Chưa có bằng chứng mạng.</pre>
      <p>Kết quả receipt <code>status=1</code> chỉ chứng minh giao dịch được thực thi thành công, chưa chứng minh hợp đồng không có lỗi. Khi deploy phải so sánh <code>eth_getCode</code> với runtime bytecode, không so sánh creation bytecode.</p>
     </div></section>
-   <section class="card"><div class="head"><h2>08 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
+   <section class="card"><div class="head"><h2>09 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
   </div>
  </div>
  <footer class="footer">BilaScript v6.0.2 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
 </main>
-<script type="module" src="./app.mjs?v=6.0.4-bila-token"></script>
+<script type="module" src="./app.mjs?v=6.0.5-provenance"></script>
 </body>
 </html>
