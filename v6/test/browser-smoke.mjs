@@ -38,6 +38,9 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
     if(method==="eth_getBalance")return "0x16345785d8a0000";
     if(method==="eth_gasPrice")return "0x3b9aca00";
     if(method==="eth_estimateGas")return "0x30000";
+    if(method==="eth_getCode")return JSON.parse(readFileSync(
+      fileURLToPath(new URL("../token/BilaBitlang.build.json",import.meta.url)),"utf8")).runtimeBytecode;
+    if(method==="eth_blockNumber")return "0x100";
     if(method==="wallet_addEthereumChain"){throw Error("Not needed");}
     throw Error("Unexpected stub RPC "+method);
   }
@@ -89,6 +92,13 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
   window.document.getElementById("bila-check").click();
   await waitFor(()=>window.document.getElementById("bila-deploy").disabled===false);
   assert.match(window.document.getElementById("bila-stage").textContent,/Đã đủ Sepolia ETH/);
+  window.document.getElementById("inspect-run").click();
+  await waitFor(()=>window.document.getElementById("inspect-match").textContent.includes("TRÙNG TOÀN BỘ"));
+  assert.match(window.document.getElementById("inspect-identity").textContent,/Solidity/);
+  assert.match(window.document.getElementById("inspect-evidence").textContent,/"compiledByNativeBilaScript": false/);
+  window.document.getElementById("inspect-native").click();
+  await waitFor(()=>window.document.getElementById("inspect-note").textContent.includes("Solc"));
+  assert.match(window.document.getElementById("inspect-etherscan").href,/0x2e12b7e0/);
   const select=window.document.getElementById("expected-wallet");
   select.value="0x1234567890123456789012345678901234567890";
   select.dispatchEvent(new window.Event("input"));
