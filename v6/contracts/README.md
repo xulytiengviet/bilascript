@@ -103,3 +103,40 @@ The native viewer starts with no proof status until it has successfully
 recompiled the current source and queried the Sepolia RPC. Its exported
 JSON includes compiler reference build and freshly retrieved on-chain
 evidence, enabling independent re-verification.
+
+
+## Two Sepolia contract addresses — provenance and receipt mapping (October 24, 2026)
+
+**Never pair a contract address with a transaction hash from a different deployment.**
+
+| Deployment | Contract address | Proof |
+|---|---|---|
+| Earlier contract | `0x305eb44bb1ccd78618a79479270d113742dcb072` | Native runtime 1,027 bytes and owner slot exact; known proof run 40065720805 |
+| Later contract | `0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6` | Exact native creation 1,058 bytes, runtime 1,027 bytes, receipt and deployer; run 40068255656 |
+
+Latest creation transaction for the **later** contract:
+`0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d`.
+This tx receipt explicitly names `0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6`.
+It does **not** create `0x305eb44bb1ccd78618a79479270d113742dcb072`.
+
+Read-only independent GitHub Actions evidence:
+https://github.com/xulytiengviet/bilascript/actions/runs/40068255656
+
+All nine creation proof conditions passed: successful receipt, correct receipt
+contract address, transaction hash, correct genesis deployer, contract creation
+`to=null`, exact creation input, zero ETH value, exact runtime, correct owner slot.
+
+False failure case: when the same transaction hash was paired with the earlier
+0x305e address, **all** conditions except `receiptContractMatches` passed, so
+the full proof correctly rejected the mismatched pair:
+https://github.com/xulytiengviet/bilascript/actions/runs/40068175550
+
+The HỢP ĐỒNG page now has a **deployment preset** selector, with the later
+contract and its creation tx preselected. Selecting the earlier contract
+automatically clears the other contract's transaction hash. The native
+Source Verification page allows either address.
+
+These are proofs of **BilaScript native compilation and on-chain EVM execution**.
+They do not make the contracts eligible for Etherscan's `Solidity Standard JSON`
+verification form, because the actual source language/compiler are not Solc.
+Do not re-label the artifact as Solidity just to obtain an Etherscan source badge.
