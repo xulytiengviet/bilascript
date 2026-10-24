@@ -140,3 +140,50 @@ These are proofs of **BilaScript native compilation and on-chain EVM execution**
 They do not make the contracts eligible for Etherscan's `Solidity Standard JSON`
 verification form, because the actual source language/compiler are not Solc.
 Do not re-label the artifact as Solidity just to obtain an Etherscan source badge.
+
+
+## XÁC THỰC: streamlined 3-step native CVNSS4.0 compiler + Sepolia workflow
+
+Live: https://bila.js.org/v6/xac-thuc/
+
+**Step 1 — Contract creation and signed Sepolia transaction.**
+Use the verified existing creation transaction or press Deploy in the website and
+sign via the selected MetaMask wallet on Ethereum Sepolia chain ID 11155111.
+The frontend refuses to deploy from any account other than
+`0x879E22703E2E432257334Db400Fbf9115aeD93Cf`, verifies real wallet
+balance and gas estimate, requires a browser confirmation followed by MetaMask
+consent, and never accepts a wrong deployment tx/contract-address pairing.
+
+**Step 2 — Import native compiler JSON.**
+Upload Bila_CVNSS40_Native.build.json or click load canonical build from GitHub.
+Older BilaScript session JSON containing AST/source and native proof JSON are
+also supported if they reproduce the exact canonical source, 22-function ABI,
+storage layout and both EVM bytecodes. Unrelated/fabricated JSON is rejected.
+
+**Step 3 — Recompile source and verify native EVM on real Sepolia RPC.**
+The native BilaScript compiler, not Solc, recompiles CVNSS source and compares
+the creation transaction input, receipt.status, from address, null tx.to,
+runtime eth_getCode, owner storage slot0, contract address and chain ID.
+Only full verified matches enable independent JSON proof export.
+
+**IMPORTANT: Reference Solidity/Etherscan configuration displayed as default:**
+
+- Compiler Type: `STANDARD JSON-INPUT`
+- Compiler Version: `v0.8.30+commit.73712a01`
+- Scope: **Solidity BILA ERC-20 reference contract only**
+- Actual native compiler: `BilaScript-v6.0.1-native-evm` (CVNSS4.0 input)
+
+Do not try to upload native `.build.json` or native attestation JSON into
+Etherscan's Solidity Standard JSON form, and never claim a Solidity source
+badge on a native BilaScript contract. See
+https://kb.etherscan.com/how-to-verify-contracts for verification mechanics.
+
+Existing verified native test pair in the UI:
+
+- Contract: `0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6`
+- Creation tx: `0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d`
+- GitHub public receipt+bytecode proof: https://github.com/xulytiengviet/bilascript/actions/runs/40068255656
+
+CI covers input mismatch, wrong signer, incorrect contract address, JSON
+reproducibility, the three-step browser flow, and mocked EIP-1193 wallet signing
+including zero-balance refusal. This is testnet experimental software.
