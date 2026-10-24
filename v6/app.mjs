@@ -1,5 +1,5 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
-import {PUBLIC_TEST_VECTOR_ADDRESS,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -8,7 +8,7 @@ const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument"
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
 const SEPOLIA="0xaa36a7";
 const expectedWallet=$("expected-wallet");
-expectedWallet.value=new URLSearchParams(location.search).get("deployer")||"";
+expectedWallet.value=new URLSearchParams(location.search).get("deployer")||SELECTED_SEPOLIA_WALLET;
 if(expectedWallet.value.toLowerCase()===PUBLIC_TEST_VECTOR_ADDRESS.toLowerCase()){
   setTimeout(()=>writeLog("error","Địa chỉ từ URL là test vector công khai — bị chặn triển khai Sepolia"),0);
 }
@@ -104,6 +104,24 @@ async function connect(){
   $("wallet").textContent=account.slice(0,8)+"…"+account.slice(-6);
   setStatus("Đã kết nối Sepolia — chưa triển khai","neutral");
   writeLog("ok","Đã xác minh chain ID 11155111, ví "+account);
+}
+async function checkWalletOnSepolia(){
+  const expected=assertSafeSepoliaWallet(expectedWallet.value.trim());
+  provider=getProvider();
+  await assertSepolia();
+  const [wei,txCount,code,block]=await Promise.all([
+    rpc("eth_getBalance",[expected,"latest"]),
+    rpc("eth_getTransactionCount",[expected,"latest"]),
+    rpc("eth_getCode",[expected,"latest"]),
+    rpc("eth_blockNumber")
+  ]);
+  const amount=Number(BigInt(wei))/1e18;
+  $("wallet-balance").textContent=amount.toFixed(6)+" Sepolia ETH";
+  $("wallet-nonce").textContent=BigInt(txCount).toString();
+  $("wallet-check-block").textContent=BigInt(block).toString();
+  const codeType=(code==="0x")?"EOA hoặc chưa có mã":"Có bytecode ở địa chỉ";
+  writeLog("ok","Sepolia RPC: "+expected+" · "+amount.toFixed(6)+" Sepolia ETH, nonce="+BigInt(txCount)+" · "+codeType);
+  if(amount===0)writeLog("error","Ví không có Sepolia ETH theo RPC này; cần testnet faucet để triển khai");
 }
 async function changeChain(){
   const p=getProvider();
@@ -236,6 +254,7 @@ $("compile").addEventListener("click",compile);
 $("reset").addEventListener("click",()=>{source.value=EXAMPLE;compile();});
 $("connect").addEventListener("click",guard(connect));
 $("switch").addEventListener("click",guard(changeChain));
+$("wallet-check").addEventListener("click",guard(checkWalletOnSepolia));
 $("deploy").addEventListener("click",guard(deploy));
 $("run").addEventListener("click",guard(runCall));
 $("estimate").addEventListener("click",guard(estimateOnly));
