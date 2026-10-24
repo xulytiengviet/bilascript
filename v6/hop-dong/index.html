@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#061a2e">
+<meta name="description" content="BilaScript Native EVM — HỢP ĐỒNG CVNSS4.0, không dùng Solidity, kiểm tra ABI/opcode/gas/storage và triển khai Sepolia bằng MetaMask.">
+<title>HỢP ĐỒNG · BilaScript Native EVM · CVNSS4.0</title>
+<style>
+:root{color-scheme:dark;--bg:#061827;--panel:#0b2944;--deep:#061a2d;--line:#33536a;--text:#eff7fc;--muted:#a9c7d8;--gold:#f4ce70;--mint:#69e4b4;--red:#ff9aa4}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}button,input,textarea,select{font:inherit}button{cursor:pointer;background:#193951;color:var(--text);border:1px solid #486c82;padding:10px 14px;border-radius:9px;font-weight:650}button:hover{background:#275274}button:disabled{opacity:.4;cursor:not-allowed}.primary{background:var(--gold);color:#152f42;border-color:var(--gold)}.green{border-color:#52bba0;color:var(--mint)}
+main{max-width:1620px;margin:auto;padding:24px 22px 70px}.header{background:#0a2237;border-bottom:1px solid var(--line);padding:15px 22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}.brand{font:900 22px Consolas,monospace;color:var(--text)}.brand b{color:var(--gold)}.header nav{display:flex;flex-wrap:wrap;gap:15px;margin-left:auto}.header nav a{color:var(--muted);font-size:12px}
+.eyebrow{font:700 11px Consolas,monospace;letter-spacing:.15em;color:var(--mint)}h1{font-size:clamp(32px,4vw,52px);letter-spacing:-.035em;margin:8px 0 12px;line-height:1.12}h1 span{color:var(--gold)}h2{font-size:16px;margin:0}h3{font-size:14px;margin:12px 0 6px}p{color:var(--muted);margin:8px 0}.sub,small{color:var(--muted);font-size:12px}.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:8px 0 18px}.hero p{max-width:850px}.tag{font:700 11px Consolas,monospace;padding:7px 12px;border:1px solid #3f9d93;border-radius:100px;color:var(--mint)}.notice{border:1px solid #6c6c61;border-left:4px solid var(--gold);background:#203447;border-radius:10px;padding:12px 16px;margin:14px 0;color:#e9f2fa}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;margin:18px 0}.stat,.panel{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat{padding:16px}.stat strong{display:block;font:700 clamp(15px,1.6vw,23px) Consolas,monospace;color:var(--gold);overflow-wrap:anywhere}.stat small{display:block;margin-top:3px}
+.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;align-items:start}.panel{overflow:hidden;margin:0 0 14px}.head{padding:15px 17px;background:#123148;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap}.inner{padding:17px}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:11px 0}.buttonLink{display:inline-block;padding:9px 12px;border:1px solid #52738a;border-radius:8px}
+label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}.field{width:100%;background:var(--deep);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:11px;outline:none}.field:focus{border-color:var(--gold)}textarea.field{font:12px/1.65 Consolas,"Cascadia Code",monospace;resize:vertical;min-height:250px}.code{font-family:Consolas,"Cascadia Code",monospace;font-size:12px;overflow-wrap:anywhere}.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}.pill{padding:5px 9px;border-radius:100px;border:1px solid #487a86;color:#81ceff;font:11px Consolas,monospace}
+#state[data-state="ok"]{color:var(--mint)}#state[data-state="error"]{color:var(--red)}#state[data-state="pending"]{color:var(--gold)}
+pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;font:12px/1.54 Consolas,monospace}table{width:100%;border-collapse:collapse;font:12px Consolas,monospace}td,th{padding:8px;border-bottom:1px solid #2d495f;text-align:left}th{position:sticky;top:0;background:#183951;color:var(--gold)}.tablebox{max-height:365px;overflow:auto;border:1px solid var(--line);border-radius:8px}.log{border-bottom:1px solid #335168;padding:7px 0;overflow-wrap:anywhere;font:12px/1.5 Consolas,monospace}.log.error{color:var(--red)}.log.ok{color:var(--mint)}
+.stage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.stage div{text-align:center;padding:12px 7px;border:1px solid #37596e;border-radius:8px;color:var(--muted)}.stage strong{display:block;font:700 12px Consolas,monospace;color:var(--text)}.instructions{padding-left:20px;color:var(--muted)}.instructions li{margin:7px 0}
+@media(max-width:1050px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:630px){main{padding:18px 11px 60px}.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.stage{grid-template-columns:repeat(2,1fr)}.header{padding:12px}.header nav{margin-left:0}button{width:100%}.buttons a{width:100%}}
+</style></head>
+<body>
+<header class="header">
+<a href="../" class="brand">BILA<b>SCRIPT</b> / V6</a><span class="tag">HỢP ĐỒNG · NATIVE EVM</span>
+<nav aria-label="Điều hướng"><a href="../">Phòng thí nghiệm</a><a href="#nguon">CVNSS4.0</a><a href="#bytecode">Bytecode / Opcode</a><a href="#sepolia">Sepolia / Gas</a><a href="#chung-cu">Chứng cứ</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6/contracts" target="_blank" rel="noopener noreferrer">Mã nguồn ↗</a></nav>
+</header>
+<main>
+<section class="hero"><div>
+<div class="eyebrow">PHÒNG THÍ NGHIỆM BYTECODE / OPCODE / GAS / TRẠNG THÁI EVM THỰC</div>
+<h1>HỢP ĐỒNG <span>CVNSS4.0 Native EVM</span></h1>
+<p>Mã nguồn viết bằng BilaScript/CVNSS4.0, biên dịch trực tiếp ra creation/runtime EVM bằng compiler native — <strong>không transpile sang Solidity, không dùng Solc để sinh bytecode</strong>. Kiểm tra ABI, storage, opcode, gas thực và triển khai Sepolia bằng MetaMask.</p></div>
+<span id="state" data-state="neutral" class="tag" role="status" aria-live="polite">Chưa nạp nguồn</span></section>
+<div class="notice"><strong>Giới hạn:</strong> Compiler native hiện hỗ trợ biến uint256, hàm đọc/ghi/tăng 1, quyền chi_chu, kiểm tra overflow và nonpayable; <strong>chưa hỗ trợ ERC-20, mapping, event, kiểu động hoặc Solidity Verified Source trên Etherscan.</strong> Profile từ khóa EVM CVNSS4.0 còn ở trạng thái đề xuất. Sepolia là testnet thật; người sở hữu MetaMask phải ký triển khai.</div>
+<div class="stage"><div><strong>01 · NGUỒN .BILA</strong>22 hàm CVNSS4.0</div><div><strong>02 · NATIVE EVM</strong>AST · ABI · Opcodes</div><div><strong>03 · META MASK</strong>Gas / ký Sepolia</div><div><strong>04 · CHỨNG CỨ</strong>Receipt · Code · Storage</div></div>
+<div class="stats"><div class="stat"><strong id="metric-source">—</strong><small>Dòng mã CVNSS4.0</small></div><div class="stat"><strong id="metric-func">—</strong><small>Hàm ABI native</small></div><div class="stat"><strong id="metric-storage">—</strong><small>Storage slots (gồm owner)</small></div><div class="stat"><strong id="metric-bytes">—</strong><small>Creation bytes</small></div><div class="stat"><strong id="metric-ops">—</strong><small>EVM opcodes</small></div></div>
+<div class="layout"><div>
+<section class="panel" id="nguon"><div class="head"><h2>01 · MÃ NGUỒN HỢP ĐỒNG BILASCRIPT / CVNSS4.0</h2><span class="pill">.bila · native</span></div><div class="inner">
+<p><strong>Bila_CVNSS40_Native:</strong> sổ đăng ký dữ liệu nghiên cứu có tám biến trạng thái và 22 hàm để gán, đọc và tăng các bộ đếm có kiểm tra tràn. Quyền ghi thuộc người triển khai (owner storage slot 0). Giá trị được người dùng cung cấp, không phải oracle hoặc chứng chỉ xác minh tính đúng của dữ liệu.</p>
+<label for="native-source">Mã nguồn .bila (sửa nguồn sẽ khóa nút deploy cho đến khi biên dịch và kiểm tra lại)</label><textarea id="native-source" class="field code" spellcheck="false" aria-label="Nguồn CVNSS4.0"></textarea>
+<div class="buttons"><button class="primary" id="native-compile">Biên dịch CVNSS4.0 → EVM</button><button id="native-restore">Nạp lại nguồn chuẩn</button><button id="native-download">Tải mã .bila</button></div>
+<div class="two"><div><label>Mã băm Keccak-256 văn bản nguồn</label><pre id="source-hash">—</pre></div><div><label>Compiler / vocabulary profile</label><pre id="compiler-name">Chưa biên dịch</pre></div></div>
+</div></section>
+<section class="panel" id="bytecode"><div class="head"><h2>02 · BYTECODE / ABI / OPCODE / STORAGE</h2><span class="pill">EVM trực tiếp</span></div><div class="inner">
+<label for="creation">Creation bytecode</label><textarea id="creation" class="field code" readonly style="min-height:90px"></textarea>
+<label for="runtime">Runtime bytecode</label><textarea id="runtime" class="field code" readonly style="min-height:90px"></textarea>
+<div class="buttons"><button id="download-build">Tải build JSON</button><button id="copy-creation">Sao chép creation bytecode</button></div>
+<div class="two"><div><h3>ABI chuẩn EVM</h3><pre id="abi">Chưa biên dịch</pre></div><div><h3>Storage layout</h3><pre id="layout">Chưa biên dịch</pre></div></div>
+<h3>Disassembly opcode từ compiler native</h3><div class="tablebox"><table><thead><tr><th>PC</th><th>HEX</th><th>OPCODE</th><th>Immediate</th></tr></thead><tbody id="opcode-rows"></tbody></table></div><p class="sub">Disassembly là phân tích mã tĩnh. Gas, block, receipt và storage on-chain chỉ hiển thị sau khi truy vấn RPC.</p>
+</div></section>
+<section class="panel"><div class="head"><h2>03 · TƯƠNG TÁC HỢP ĐỒNG EVM</h2><span class="pill">eth_call / tx</span></div><div class="inner">
+<p>Chọn hàm từ ABI native. Hàm đọc dùng eth_call; hàm ghi phải được MetaMask xác nhận và tiêu thụ Sepolia ETH.</p>
+<div class="two"><div><label for="method">Hàm / selector ABI</label><select id="method" class="field"></select></div><div><label for="method-value">uint256 (chỉ hàm có tham số)</label><input id="method-value" class="field code" value="1" inputmode="numeric"></div></div><p id="method-info" class="sub">Chưa biên dịch</p>
+<div class="buttons"><button id="method-run" disabled>Đọc / gửi giao dịch thật</button><button id="native-refresh" disabled>Đọc storage Sepolia</button></div>
+<label>Kết quả / receipt</label><pre id="method-result">Chưa có kết quả</pre><label>Storage · eth_getStorageAt</label><pre id="native-storage">Chưa truy vấn RPC</pre>
+</div></section></div><div>
+<section class="panel" id="sepolia"><div class="head"><h2>04 · VÍ GỐC / GAS / DEPLOY SEPOLIA</h2><span class="pill">Chain ID 11155111</span></div><div class="inner">
+<p>Hợp đồng mới triển khai từ ví nghiên cứu được chỉ định. <strong>Owner slot 0 là người trực tiếp ký.</strong> Không dùng seed phrase/private key trên website.</p>
+<label>Ví ký triển khai và nhận quyền chủ sở hữu</label><pre id="required-wallet">0x879E22703E2E432257334Db400Fbf9115aeD93Cf</pre>
+<label for="wallet-provider">Ví EIP-6963 / MetaMask</label><select id="wallet-provider" class="field" disabled><option>Đang tìm ví…</option></select>
+<div class="buttons"><button id="wallet-scan">Quét lại ví</button><button id="wallet-connect" class="primary">Kết nối ví Sepolia</button></div>
+<p id="wallet-state" class="sub" role="status" aria-live="polite">Chưa kết nối.</p>
+<div class="two"><div class="stat"><strong id="balance">—</strong><small>Số dư Sepolia ETH · RPC</small></div><div class="stat"><strong id="cost">—</strong><small>Chi phí gas dự kiến · RPC</small></div></div>
+<p id="gas-info" class="sub">Cần biên dịch, kết nối đúng ví và kiểm tra đủ gas trước khi triển khai.</p>
+<div class="buttons"><button id="check-gas">Kiểm tra ETH và gas</button><button id="deploy-native" class="green" disabled>TRIỂN KHAI HỢP ĐỒNG NATIVE TRÊN SEPOLIA</button></div>
+<div class="buttons"><a class="buttonLink" href="../#faucet">Sepolia Faucet ↗</a><a class="buttonLink" href="https://sepolia.etherscan.io/address/0x879E22703E2E432257334Db400Fbf9115aeD93Cf" target="_blank" rel="noopener noreferrer">Ví gốc trên Etherscan ↗</a></div>
+</div></section>
+<section class="panel" id="chung-cu"><div class="head"><h2>05 · CHỨNG CỨ NATIVE TRÊN CHUỖI</h2><span class="pill">RPC · không giả lập</span></div><div class="inner">
+<p>Chỉ xác nhận sau khi receipt thành công, transaction.from và input khớp, runtime khớp, owner slot 0 trùng ví gốc. Nguồn, bytecode, ABI và storage được xuất thành hồ sơ để tái biên dịch.</p>
+<label for="contract-address">Địa chỉ hợp đồng do receipt cung cấp</label><input id="contract-address" class="field code" placeholder="0x... · chưa có" autocomplete="off">
+<label for="tx-hash">Transaction hash có thể dán lại</label><input id="tx-hash" class="field code" placeholder="0x... · chờ MetaMask" autocomplete="off">
+<div class="buttons"><button id="verify-native">Xác minh receipt + compiler native</button><button id="download-proof" disabled>Tải chứng cứ JSON</button></div>
+<pre id="proof">CHƯA TRIỂN KHAI · Chưa có bằng chứng Sepolia. Test trên Anvil không phải là giao dịch công khai.</pre>
+<div class="buttons"><a id="tx-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Giao dịch Etherscan ↗</a><a id="contract-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Hợp đồng Etherscan ↗</a></div>
+<p class="sub">Etherscan hiện không xác minh trực tiếp nguồn BilaScript như Solidity. Xuất nguồn .bila cùng ABI/bytecode và chứng cứ so khớp độc lập; không gắn nhãn Verified Solidity cho native contract.</p>
+</div></section>
+<section class="panel"><div class="head"><h2>06 · NHẬT KÝ BIÊN DỊCH / RPC</h2><small>Truy vết theo phiên</small></div><div class="inner"><div id="logs" aria-live="polite">Chưa thực hiện thao tác.</div></div></section>
+<section class="panel"><div class="head"><h2>07 · GIỚI HẠN NGỮ NGHĨA</h2><small>Minh bạch</small></div><div class="inner"><ol class="instructions">
+<li>Hợp đồng này sử dụng 8 biến uint256, 22 hàm public, owner-only writes, checked increment, state reads, ABI selectors và nonpayable, tất cả từ bytecode do BilaScript native sinh.</li>
+<li>Không có mapping, kiểu dữ liệu động, events hoặc chức năng ERC-20. Đây là hợp đồng nghiên cứu sổ chỉ số, không phải một token.</li>
+<li>Không suy đoán dữ liệu mạng. Số liệu được người dùng nhập và ghi qua giao dịch chỉ chứng minh dữ liệu đã được ghi, không chứng minh nội dung đúng sự thật.</li>
+<li>Từ khóa nằm trong profile EVM CVNSS4.0 đang kiểm định; tên hàm và biến là định danh ABI do người viết đặt.</li>
+</ol>
+<a class="buttonLink" href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/contracts/Bila_CVNSS40_Native.bila" target="_blank" rel="noopener noreferrer">Nguồn hợp đồng .bila trên GitHub ↗</a></div></section>
+</div></div>
+<footer class="sub" style="padding-top:22px;border-top:1px solid var(--line);margin-top:20px">BilaScript Native EVM · CVNSS4.0 EVM profile thử nghiệm · Anvil và Sepolia phân biệt rõ · Không dùng mainnet / tài sản thật.</footer>
+</main><script type="module" src="../contracts/native-lab.mjs?v=6.0.6-native-lab"></script>
+</body></html>
