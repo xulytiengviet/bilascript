@@ -1,3 +1,4 @@
+import {EVM_KEYWORDS,EVM_RESERVED,EVM_VOCABULARY} from "./vocabulary-evm.mjs";
 /* BilaScript v6.0.1 experimental EVM compiler. No Solidity, Solang, fake RPC or simulated receipts.
  * Checked uint256 subset: constructor owner, enforced chi_chu writes and nonpayable. Unsupported syntax is a hard error.
  * DO NOT use for assets or production contracts without an independent audit.
@@ -47,16 +48,8 @@ export function keccak256(value) {
   return "0x"+out;
 }
 function fail(message){ throw new Error("BILA-EVM6: "+message); }
-// Semantic IDs are stable and language spelling is deliberately not part of the EVM ABI type.
-const KEYWORDS = Object.freeze({
-  hop_dong:"contract",hoph_dogd:"contract",
-  haml_sob:"function",trov_ved:"return",
-  cogy_kai:"public",chiz_docr:"view",traz_ved:"returns",
-  sob_wyly_kogy_zaub_256:"uint256",
-  chi_chu:"owner_only"
-});
-const RESERVED=new Set(["contract","function","return","uint256","public","view","returns","owner_only","address"]);
-
+const KEYWORDS=EVM_KEYWORDS;
+const RESERVED=EVM_RESERVED;
 function tokenize(source) {
   if (typeof source!=="string" || source.length>50000) fail("Nguồn không hợp lệ hoặc quá 50 KB");
   const rx=/\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/|[a-zA-Z_][a-zA-Z_0-9]*|[0-9]+|[{}();=+]/y;
@@ -270,7 +263,7 @@ export function compileBila(source) {
     0x60,0,0x39,0x61,length>>8,length&255,0x60,0,0xf3,...runtimeBytes];
   return {
     compiler:"BilaScript-v6.0.1-native-evm",
-    experimental:true,ast,storageLayout,typeSystem,effects,defaultMutability,
+    experimental:true,vocabulary:EVM_VOCABULARY.profile+"@"+EVM_VOCABULARY.version,ast,storageLayout,typeSystem,effects,defaultMutability,
     abi,runtimeBytecode:"0x"+hex(runtimeBytes),creationBytecode:"0x"+hex(creation),
     opcodes:disassemble("0x"+hex(runtimeBytes)),
     methods:Object.fromEntries(ast.functions.map(f=>[f.name,{
