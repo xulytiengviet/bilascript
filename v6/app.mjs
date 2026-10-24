@@ -1,6 +1,7 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
 import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs?v=6.0.2-wallet-879e";
 import {BrowserWallets,ensureSepolia,describeProviderError} from "./wallet-adapter.mjs";
+import {selectedRecipient,readFaucetBalance} from "./faucet.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -37,6 +38,45 @@ if(expectedWallet.value.toLowerCase()===PUBLIC_TEST_VECTOR_ADDRESS.toLowerCase()
   setTimeout(()=>writeLog("error","Địa chỉ từ URL là test vector công khai — bị chặn triển khai Sepolia"),0);
 }
 function assertSigner(){return matchWallet(account,expectedWallet.value.trim());}
+function syncFaucetRecipient(){
+  const recipient=expectedWallet.value.trim();
+  $("faucet-recipient").textContent=recipient||"Chưa có địa chỉ nhận";
+  $("faucet-eth").textContent="Chưa kiểm tra";
+  $("faucet-block").textContent="—";
+  $("faucet-feedback").textContent="Số dư chỉ hiển thị sau khi xác minh với RPC của Ethereum Sepolia.";
+}
+async function copyFaucetRecipient(){
+  const recipient=selectedRecipient(expectedWallet.value);
+  if(!navigator.clipboard||typeof navigator.clipboard.writeText!=="function")
+    throw Error("Trình duyệt chưa cấp quyền sao chép. Hãy chọn và sao chép địa chỉ nhận ETH hiển thị.");
+  await navigator.clipboard.writeText(recipient);
+  $("faucet-feedback").textContent="Đã sao chép "+recipient+". Dán chính xác địa chỉ này vào trang faucet bạn chọn.";
+  writeLog("ok","Đã sao chép địa chỉ nhận Sepolia ETH (không gửi giao dịch): "+recipient);
+}
+async function checkFaucetBalance(){
+  const recipient=selectedRecipient(expectedWallet.value);
+  const btn=$("faucet-balance");
+  btn.disabled=true;
+  $("faucet-feedback").textContent="Đang đọc Sepolia RPC công khai; không sử dụng dữ liệu mô phỏng…";
+  try{
+    const result=await readFaucetBalance(recipient);
+    if(expectedWallet.value.trim().toLowerCase()!==recipient.toLowerCase())
+      throw Error("Địa chỉ nhận đã thay đổi khi truy vấn. Kiểm tra lại số dư.");
+    $("faucet-eth").textContent=result.eth+" ETH";
+    $("faucet-block").textContent=result.blockNumber;
+    $("faucet-feedback").textContent="Đã xác minh "+result.network+" (chain 11155111), RPC "+
+      result.rpc+". Số dư: "+result.eth+" Sepolia ETH. Nonce: "+result.nonce+
+      ". Nếu faucet đã cấp tiền, số dư ở block mới sẽ phản ánh khoản nhận.";
+    writeLog("ok","Faucet kiểm tra số dư từ RPC thật: "+recipient+" · "+result.eth+" Sepolia ETH · block "+result.blockNumber);
+  }catch(err){
+    $("faucet-eth").textContent="Chưa xác minh";
+    $("faucet-block").textContent="—";
+    $("faucet-feedback").textContent="Chưa xác minh được số dư. "+
+      (err?.message||String(err))+"; hãy thử lại hoặc xem Etherscan.";
+    throw err;
+  }finally{btn.disabled=false;}
+}
+
 function saveJSON(filename,value){
   const blob=new Blob([pretty(value)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();
@@ -393,6 +433,10 @@ providerDropdown.addEventListener("change",()=>{
   }catch(error){writeLog("error",describeProviderError(error));}
 });
 $("wallet-refresh").addEventListener("click",()=>walletCatalog.refresh());
+$("faucet-copy").addEventListener("click",guard(copyFaucetRecipient));
+$("faucet-balance").addEventListener("click",guard(checkFaucetBalance));
+expectedWallet.addEventListener("input",syncFaucetRecipient);
+syncFaucetRecipient();
 walletCatalog.start();
 source.value=EXAMPLE;
 compile();
