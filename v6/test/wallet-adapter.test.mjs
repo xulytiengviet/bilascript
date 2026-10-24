@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {BrowserWallets,ensureSepolia,describeProviderError,SEPOLIA_PARAMS} from "../wallet-adapter.mjs";
-const CURRENT="0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB";
+const CURRENT="0x879E22703E2E432257334Db400Fbf9115aeD93Cf";
 const OTHER="0x1234567890123456789012345678901234567890";
 function wallet({chain="0x1",missing=false,accounts=[CURRENT],reject=false}={}){
  const state={chain,known:!missing,accounts,calls:[]};
