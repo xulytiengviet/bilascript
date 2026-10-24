@@ -1,4 +1,4 @@
-# BilaScript v6.0 — Native EVM Language Lab (experimental)
+# BilaScript v6.0.1 — Native EVM Language Lab (experimental)
 
 ## Public website
 [https://bila.js.org/v6/](https://bila.js.org/v6/) — when GitHub Pages deploys the default branch root. v5 remains unchanged.
@@ -60,3 +60,13 @@ Fe, Act, Hevm, Ethdebug, Sourcify are currently research references **only**, no
 ## Site hosting
 
 Project is rooted at \`/\` and has a \`CNAME\` set to \`bila.js.org\`. Keep Pages source pointing to \`Babylscript1_7R2_BRANCH\` at \`/(root)\`. No build step is required for \`/v6/\`. Root index links to v6; v4/v5 paths and tests remain intact.
+
+## v6.0.1 security hardening (2026-10-24)
+
+- All nonpayable runtime methods reject nonzero `CALLVALUE` in EVM bytecode; deploy initcode also rejects value.
+- Constructor records deployment `CALLER` as immutable-by-language owner at reserved storage **slot 0**. State `uint256` slots start at **slot 1**. No upgrade or ownership-transfer methods exist in this experimental subset.
+- Every state-writing function **must** include proposed CVNSS token `chi_chu` (`owner_only` semantic ID). Codegen inserts an EVM `CALLER` versus slot-0 `SLOAD` check and `REVERT` before any write. Unguarded writes fail at compilation. Unauthorized accounts cannot write.
+- Typed semantic boundary validates `uint256` variables, parameter bindings, `view` versus write effects, return context and supported expression forms. Unsupported expressions fail closed. This is a checked subset, **not** a full Solidity-like type system.
+- Legacy source using `hop_dong`, `uint256`, `public`, `view`, `returns` remains accepted **only if all writes include `chi_chu`**, to avoid silently granting new write permissions. Fresh example uses mostly CVNSS4.0 spellings; new aliases remain provisional until vocabulary-lock audit.
+- **Breaking change:** new runtime storage layout and new bytecode. Existing v6.0 contract instances are not automatically migrated. Frontend `eth_getStorageAt` now reserves owner slot 0.
+- Argot `solidity`, `solc-js` and `solc-bin` are upstream references for ABI and differential conformance; production v6 compiler still does not use Solidity/solc for code generation. Solc oracle checks are separate CI tests.
