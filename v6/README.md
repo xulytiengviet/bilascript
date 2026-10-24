@@ -70,3 +70,18 @@ Project is rooted at \`/\` and has a \`CNAME\` set to \`bila.js.org\`. Keep Page
 - Legacy source using `hop_dong`, `uint256`, `public`, `view`, `returns` remains accepted **only if all writes include `chi_chu`**, to avoid silently granting new write permissions. Fresh example uses mostly CVNSS4.0 spellings; new aliases remain provisional until vocabulary-lock audit.
 - **Breaking change:** new runtime storage layout and new bytecode. Existing v6.0 contract instances are not automatically migrated. Frontend `eth_getStorageAt` now reserves owner slot 0.
 - Argot `solidity`, `solc-js` and `solc-bin` are upstream references for ABI and differential conformance; production v6 compiler still does not use Solidity/solc for code generation. Solc oracle checks are separate CI tests.
+
+## Sepolia wallet and first public proof (2026-10-24)
+
+Requested test signer: `0xF4EeD1f0589E2Cd7cF29CCE5f6f45e1ed65594aB`. This is a **selected address, not proof that the browser controls it**. The browser must connect that exact EIP-1193 account. An earlier public BIP-39 test-vector address remains blocked by `assertSafeSepoliaWallet`.
+
+In [the v6 testnet lab](https://bila.js.org/v6/):
+
+1. Select **Ethereum Sepolia**, chain ID `11155111`, in a wallet; connect the exact selected account. Do not disclose a seed phrase or private key. Read the real account balance, nonce and block through the **Đọc số dư và nonce Sepolia từ RPC** button; testnet ETH is needed for gas.
+2. Build the canonical v6.0.1 CVNSS source. Press **Ước tính gas từ RPC**, then **Triển khai** and confirm the exact creation bytecode using the wallet. The page never signs without explicit wallet permission.
+3. After an actual receipt, verify `transaction.from`, chain ID, `transaction.input` (creation bytecode), receipt `status=1`, `eth_getCode` (runtime bytecode), and owner storage slot 0. Export the source-linked JSON proof. **No public Sepolia deploy is currently claimed in this repository without an independent transaction hash and receipt**.
+4. You can paste the deployment transaction hash into the new independent verifier even after reopening the page. It will only unlock proof export if every RPC check matches the selected wallet and the compiler's current build.
+
+Local differential fuzzing is **separate** from Sepolia deployment: `bash v6/test/differential-anvil.sh` compiles and executes both BilaScript and independent pinned Solc contracts on a real local Anvil EVM, and `v6/test-results/differential-fuzz.json` stores seeds, state after each operation, revert results, receipt statuses and gas as comparative measurements. Differences in gas **are expected**; exact gas equality is not an assertion of semantic correctness.
+
+**No private keys are checked into the repository and CI does not publish wallet-funded Sepolia transactions.** 
