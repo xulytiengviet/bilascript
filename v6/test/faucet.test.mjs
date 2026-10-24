@@ -39,7 +39,7 @@ test("recipient is only a valid Ethereum public address, never a seed or private
 });
 test("exact BigInt wei to ETH display, no floating point, no fake balance",()=>{
  assert.equal(ethAmount(0n),"0.0");
- assert.equal(ethAmount(1n),"0.0");
+ assert.equal(ethAmount(1n),"0.000000000000000001");
  assert.equal(ethAmount(1000000000000000000n),"1.0");
  assert.equal(ethAmount(100000000000000000n),"0.1");
  assert.equal(ethAmount("0x16345785d8a0000"),"0.1");
