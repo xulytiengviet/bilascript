@@ -1,0 +1,19 @@
+{
+  "schema": "bila.bitlang.sepolia.runtime-attestation.v1",
+  "timestamp": "2026-10-24T03:52:30.917Z",
+  "target": "0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758",
+  "chainId": 11155111,
+  "originWallet": "0x879E22703E2E432257334Db400Fbf9115aeD93Cf",
+  "referenceCompiler": "0.8.30+commit.73712a01.Emscripten.clang",
+  "sourceSha256": "7ecd1aa3ccd65fbc4b2f92025c9a47ca1423aa1978d235b86bd67678bbb4515d",
+  "publicRpcVerification": true,
+  "exactBytecodeMatch": true,
+  "rpcSource": "https://ethereum-sepolia-rpc.publicnode.com",
+  "blockNumber": "11981260",
+  "runtimeBytes": 1806,
+  "addressType": "ONCHAIN_CODE_READ",
+  "compilerIdentity": "solidity-reference",
+  "identityMessage": "Bytecode trùng toàn bộ bản build BILA tham chiếu: Solc/OpenZeppelin. Không được gắn nhãn compiler BilaScript native.",
+  "evidenceRun": "https://github.com/xulytiengviet/bilascript/actions/runs/40060058453",
+  "scope": "Runtime-bytecode-only. No Etherscan source-verified badge or deployer-key proof claimed."
+}
