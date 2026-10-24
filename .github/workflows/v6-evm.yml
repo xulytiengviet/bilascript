@@ -28,6 +28,8 @@ jobs:
         run: node --test v6/test/native-contracts.test.mjs
       - name: Native Sepolia source and onchain bytecode verifier (no Solidity)
         run: node --test v6/test/native-sepolia-verifier.test.mjs
+      - name: XÁC THỰC · 3-step deployment, JSON and proof guard regression
+        run: node --test v6/test/verification-wizard.test.mjs
       - name: Recompile CVNSS.4 native reference artifact byte-for-byte without Solc
         env:
           VERIFY_NATIVE_BUILD: '1'
@@ -44,6 +46,8 @@ jobs:
           node --check v6/provenance.mjs
           node --check v6/contracts/native-lab.mjs
           node --check v6/contracts/contract-source-viewer.mjs
+          node --check v6/contracts/verification-wizard-core.mjs
+          node --check v6/contracts/verification-wizard.mjs
           node --check v6/test/native-contracts-anvil.mjs
       - name: EIP-6963/EIP-1193 wallet adapter unit tests
         run: node --test v6/test/wallet-adapter.test.mjs
@@ -71,6 +75,8 @@ jobs:
         run: node --test v6/test/native-contracts-browser.test.mjs
       - name: CVNSS source-verifier browser smoke — read-only Sepolia RPC and UI proof
         run: node --test v6/test/native-source-viewer.test.mjs
+      - name: XÁC THỰC · 3-step real-shaped Sepolia RPC browser workflow
+        run: node --test v6/test/verification-wizard-browser.test.mjs
       - name: Install real Foundry EVM toolchain
         uses: foundry-rs/foundry-toolchain@v1
       - name: Anvil EVM deploy and state transition (no mock)
