@@ -1,0 +1,34 @@
+name: BilaScript v6 Native EVM Conformance
+on:
+  push:
+    paths:
+      - 'v6/**'
+      - '.github/workflows/v6-evm.yml'
+  pull_request:
+    paths:
+      - 'v6/**'
+      - '.github/workflows/v6-evm.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler-and-local-evm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit tests (Keccak, grammar, assembly, ABI)
+        run: node --test v6/test/compiler.test.mjs
+      - name: Browser module syntax
+        run: |
+          node --check v6/compiler.mjs
+          node --check v6/app.mjs
+      - name: Install real Foundry EVM toolchain
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Anvil EVM deploy and state transition (no mock)
+        run: bash v6/test/anvil.sh
