@@ -325,22 +325,34 @@ function guard(action){return async()=>{
   }
 };}
 $("compile").addEventListener("click",compile);
-$("reset").addEventListener("click",()=>{source.value=EXAMPLE;compile();});
-$("connect").addEventListener("click",guard(connect));
-$("switch").addEventListener("click",guard(changeChain));
-$("wallet-check").addEventListener("click",guard(checkWalletOnSepolia));
-$("deploy").addEventListener("click",guard(deploy));
-$("run").addEventListener("click",guard(runCall));
-$("estimate").addEventListener("click",guard(estimateOnly));
-$("refresh").addEventListener("click",guard(refreshState));
-$("verify").addEventListener("click",guard(verifyTransaction));
-$("verify-public").addEventListener("click",guard(verifyPublicDeployment));
-methodSelect.addEventListener("change",changeMethod);
-$("copy").addEventListener("click",guard(async()=>{if(!compiled)throw Error("Chưa biên dịch");await navigator.clipboard.writeText(compiled.creationBytecode);writeLog("ok","Đã sao chép creation bytecode");}));
-$(`download`).addEventListener("click",()=>{if(compiled)saveJSON("bilascript-v6-evm-build.json",{compiler:compiled.compiler,abi:compiled.abi,creationBytecode:compiled.creationBytecode,runtimeBytecode:compiled.runtimeBytecode});});
-$(`download-proof`).addEventListener("click",()=>{if(deployEvidence)saveJSON("bilascript-v6-sepolia-proof-"+deployEvidence.transactionHash+".json",deployEvidence);});
+$("reset").addEventListener("click",()=>{const providerDropdown=$("wallet-provider"),providerInfo=$("wallet-detector");
+walletCatalog.onChange(items=>{
+  const previous=providerDropdown.value||walletCatalog.selected;
+  providerDropdown.replaceChildren();
+  for(const entry of items){
+    const option=document.createElement("option");
+    option.value=entry.id;
+    option.textContent=entry.name+(entry.id.startsWith("injected:")?" · dự phòng":" · EIP-6963");
+    providerDropdown.appendChild(option);
+  }
+  const selected=items.some(x=>x.id===previous)?previous:walletCatalog.selected;
+  if(items.length){
+    providerDropdown.value=selected;
+    walletCatalog.selected=selected;
+    providerInfo.textContent="Phát hiện "+items.length+" lựa chọn ví. Chọn đúng extension trước khi kết nối.";
+  }else providerInfo.textContent="Chưa có ví EVM. Mở/cho phép MetaMask trong phần Extensions, rồi làm mới danh sách.";
+  providerDropdown.disabled=!items.length;
+});
+providerDropdown.addEventListener("change",()=>{
+  try{
+    walletCatalog.select(providerDropdown.value);
+    const selected=walletCatalog.current();
+    if(provider!==selected){provider=selected;clearAccount("Đã chọn ví khác · hãy kết nối lại");listenProvider(selected);}
+  }catch(error){writeLog("error",describeProviderError(error));}
+});
+$("wallet-refresh").addEventListener("click",()=>walletCatalog.refresh());
+walletCatalog.start();
 source.value=EXAMPLE;compile();
-if(window.ethereum?.on){
-  window.ethereum.on("chainChanged",()=>{account="";$("wallet").textContent="Chưa kết nối";setStatus("Mạng thay đổi · kết nối lại","neutral");});
-  window.ethereum.on("accountsChanged",()=>{account="";$("wallet").textContent="Chưa kết nối";setStatus("Tài khoản thay đổi · kết nối lại","neutral");});
-}
+window.addEventListener("unhandledrejection",event=>{
+  writeLog("error","Lỗi kết nối chưa được xử lý: "+describeProviderError(event.reason));
+});
