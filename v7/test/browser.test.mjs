@@ -79,6 +79,15 @@ test("v7 dashboard refuses deployments until AST/storage and deterministic fuzz 
   el("preflight").click();
   await until(()=>el("deploy-send").disabled===false,"gas preflight");
   assert.equal(sent,0);
+  // If wallet network changes after gas preflight, signing must fail closed.
+  chain="0x1";
+  el("deploy-send").click();
+  await until(()=>el("deploy-state").dataset.kind==="fail","wrong chain after preflight");
+  assert.equal(sent,0);
+  assert.equal(consents,0);
+  chain="0xaa36a7";
+  el("preflight").click();
+  await until(()=>el("deploy-send").disabled===false,"new gas quote after chain restoration");
   el("deploy-send").click();
   await until(()=>el("receipt").textContent.includes('"verified": true'),"signed deployment and RPC proof");
   assert.equal(sent,1);assert.equal(consents,1);
