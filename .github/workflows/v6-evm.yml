@@ -29,12 +29,17 @@ jobs:
           node --check v6/compiler.mjs
           node --check v6/app.mjs
           node --check v6/sepolia-proof.mjs
+          node --check v6/wallet-adapter.mjs
+      - name: EIP-6963/EIP-1193 wallet adapter unit tests
+        run: node --test v6/test/wallet-adapter.test.mjs
       - name: Verify Sepolia evidence security checks (fixtures, not public deployment)
         run: node --test v6/test/sepolia-proof.test.mjs
       - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
-        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30
+        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30 jsdom@26.1.0
       - name: Compare selectors, ABI and storage layout against Argot solc-js
         run: node --test v6/test/solc-oracle.test.mjs
+      - name: Browser smoke — real app DOM and injected-wallet click flow
+        run: node --test v6/test/browser-smoke.mjs
       - name: Install real Foundry EVM toolchain
         uses: foundry-rs/foundry-toolchain@v1
       - name: Anvil EVM deploy and state transition (no mock)
