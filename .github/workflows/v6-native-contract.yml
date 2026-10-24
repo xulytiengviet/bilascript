@@ -21,6 +21,8 @@ jobs:
           node-version: '22'
       - name: Native CVNSS.4 grammar, ABI and codegen tests (without Solc)
         run: node --test v6/test/native-contracts.test.mjs
+      - name: Native Sepolia source and onchain bytecode verifier (no Solidity)
+        run: node --test v6/test/native-sepolia-verifier.test.mjs
       - name: Compile .bila directly to native EVM and produce immutable reference
         env:
           WRITE_NATIVE_BUILD: '1'
