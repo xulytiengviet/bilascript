@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {compileBila,EXAMPLE} from "../compiler.mjs";
-import {STUDY_WALLET,SEPOLIA_CHAIN_ID,matchWallet,verifySepoliaDeploy} from "../sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,SEPOLIA_CHAIN_ID,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "../sepolia-proof.mjs";
+const FRESH_FIXTURE="0x1234567890123456789012345678901234567890";
 
 const compiled=compileBila(EXAMPLE);
 const receipt={
@@ -10,23 +11,29 @@ const receipt={
   blockNumber:"0xa",gasUsed:"0x5208"
 };
 const transaction={
-  hash:receipt.transactionHash,from:STUDY_WALLET,to:null,
+  hash:receipt.transactionHash,from:FRESH_FIXTURE,to:null,
   input:compiled.creationBytecode,value:"0x0"
 };
 const evidence={
-  expectedWallet:STUDY_WALLET,chainId:SEPOLIA_CHAIN_ID,receipt,transaction,
+  expectedWallet:FRESH_FIXTURE,chainId:SEPOLIA_CHAIN_ID,receipt,transaction,
   code:compiled.runtimeBytecode,
-  ownerSlot:"0x"+BigInt(STUDY_WALLET).toString(16).padStart(64,"0"),
+  ownerSlot:"0x"+BigInt(FRESH_FIXTURE).toString(16).padStart(64,"0"),
   compiled
 };
-test("scope exactly provided signing wallet",()=>{
- assert.equal(matchWallet(STUDY_WALLET.toUpperCase().replace("0X","0x"),STUDY_WALLET).toLowerCase(),STUDY_WALLET.toLowerCase());
- assert.throws(()=>matchWallet("0x"+"1".repeat(40),STUDY_WALLET),/khác địa chỉ/);
+test("reject known public BIP39 test-vector wallet, and validate fresh wallet format",()=>{
+ assert.throws(()=>assertSafeSepoliaWallet(PUBLIC_TEST_VECTOR_ADDRESS),/test vector/);
+ assert.throws(()=>matchWallet(PUBLIC_TEST_VECTOR_ADDRESS,PUBLIC_TEST_VECTOR_ADDRESS),/test vector/);
+ assert.throws(()=>verifySepoliaDeploy({...evidence,expectedWallet:PUBLIC_TEST_VECTOR_ADDRESS}),/test vector/);
+ assert.equal(assertSafeSepoliaWallet(FRESH_FIXTURE),FRESH_FIXTURE);
+});
+test("scope exactly selected non-public signer",()=>{
+ assert.equal(matchWallet(FRESH_FIXTURE.toUpperCase().replace("0X","0x"),FRESH_FIXTURE).toLowerCase(),FRESH_FIXTURE.toLowerCase());
+ assert.throws(()=>matchWallet("0x"+"1".repeat(40),FRESH_FIXTURE),/khác địa chỉ/);
 });
 test("proof validator requires chain/from/input/code/owner/receipt",()=>{
  const output=verifySepoliaDeploy(evidence);
  assert.equal(output.transactionHash,receipt.transactionHash);
- assert.equal(output.sourceWallet,STUDY_WALLET);
+ assert.equal(output.sourceWallet,FRESH_FIXTURE);
  assert.equal(output.status,"VERIFIED_FROM_PUBLIC_RPC");
  const changes=[
    {chainId:"0x1"},
