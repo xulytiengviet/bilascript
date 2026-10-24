@@ -52,3 +52,44 @@ The exact reference build is checked in CI. Do not substitute CDN solc builds, c
 - The wallet can transfer BILA using standard ERC-20 methods, so its balance can change after genesis; on-chain mint event and totalSupply must be inspected for issuance proof.
 - Sepolia ETH has no mainnet monetary value; BILA on Sepolia is experimental and carries no market listing or guarantee.
 - For the goal of replacing Solidity, this is a **compatibility reference** and test vector, NOT evidence of native CVNSS4.0 compiler parity.
+
+
+## Runtime bytecode identity verified on Sepolia — October 24, 2026
+
+Contract: https://sepolia.etherscan.io/address/0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758
+
+An independent GitHub Actions runner queried Ethereum Sepolia at block 11981260.
+On-chain runtime is 1806 bytes and matches the committed BILA build byte-for-byte.
+
+- Public RPC attestation: [BilaBitlang.sepolia-attestation.json](./BilaBitlang.sepolia-attestation.json)
+- Independently reproducible proof: https://github.com/xulytiengviet/bilascript/actions/runs/40060058453
+- Classification: Solidity / solc-js 0.8.30 + OpenZeppelin Contracts 5.6.1, NOT BilaScript native.
+- Limitation: a runtime match is not proof of Etherscan's public source-verified badge, creator identity or transaction origin.
+
+### Etherscan Verify & Publish
+
+Use https://sepolia.etherscan.io/verifyContract?a=0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758
+
+Compiler type: Solidity (Standard-Json-Input).
+Compiler version: v0.8.30+commit.73712a01.
+Open-source license: MIT.
+Upload: [BilaBitlang.standard-json.json](./BilaBitlang.standard-json.json).
+Qualified contract: v6/token/BilaBitlang.sol:BilaBitlang.
+Optimizer: enabled, 200 runs. EVM version: Cancun.
+Metadata bytecode hash: none. Constructor arguments: empty.
+
+The Standard JSON file embeds six sources, including every OpenZeppelin import,
+and is recompiled byte-for-byte in CI against the deployed reference build.
+A single flattened source or a different build setting is insufficient for
+reproducible verification. Only Etherscan can mark the Contract -> Code section
+source-verified after a successful source submission.
+
+### BilaScript Compiler Identity Lab
+
+https://bila.js.org/v6/#provenance
+
+Paste bytecode or enter the Sepolia address to compare exact runtime or creation
+bytecode, and generate a provenance report. Separately, recompile CVNSS4.0
+source from the live BilaScript compiler and label as native ONLY on an exact
+match. This is deliberately different from asserting that ERC-20 selectors
+prove a native language compiler emitted the token.
