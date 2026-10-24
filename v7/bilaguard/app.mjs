@@ -217,7 +217,8 @@ async function getReceipt(p,hash){
 }
 async function deploy(){
  if(!canDeploy()||!quote||quote.revision!==epoch)throw Error("Cần chạy preflight Sepolia mới cho bản nguồn hiện tại.");
- const revision=epoch,creation=analysis.build.creationBytecode,runtime=analysis.build.runtimeBytecode,p=wallet();
+ const revision=epoch,creation=analysis.build.creationBytecode,runtime=analysis.build.runtimeBytecode,
+  sourceHash=analysis.sourceKeccak256,p=wallet();
  signing=true;$("deploy-send").disabled=true;$("preflight").disabled=true;
  try{
   await verifyAccount(p);
@@ -233,9 +234,13 @@ async function deploy(){
  if(!window.confirm(message)){signing=false;refreshGate();return;}
  let txHash="";
  try{
+  // Wallet can switch accounts/networks while its confirmation dialog is open.
+  await verifyAccount(p);
   const gas=await verifyGas(p,creation);
   requireStable(creation,revision);
   if(!gas.requiredWei)throw Error("Gas estimate không hợp lệ.");
+  await verifyAccount(p);
+  requireStable(creation,revision);
   txHash=await p.request({method:"eth_sendTransaction",params:[{
    from:ROOT,data:creation,value:"0x0"
   }]});
@@ -257,7 +262,7 @@ async function deploy(){
    BigInt(tx?.value??"0x0")===0n&&same(tx?.hash,txHash)&&
    same(receipt.transactionHash,txHash)&&same(receipt.contractAddress,address);
   const evidence={schema:"bilaguard.v0.1.sepolia.deployment-proof",
-   compiler:"BilaScript-v6.0.1-native-evm",sourceHash:analysis.sourceKeccak256,
+   compiler:"BilaScript-v6.0.1-native-evm",sourceHash,
    transactionHash:txHash,contract:address,owner:ROOT,chainId:Number(SEPOLIA),
    gasUsed:receipt.gasUsed,receiptBlock:receipt.blockNumber,
    runtimeBytecodeMatches: same(code,runtime),ownerSlotMatches:BigInt(owner)===BigInt(ROOT),
