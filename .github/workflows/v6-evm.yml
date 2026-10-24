@@ -28,6 +28,10 @@ jobs:
         run: |
           node --check v6/compiler.mjs
           node --check v6/app.mjs
+      - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
+        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30
+      - name: Compare selectors, ABI and storage layout against Argot solc-js
+        run: node --test v6/test/solc-oracle.test.mjs
       - name: Install real Foundry EVM toolchain
         uses: foundry-rs/foundry-toolchain@v1
       - name: Anvil EVM deploy and state transition (no mock)
