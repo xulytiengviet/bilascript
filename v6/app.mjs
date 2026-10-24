@@ -1,4 +1,5 @@
-import {compileBila,encodeCall,disassemble,EXAMPLE} from "./compiler.mjs";
+import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
+import {STUDY_WALLET,validWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -6,6 +7,14 @@ const logBox=$("events"), report=$("evidence"), status=$("status");
 const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument");
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
 const SEPOLIA="0xaa36a7";
+const expectedWallet=$("expected-wallet");
+expectedWallet.value=new URLSearchParams(location.search).get("deployer")||STUDY_WALLET;
+function assertSigner(){return matchWallet(account,expectedWallet.value.trim());}
+function saveJSON(filename,value){
+  const blob=new Blob([pretty(value)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 function writeLog(kind,message){
   const date=new Date().toLocaleTimeString("vi-VN",{hour12:false});
   const el=document.createElement("div");el.className="log "+kind;
@@ -47,6 +56,8 @@ function changeMethod(){
 function compile(){
   try{
     compiled=compileBila(source.value);
+    deployEvidence=null;
+    $("download-proof").disabled=true;
     output.value=compiled.creationBytecode;
     $("runtime").value=compiled.runtimeBytecode;
     abi.value=pretty(compiled.abi);
@@ -85,7 +96,7 @@ async function connect(){
   await assertSepolia();
   const accounts=await rpc("eth_requestAccounts");
   if(!accounts||!accounts[0])throw Error("Ví không trả về tài khoản");
-  account=accounts[0];
+  account=matchWallet(accounts[0],expectedWallet.value.trim());
   $("wallet").textContent=account.slice(0,8)+"…"+account.slice(-6);
   setStatus("Đã kết nối Sepolia — chưa triển khai","neutral");
   writeLog("ok","Đã xác minh chain ID 11155111, ví "+account);
@@ -98,6 +109,7 @@ async function changeChain(){
 function requireReady(){
   if(!compiled)throw Error("Hãy biên dịch trước");
   if(!account)throw Error("Hãy kết nối ví Sepolia");
+  assertSigner();
 }
 async function receipt(txHash){
   const started=Date.now();
@@ -129,16 +141,21 @@ async function deploy(){
   if(toBig(r.status)!==1n)throw Error("Deploy bị revert: "+hash);
   if(!r.contractAddress)throw Error("Receipt thành công nhưng không có contractAddress");
   addressInput.value=r.contractAddress;linkContract(r.contractAddress);
-  const chainCode=await rpc("eth_getCode",[r.contractAddress,"latest"]);
-  const codeMatch=chainCode.toLowerCase()===compiled.runtimeBytecode.toLowerCase();
-  const chainId=await assertSepolia();
-  deployEvidence={chainId,txHash:hash,contract:r.contractAddress,gasUsed:toBig(r.gasUsed).toString(),
-    blockNumber:toBig(r.blockNumber).toString(),status:r.status,bytecodeMatches:codeMatch,
-    deployedBytecode:chainCode,compiler:compiled.compiler,creationBytecode:creation};
+  const [chainCode,chainId,transaction,ownerSlot]=await Promise.all([
+    rpc("eth_getCode",[r.contractAddress,"latest"]),
+    assertSepolia(),
+    rpc("eth_getTransactionByHash",[hash]),
+    rpc("eth_getStorageAt",[r.contractAddress,"0x0","latest"])
+  ]);
+  deployEvidence=verifySepoliaDeploy({
+    expectedWallet:assertSigner(),chainId,receipt:r,transaction,
+    code:chainCode,ownerSlot,compiled
+  });
   $("gas-used").textContent=toBig(r.gasUsed).toLocaleString("vi-VN")+" gas · receipt";
   report.textContent=pretty(deployEvidence);
-  setStatus(codeMatch?"Deploy thành công · bytecode khớp":"Deploy thành công · bytecode KHÔNG khớp",codeMatch?"ok":"error");
-  writeLog(codeMatch?"ok":"error","Receipt "+r.status+" · runtime bytecode "+(codeMatch?"TRÙNG":"KHÁC")+" nguồn · "+r.contractAddress);
+  $("download-proof").disabled=false;
+  setStatus("Sepolia đã xác minh: ví · receipt · bytecode · chủ sở hữu","ok");
+  writeLog("ok","Đã xác minh thực: "+r.contractAddress+" từ "+account+"; gas="+toBig(r.gasUsed));
   await refreshState();
 }
 async function runCall(){
@@ -170,6 +187,7 @@ async function runCall(){
 }
 async function refreshState(){
   if(!account)throw Error("Hãy kết nối ví trước");
+  assertSigner();
   await assertSepolia();
   const a=inputAddress();
   const code=await rpc("eth_getCode",[a,"latest"]);
@@ -199,6 +217,7 @@ async function estimateOnly(){
 }
 async function verifyTransaction(){
   if(!lastTx)throw Error("Chưa có transaction hash từ phiên này");
+  assertSigner();
   await assertSepolia();
   const r=await rpc("eth_getTransactionReceipt",[lastTx]);
   if(!r)throw Error("Chưa tìm được transaction receipt");
@@ -219,7 +238,8 @@ $("refresh").addEventListener("click",guard(refreshState));
 $("verify").addEventListener("click",guard(verifyTransaction));
 methodSelect.addEventListener("change",changeMethod);
 $("copy").addEventListener("click",guard(async()=>{if(!compiled)throw Error("Chưa biên dịch");await navigator.clipboard.writeText(compiled.creationBytecode);writeLog("ok","Đã sao chép creation bytecode");}));
-$("download").addEventListener("click",()=>{if(!compiled)return;const blob=new Blob([pretty({compiler:compiled.compiler,abi:compiled.abi,creationBytecode:compiled.creationBytecode,runtimeBytecode:compiled.runtimeBytecode})],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="bilascript-v6-evm-build.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});
+$(`download`).addEventListener("click",()=>{if(compiled)saveJSON("bilascript-v6-evm-build.json",{compiler:compiled.compiler,abi:compiled.abi,creationBytecode:compiled.creationBytecode,runtimeBytecode:compiled.runtimeBytecode});});
+$(`download-proof`).addEventListener("click",()=>{if(deployEvidence)saveJSON("bilascript-v6-sepolia-proof-"+deployEvidence.transactionHash+".json",deployEvidence);});
 source.value=EXAMPLE;compile();
 if(window.ethereum?.on){
   window.ethereum.on("chainChanged",()=>{account="";$("wallet").textContent="Chưa kết nối";setStatus("Mạng thay đổi · kết nối lại","neutral");});
