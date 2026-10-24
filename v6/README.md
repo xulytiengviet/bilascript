@@ -85,3 +85,41 @@ In [the v6 testnet lab](https://bila.js.org/v6/):
 Local differential fuzzing is **separate** from Sepolia deployment: `bash v6/test/differential-anvil.sh` compiles and executes both BilaScript and independent pinned Solc contracts on a real local Anvil EVM, and `v6/test-results/differential-fuzz.json` stores seeds, state after each operation, revert results, receipt statuses and gas as comparative measurements. Differences in gas **are expected**; exact gas equality is not an assertion of semantic correctness.
 
 **No private keys are checked into the repository and CI does not publish wallet-funded Sepolia transactions.** 
+
+## Ethereum Sepolia Faucet in the static V6 lab
+
+The V6 page now has an **Ethereum Sepolia Faucet** section for the selected
+address `0x879E22703E2E432257334Db400Fbf9115aeD93Cf`.
+
+- Start with [pk910 Sepolia PoW Faucet](https://sepolia-faucet.pk910.de/)
+  if your new wallet has no mainnet ETH; enter the address and complete browser PoW.
+  The faucet itself manages all limits and reward availability.
+- Alternatives: [Google Cloud Web3](https://cloud.google.com/application/web3/faucet/ethereum/sepolia),
+  [Alchemy](https://www.alchemy.com/faucets/ethereum-sepolia) (Ethereum mainnet activity
+  and mainnet balance eligibility required), and
+  [QuickNode](https://faucet.quicknode.com/ethereum/sepolia)
+  (cooldown and anti-bot eligibility).
+- The "Sao chép địa chỉ nhận ETH" button copies the address only; it never signs.
+- The "Kiểm tra số dư Sepolia từ RPC" button queries Ethereum Sepolia public HTTPS RPC,
+  checks chain ID 11155111, and shows actual balance, nonce and block. When browser
+  CORS blocks the public RPC, the page can fall back to the chosen EIP-1193 wallet
+  for read-only RPC after verifying chain ID; no wallet connection is required
+  simply to **request** tokens from a third-party faucet. Failures display errors,
+  never a fabricated zero or a fake transaction.
+- A zero-balance wallet is blocked from attempting compiler deployment until it
+  has testnet ETH. Recheck the balance after funding.
+
+**Why NEXT_PUBLIC_FAUCET_SERVER_URL errors occur:** that variable belongs to an
+external Next.js faucet frontend. Without its independently deployed, funded,
+rate-limited signing backend, that service cannot send Sepolia ETH. BilaScript is
+hosted as static GitHub Pages and has **no** funded faucet server or server signing
+keys. It cannot repair a third-party Next.js runtime variable or legitimately claim
+to dispense ETH directly. This UI links to independently operated faucets rather
+than introducing an unsafe browser signing key or an invented "Request ETH" call.
+Do not add a private key to GitHub, JavaScript or a public environment variable.
+
+Verification:
+```sh
+node --test v6/test/faucet.test.mjs
+node --test v6/test/browser-smoke.mjs
+```
