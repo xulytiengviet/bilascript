@@ -95,7 +95,7 @@ export function runTargetedFuzz(source){
   ["replace-cvnss-type",source.replace(/sob_wyly_kogy_zaub_256(?=\s+[a-zA-Z_][a-zA-Z_0-9]*\s*;)/,"uint256")],
   ["insert-bidi-override",source.replace(/hoph_dogd(?=\s+[a-zA-Z_][a-zA-Z_0-9]*\s*\{)/,"hoph\u202Edogd")],
   ["remove-first-owner-guard",source.replace("cogy_kai chi_chu","cogy_kai")],
-  ["replace-first-public",source.replace("cogy_kai","public")],
+  ["replace-first-public",source.replace(/(\)\s+)cogy_kai(?=\s+(?:chi_chu|chiz_docr))/,"$1public")],
   ["inject-unknown-op",source.replace(/hoph_dogd(?=\s+[a-zA-Z_][a-zA-Z_0-9]*\s*\{)/,"foo_keyword hoph_dogd")]
  ];
  const cases=[],failures=[];
