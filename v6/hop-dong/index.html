@@ -64,12 +64,21 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 </div></section>
 <section class="panel" id="chung-cu"><div class="head"><h2>05 · CHỨNG CỨ NATIVE TRÊN CHUỖI</h2><span class="pill">RPC · không giả lập</span></div><div class="inner">
 <p>Chỉ xác nhận sau khi receipt thành công, transaction.from và input khớp, runtime khớp, owner slot 0 trùng ví gốc. Nguồn, bytecode, ABI và storage được xuất thành hồ sơ để tái biên dịch.</p>
-<label for="contract-address">Địa chỉ hợp đồng do receipt cung cấp</label><input id="contract-address" class="field code" placeholder="0x... · chưa có" autocomplete="off">
+<div class="notice" style="margin:8px 0 16px">
+<strong>Đã phát hiện hợp đồng native trên Sepolia</strong>
+<p>Địa chỉ 0x305eb44bb1ccd78618a79479270d113742dcb072 đã được kiểm tra qua RPC công khai: runtime 1.027 byte trùng với compiler BilaScript và owner slot 0 trùng ví gốc. Đây là xác minh nguồn/bytecode riêng, <strong>không phải nhãn Solidity Verified trên Etherscan</strong>.</p>
+<div class="buttons"><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="https://github.com/xulytiengviet/bilascript/actions/runs/40065720805">Bằng chứng RPC công khai ↗</a><a class="buttonLink" target="_blank" rel="noopener noreferrer" href="../contracts/Bila_CVNSS40_Native.build.json">Tải lại Bila_CVNSS40_Native.build.json ↗</a></div>
+</div>
+<label for="contract-address">Địa chỉ hợp đồng Sepolia cần xác minh</label><input id="contract-address" class="field code" value="0x305eb44bb1ccd78618a79479270d113742dcb072" autocomplete="off">
 <label for="tx-hash">Transaction hash có thể dán lại</label><input id="tx-hash" class="field code" placeholder="0x... · chờ MetaMask" autocomplete="off">
-<div class="buttons"><button id="verify-native">Xác minh receipt + compiler native</button><button id="download-proof" disabled>Tải chứng cứ JSON</button></div>
-<pre id="proof">CHƯA TRIỂN KHAI · Chưa có bằng chứng Sepolia. Test trên Anvil không phải là giao dịch công khai.</pre>
+<label for="local-build">Tải lại file build JSON (chấp nhận file tải xuống hoặc file đang có trong máy)</label>
+<input id="local-build" class="field" type="file" accept=".json,application/json">
+<div class="buttons"><button id="load-canonical-build">Nạp lại build native chuẩn từ repository</button><button id="verify-address" class="primary">XÁC THỰC HỢP ĐỒNG BẰNG BILASCRIPT</button></div>
+<p id="verify-build-state" class="sub" aria-live="polite">Nguồn .bila và build.json phải tái biên dịch cho ra cùng 1.027 byte runtime. Nếu file bạn có khác bản chuẩn, hệ thống sẽ từ chối báo trùng.</p>
+<div class="buttons"><button id="verify-native">Xác minh đầy đủ receipt + compiler native (cần tx hash)</button><button id="download-proof" disabled>Tải chứng cứ JSON</button></div>
+<pre id="proof">CHƯA TẢI CHỨNG CỨ RPC TRONG PHIÊN NÀY · Địa chỉ hợp đồng đã có, hãy nhấn XÁC THỰC HỢP ĐỒNG BẰNG BILASCRIPT để kiểm tra trực tiếp.</pre>
 <div class="buttons"><a id="tx-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Giao dịch Etherscan ↗</a><a id="contract-link" class="buttonLink" href="#" hidden target="_blank" rel="noopener noreferrer">Hợp đồng Etherscan ↗</a></div>
-<p class="sub">Etherscan hiện không xác minh trực tiếp nguồn BilaScript như Solidity. Xuất nguồn .bila cùng ABI/bytecode và chứng cứ so khớp độc lập; không gắn nhãn Verified Solidity cho native contract.</p>
+<p class="sub"><strong>Lưu ý Etherscan:</strong> Không chọn Solidity Compiler để tải file này. <code>Bila_CVNSS40_Native.build.json</code> chứa ABI và bytecode của compiler độc lập, <strong>không phải</strong> Solidity Standard JSON Input; Etherscan sẽ không tạo lại bytecode bằng Solc. Hãy dùng công cụ xác thực native trên trang này, hoặc cung cấp transaction hash để kiểm tra cả creation input/receipt.</p>
 </div></section>
 <section class="panel"><div class="head"><h2>06 · NHẬT KÝ BIÊN DỊCH / RPC</h2><small>Truy vết theo phiên</small></div><div class="inner"><div id="logs" aria-live="polite">Chưa thực hiện thao tác.</div></div></section>
 <section class="panel"><div class="head"><h2>07 · GIỚI HẠN NGỮ NGHĨA</h2><small>Minh bạch</small></div><div class="inner"><ol class="instructions">
