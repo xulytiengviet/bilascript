@@ -57,7 +57,7 @@ function compile(){
     $("n-bytes").textContent=(compiled.creationBytecode.length-2)/2;
     $("n-methods").textContent=compiled.ast.functions.length;
     renderMethods();
-    setStatus("Đã biên dịch — CHƯA xác minh on-chain","neutral");
+    setStatus("Đã biên dịch 6.0.1 · CHƯA xác minh on-chain","neutral");
     writeLog("ok","Native bytecode và ABI đã sinh từ BilaScript; chưa có chứng nhận triển khai");
     report.textContent="Chưa có bằng chứng mạng. Bytecode tĩnh không chứng minh runtime thực thi đúng.";
   }catch(err){
@@ -177,11 +177,12 @@ async function refreshState(){
   $("chain-code").textContent=exists?code.length/2-1+" byte runtime":"KHÔNG CÓ mã EVM tại địa chỉ này";
   const match=compiled&&code.toLowerCase()===compiled.runtimeBytecode.toLowerCase();
   $("bytecode-match").textContent=exists?(match?"KHỚP compiler hiện tại":"KHÁC/CHƯA XÁC MINH"):"KHÔNG CÓ CONTRACT";
-  const slots=compiled?compiled.ast.state.length:1;
+  const layout=compiled?.storageLayout||[{name:"__bila_owner",type:"address",slot:0}];
   const values=[];
-  for(let i=0;i<slots;i++){
-    const val=await rpc("eth_getStorageAt",[a,"0x"+i.toString(16),"latest"]);
-    values.push({slot:i,hex:val,decimal:toBig(val).toString()});
+  for(const entry of layout){
+    const val=await rpc("eth_getStorageAt",[a,"0x"+entry.slot.toString(16),"latest"]);
+    const owner=entry.type==="address"?"0x"+toBig(val).toString(16).padStart(40,"0").slice(-40):undefined;
+    values.push({name:entry.name,slot:entry.slot,type:entry.type,hex:val,decimal:toBig(val).toString(),owner});
   }
   $("storage").textContent=pretty(values);
   $("last-block").textContent=toBig(await rpc("eth_blockNumber")).toString();
