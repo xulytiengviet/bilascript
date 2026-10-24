@@ -30,6 +30,18 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: Check real ERC20 transfer and allowance with Anvil
         run: bash v6/token/test-token-anvil.sh
+      - name: Public Sepolia bytecode identity check (read-only, independent of local Anvil)
+        id: onchain-probe
+        continue-on-error: true
+        run: node v6/token/probe-public-sepolia.mjs
+      - name: Retain public RPC attestation (including RPC errors)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bila-public-sepolia-provenance
+          path: v6/test-results/bila-sepolia-provenance.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Retain deterministic token artifact for GitHub Pages review
         uses: actions/upload-artifact@v4
         with:
