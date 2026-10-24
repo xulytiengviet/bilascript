@@ -271,6 +271,7 @@ async function identityReferenceBuild(){
   return bilaBuild;
 }
 function setIdentityOutcome(result,chainContext=null,examinedBytecode=null){
+  const checkedNative=result.classification==="native-bilascript"?compileBila(source.value):null;
   compilerIdentityEvidence={
     schema:"bilascript.compiler-provenance-inspector.v1",
     examinedAt:new Date().toISOString(),networkContext:chainContext,
@@ -279,8 +280,8 @@ function setIdentityOutcome(result,chainContext=null,examinedBytecode=null){
     referenceSourceUrl:"https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.sol",
     standardJsonUrl:"https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.standard-json.json",
     nativeReproducibleSource:result.classification==="native-bilascript"?source.value:null,
-    nativeBuild:result.classification==="native-bilascript"?
-      {creationBytecode:compiled?.creationBytecode,runtimeBytecode:compiled?.runtimeBytecode,abi:compiled?.abi}:null,
+    nativeBuild:checkedNative?
+      {creationBytecode:checkedNative.creationBytecode,runtimeBytecode:checkedNative.runtimeBytecode,abi:checkedNative.abi}:null,
     inferenceLimit:"Bytecode identity does not imply a proof of account ownership or an Etherscan source-verified badge."
   };
   $("inspect-evidence").textContent=pretty(compilerIdentityEvidence);
