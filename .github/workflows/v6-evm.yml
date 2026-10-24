@@ -28,6 +28,9 @@ jobs:
         run: |
           node --check v6/compiler.mjs
           node --check v6/app.mjs
+          node --check v6/sepolia-proof.mjs
+      - name: Verify Sepolia evidence security checks (fixtures, not public deployment)
+        run: node --test v6/test/sepolia-proof.test.mjs
       - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
         run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30
       - name: Compare selectors, ABI and storage layout against Argot solc-js
