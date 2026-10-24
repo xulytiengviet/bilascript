@@ -41,7 +41,7 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 <section class="panel" id="bytecode"><div class="head"><h2>02 · BYTECODE / ABI / OPCODE / STORAGE</h2><span class="pill">EVM trực tiếp</span></div><div class="inner">
 <label for="creation">Creation bytecode</label><textarea id="creation" class="field code" readonly style="min-height:90px"></textarea>
 <label for="runtime">Runtime bytecode</label><textarea id="runtime" class="field code" readonly style="min-height:90px"></textarea>
-<div class="buttons"><button id="download-build">Tải build JSON</button><button id="copy-creation">Sao chép creation bytecode</button></div>
+<div class="buttons"><button id="download-build">Tải build JSON</button><button id="copy-creation">Sao chép creation bytecode</button><a class="buttonLink" href="../contracts/Bila_CVNSS40_Native.build.json" target="_blank" rel="noopener noreferrer">Bản build native chuẩn trên GitHub ↗</a></div>
 <div class="two"><div><h3>ABI chuẩn EVM</h3><pre id="abi">Chưa biên dịch</pre></div><div><h3>Storage layout</h3><pre id="layout">Chưa biên dịch</pre></div></div>
 <h3>Disassembly opcode từ compiler native</h3><div class="tablebox"><table><thead><tr><th>PC</th><th>HEX</th><th>OPCODE</th><th>Immediate</th></tr></thead><tbody id="opcode-rows"></tbody></table></div><p class="sub">Disassembly là phân tích mã tĩnh. Gas, block, receipt và storage on-chain chỉ hiển thị sau khi truy vấn RPC.</p>
 </div></section>
