@@ -86,3 +86,28 @@ test("all RPC failures reject: never silently fabricate 0 Sepolia ETH",async()=>
   fetcher:responseFor(RESPONSES)
  }),/HTTPS/);
 });
+
+test("wallet EIP-1193 is read-only fallback if all public RPC endpoints fail",async()=>{
+ const methods=[];
+ const walletProvider={
+  async request({method,params}){
+   methods.push(method);
+   assert.ok(!method.startsWith("eth_send"),"Balance check cannot send a transaction");
+   return RESPONSES[method];
+  }
+ };
+ const result=await readFaucetBalance(RECIPIENT,{
+  endpoints:["https://cors-blocked.example"],
+  fetcher:async()=>{throw Error("CORS");},walletProvider
+ });
+ assert.equal(result.eth,"0.1");
+ assert.equal(result.source,"WALLET_RPC_LIVE");
+ assert.deepEqual(methods,["eth_chainId","eth_getBalance","eth_getTransactionCount","eth_blockNumber"]);
+});
+test("wallet fallback on mainnet must fail closed instead of presenting fake Sepolia funds",async()=>{
+ await assert.rejects(()=>readFaucetBalance(RECIPIENT,{
+  endpoints:["https://not-available.example"],
+  fetcher:async()=>{throw Error("offline");},
+  walletProvider:{request:async()=> "0x1"}
+ }),/Ví chưa ở Ethereum Sepolia/);
+});
