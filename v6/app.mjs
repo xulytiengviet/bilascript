@@ -106,7 +106,10 @@ function compile(){
 }
 function getProvider(){
   const p=walletCatalog.current();
-  if(p!==provider){provider=p;listenProvider(p);}
+  if(p!==provider){
+    if(provider)clearAccount("Ví được chọn đã thay đổi · hãy kết nối lại");
+    provider=p;listenProvider(p);
+  }
   return p;
 }
 async function rpc(method,params=[]){
@@ -137,7 +140,8 @@ async function connect(){
   const expected=expectedWallet.value.trim();
   if(!fresh.some(a=>a.toLowerCase()===expected.toLowerCase()))
     throw Error("Ví đang mở "+fresh[0]+", chưa cấp quyền tài khoản "+expected+". Hãy chọn tài khoản phù hợp trong ví và kết nối lại.");
-  account=matchWallet(fresh[0],expected);
+  const matched=fresh.find(a=>a.toLowerCase()===expected.toLowerCase());
+  account=matchWallet(matched,expected);
   $("wallet").textContent=account.slice(0,8)+"…"+account.slice(-6);
   setStatus("Kết nối thành công · Sepolia đã xác minh","ok");
   writeLog("ok","Kết nối ví "+account+" trên Sepolia 11155111");
@@ -326,7 +330,11 @@ function guard(action){return async()=>{
 };}
 $("compile").addEventListener("click",compile);
 $("reset").addEventListener("click",()=>{source.value=EXAMPLE;compile();});
-$("connect").addEventListener("click",guard(connect));
+$("connect").addEventListener("click",guard(async()=>{
+  const button=$("connect");
+  button.disabled=true;
+  try{await connect();}finally{button.disabled=false;}
+}));
 $("switch").addEventListener("click",guard(changeChain));
 $("wallet-check").addEventListener("click",guard(checkWalletOnSepolia));
 $("deploy").addEventListener("click",guard(deploy));
