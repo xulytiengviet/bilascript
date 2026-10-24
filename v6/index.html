@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071c33">
 <meta name="description" content="BilaScript v6.0.3: compiler EVM native thử nghiệm và phòng thí nghiệm Sepolia dùng RPC, receipt, gas, storage thực; không có dữ liệu mô phỏng.">
-<title>BilaScript v6.0.3 · Faucet Sepolia · Native EVM Compiler</title>
+<title>BilaScript v6.0.4 · BILA Token Sepolia · Native EVM Compiler</title>
 <style>
 :root{color-scheme:dark;--bg:#061827;--top:#071e34;--panel:#0b2944;--deep:#041420;--line:#2b5069;--text:#edf6fe;--muted:#afc5d6;--gold:#e7c365;--mint:#70e9bc;--red:#ff9195;--blue:#72c8ff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 system-ui,"Segoe UI",Arial,sans-serif}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}
@@ -43,7 +43,7 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
 <header class="top">
  <div class="brand">BILA<b>SCRIPT</b> / V6</div>
  <span class="tag">NATIVE EVM · EXPERIMENTAL</span>
- <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
+ <nav class="nav" aria-label="Điều hướng"><a href="../">Tổng quan</a><a href="../v5/">v5 · 50 bài toán</a><a href="#compiler">Compiler</a><a href="#opcode">Opcode</a><a href="#faucet">Nhận ETH thử nghiệm</a><a href="#testnet">Sepolia</a><a href="#token-bila">BILA ERC-20</a><a href="#evidence">Bằng chứng</a><a href="https://github.com/xulytiengviet/bilascript/tree/Babylscript1_7R2_BRANCH/v6" target="_blank" rel="noopener">Mã nguồn ↗</a></nav>
 </header>
 <main>
  <section class="hero">
@@ -117,7 +117,14 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <div class="fields"><div class="metric"><strong id="wallet-balance" style="font-size:14px">Chưa truy vấn</strong><small>Sepolia ETH thử nghiệm</small></div><div class="metric"><strong id="wallet-nonce" style="font-size:14px">—</strong><small>Transaction count; block <span id="wallet-check-block">—</span></small></div></div>
      <p class="sub"><strong style="color:var(--red)">Cảnh báo:</strong> 0x9858EfFD232B4033E47d90003D41EC34EcaEda94 là địa chỉ của test vector BIP-39 công khai, không thể dùng làm bằng chứng quyền sở hữu riêng và không an toàn để triển khai. <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">Faucet Sepolia cho ví thử nghiệm mới ↗</a></p>
      <div class="field"><label for="address">Địa chỉ hợp đồng Sepolia (tự nhập hoặc sau deploy)</label><input id="address" class="input code" placeholder="0x... (40 ký tự hex)" autocomplete="off" spellcheck="false"></div>
-     <div class="controls"><button id="estimate">Ước tính gas từ RPC</button><button id="deploy" class="safe">Triển khai creation bytecode lên Sepolia</button></div>
+     <div class="faucet-panel">
+     <p><strong>Kiểm tra đã nhận ETH → sẵn sàng triển khai</strong></p>
+     <p class="sub">Đọc số dư tài khoản đang kết nối, gasPrice và eth_estimateGas của chính creation bytecode bằng RPC Ethereum Sepolia. Chỉ mở nút triển khai khi số dư đủ trả gas dự kiến.</p>
+     <div class="controls"><button id="deploy-check" class="primary">Kiểm tra ETH và gas để triển khai</button></div>
+     <div class="fields"><div class="metric"><strong id="deploy-eth" style="font-size:16px">Chưa kiểm tra</strong><small>Số dư Sepolia ETH</small></div><div class="metric"><strong id="deploy-cost" style="font-size:16px">—</strong><small>Phí ước tính ETH</small></div></div>
+     <p id="deploy-readiness" class="sub" role="status" aria-live="polite">Chưa có kết quả kiểm tra từ MetaMask. Kết nối đúng ví, rồi bấm kiểm tra.</p>
+    </div>
+    <div class="controls"><button id="estimate">Ước tính gas từ RPC</button><button id="deploy" class="safe" disabled>Triển khai creation bytecode lên Sepolia</button></div>
      <div class="field"><label for="method">Chọn hàm ABI để gọi</label><select id="method"></select></div>
      <p id="method-description"></p>
      <div class="field"><label id="argument-label" for="argument">Giá trị đầu vào uint256</label><input id="argument" class="input code" value="42" inputmode="numeric" placeholder="uint256"></div>
@@ -132,18 +139,39 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <div class="links" style="margin-top:12px"><a id="explorer-tx" href="#" target="_blank" rel="noopener" hidden>Transaction</a><a id="explorer-contract" href="#" target="_blank" rel="noopener" hidden>Contract</a><a href="https://sepolia.etherscan.io/" target="_blank" rel="noopener">Sepolia Explorer ↗</a></div>
     </div>
    </section>
-   <section class="card" id="evidence"><div class="head"><h2>06 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
+<section class="card" id="token-bila"><div class="head">
+     <h2>06 · Token BILA · Bitlang (ERC-20 Sepolia)</h2><small>Solc/OpenZeppelin tham chiếu · không phải native BilaScript</small>
+    </div><div class="inner">
+     <p><strong>Bila (Bitlang) / BILA</strong> là token ERC-20 thử nghiệm phục vụ kiểm chứng khả năng tương tác EVM của hệ sinh thái BilaScript. Đây là hợp đồng tham chiếu được biên dịch bằng <strong>Solc 0.8.30 + OpenZeppelin 5.6.1</strong>, không được đánh đồng với compiler native CVNSS4.0.</p>
+     <div class="fields">
+      <div class="metric"><strong style="font-size:16px">1.000.000 BILA</strong><small>Tổng cung cố định · 18 decimals</small></div>
+      <div class="metric"><strong style="font-size:15px" id="bila-backend">Chưa nạp bytecode</strong><small>Backend và build từ repository</small></div>
+     </div>
+     <p class="sub">Ví gốc cố định (nhận toàn bộ BILA ban đầu): <code>0x879E22703E2E432257334Db400Fbf9115aeD93Cf</code>. Không có hàm đúc thêm, không phí giao dịch token, không nâng cấp. Địa chỉ ví gốc không phải địa chỉ hợp đồng; hợp đồng được tạo mới sau khi MetaMask ký.</p>
+     <div class="controls"><button id="bila-load" class="primary">Nạp creation bytecode ERC-20 đã biên dịch</button><button id="bila-check">Kiểm tra ETH và gas token</button></div>
+     <div class="fields"><div class="metric"><strong style="font-size:14px" id="bila-eth">Chưa kiểm tra</strong><small>Sepolia ETH ví gốc</small></div><div class="metric"><strong style="font-size:14px" id="bila-estimate">—</strong><small>Phí deploy ERC-20 ước tính</small></div></div>
+     <p class="sub" id="bila-stage" role="status" aria-live="polite">Chưa nạp build. Bước 1: nạp bytecode. Bước 2: kết nối ví và kiểm tra gas. Bước 3: xác nhận triển khai trong MetaMask.</p>
+     <div class="controls"><button id="bila-deploy" class="safe" disabled>Triển khai BILA ERC-20 trên Sepolia</button></div>
+     <div class="field"><label for="bila-tx">Transaction hash của hợp đồng BILA (đọc lại và xác minh độc lập)</label>
+      <input class="input code" id="bila-tx" placeholder="0x... (64 hex)" autocomplete="off" spellcheck="false">
+     </div>
+     <div class="controls"><button id="bila-verify">Xác minh token BILA đã phát hành từ RPC thật</button><button id="bila-proof" disabled>Tải chứng cứ token BILA JSON</button></div>
+     <pre id="bila-evidence">CHƯA TRIỂN KHAI · Chưa có transaction hash và contract address được RPC Sepolia xác nhận.</pre>
+     <p class="sub">Bằng chứng hợp lệ gồm: receipt thành công, người triển khai đúng ví gốc, bytecode trùng build tham chiếu, sự kiện <code>Transfer</code> ban đầu từ địa chỉ 0 tới ví gốc, <code>totalSupply=10²⁴</code> và <code>decimals=18</code>. Không có bằng chứng giao dịch thì không hiển thị thành công.</p>
+     <p class="sub"><a href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.sol" target="_blank" rel="noopener">Nguồn hợp đồng ERC-20 ↗</a> · <a href="https://github.com/xulytiengviet/bilascript/blob/Babylscript1_7R2_BRANCH/v6/token/BilaBitlang.build.json" target="_blank" rel="noopener">Build tham chiếu (JSON) ↗</a></p>
+    </div></section>
+      <section class="card" id="evidence"><div class="head"><h2>07 · Bằng chứng EVM thực</h2><small>Không điền số liệu mẫu</small></div>
     <div class="inner"><div class="fields"><div class="metric"><strong id="chain-code" style="font-size:14px">—</strong><small>eth_getCode</small></div><div class="metric"><strong id="bytecode-match" style="font-size:14px">—</strong><small>So sánh runtime</small></div></div>
      <p>Block mới nhất: <b id="last-block">—</b></p>
      <h3>Storage slots · eth_getStorageAt</h3><pre id="storage">Chưa truy vấn blockchain</pre>
      <h3 style="margin-top:13px">Receipt / chứng cứ triển khai</h3><pre id="evidence">Chưa có bằng chứng mạng.</pre>
      <p>Kết quả receipt <code>status=1</code> chỉ chứng minh giao dịch được thực thi thành công, chưa chứng minh hợp đồng không có lỗi. Khi deploy phải so sánh <code>eth_getCode</code> với runtime bytecode, không so sánh creation bytecode.</p>
     </div></section>
-   <section class="card"><div class="head"><h2>07 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
+   <section class="card"><div class="head"><h2>08 · Nhật ký thao tác RPC</h2><small>Giao dịch / lỗi thực tế trong phiên</small></div><div class="inner logs" id="events" aria-live="polite"></div></section>
   </div>
  </div>
  <footer class="footer">BilaScript v6.0.2 · Nghiên cứu compiler EVM, không phải sản phẩm tài chính · CVNSS4.0 keyword mapping dựa trên cách khóa semantic ID của v5 · <a href="../v5/">V5 giữ nguyên</a> · <a href="https://github.com/xulytiengviet/bilascript">GitHub</a></footer>
 </main>
-<script type="module" src="./app.mjs?v=6.0.3-faucet"></script>
+<script type="module" src="./app.mjs?v=6.0.4-bila-token"></script>
 </body>
 </html>
