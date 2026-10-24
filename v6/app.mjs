@@ -1,11 +1,35 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
 import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
+import {BrowserWallets,ensureSepolia,describeProviderError} from "./wallet-adapter.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
 const logBox=$("events"), report=$("evidence"), status=$("status");
 const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument");
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
+const walletCatalog=new BrowserWallets(window);
+let providerSubscription=null;
+function clearAccount(message){
+  account="";
+  $("wallet").textContent="Chưa kết nối";
+  if(message)setStatus(message,"neutral");
+}
+function listenProvider(p){
+  if(providerSubscription){
+    const previous=providerSubscription;
+    if(typeof previous.provider.removeListener==="function"){
+      previous.provider.removeListener("chainChanged",previous.chainHandler);
+      previous.provider.removeListener("accountsChanged",previous.accountHandler);
+    }
+  }
+  const chainHandler=()=>clearAccount("Mạng đã thay đổi · cần kết nối lại");
+  const accountHandler=()=>clearAccount("Tài khoản đã thay đổi · cần kết nối lại");
+  if(typeof p.on==="function"){
+    p.on("chainChanged",chainHandler);
+    p.on("accountsChanged",accountHandler);
+  }
+  providerSubscription={provider:p,chainHandler,accountHandler};
+}
 const SEPOLIA="0xaa36a7";
 const expectedWallet=$("expected-wallet");
 expectedWallet.value=new URLSearchParams(location.search).get("deployer")||SELECTED_SEPOLIA_WALLET;
@@ -81,8 +105,8 @@ function compile(){
   }
 }
 function getProvider(){
-  const p=window.ethereum;
-  if(!p||typeof p.request!=="function")throw Error("Không phát hiện ví EIP-1193. Cài/mở MetaMask hoặc ví tương thích trong trình duyệt.");
+  const p=walletCatalog.current();
+  if(p!==provider){provider=p;listenProvider(p);}
   return p;
 }
 async function rpc(method,params=[]){
@@ -90,20 +114,33 @@ async function rpc(method,params=[]){
   return p.request({method,params});
 }
 async function assertSepolia(){
-  const actual=await rpc("eth_chainId");
-  if(actual.toLowerCase()!==SEPOLIA)throw Error("Sai mạng "+actual+"; chỉ cho phép Sepolia (11155111). Không triển khai mainnet.");
-  return actual;
+  return ensureSepolia(getProvider(),{switchNetwork:false});
+}
+async function assertLiveSigner(){
+  const p=getProvider();
+  const connected=await p.request({method:"eth_accounts"});
+  if(!Array.isArray(connected)||!connected[0])throw Error("Ví chưa cấp quyền tài khoản, hãy Kết nối lại.");
+  matchWallet(connected[0],expectedWallet.value.trim());
+  if(connected[0].toLowerCase()!==account.toLowerCase())throw Error("Tài khoản ví đã thay đổi, vui lòng kết nối lại.");
+  await ensureSepolia(p,{switchNetwork:false});
 }
 async function connect(){
   assertSafeSepoliaWallet(expectedWallet.value.trim());
-  provider=getProvider();
-  await assertSepolia();
-  const accounts=await rpc("eth_requestAccounts");
-  if(!accounts||!accounts[0])throw Error("Ví không trả về tài khoản");
-  account=matchWallet(accounts[0],expectedWallet.value.trim());
+  const p=getProvider();
+  setStatus("Đang mở yêu cầu cấp quyền trong ví…","pending");
+  const accounts=await p.request({method:"eth_requestAccounts"});
+  if(!Array.isArray(accounts)||!accounts[0])throw Error("Ví không trả về tài khoản, hãy mở khóa và cấp quyền cho bila.js.org.");
+  setStatus("Đã cấp quyền tài khoản · đang chuyển sang Sepolia…","pending");
+  await ensureSepolia(p,{switchNetwork:true});
+  const fresh=await p.request({method:"eth_accounts"});
+  if(!Array.isArray(fresh)||!fresh[0])throw Error("Ví không còn cấp quyền tài khoản sau khi đổi mạng");
+  const expected=expectedWallet.value.trim();
+  if(!fresh.some(a=>a.toLowerCase()===expected.toLowerCase()))
+    throw Error("Ví đang mở "+fresh[0]+", chưa cấp quyền tài khoản "+expected+". Hãy chọn tài khoản phù hợp trong ví và kết nối lại.");
+  account=matchWallet(fresh[0],expected);
   $("wallet").textContent=account.slice(0,8)+"…"+account.slice(-6);
-  setStatus("Đã kết nối Sepolia — chưa triển khai","neutral");
-  writeLog("ok","Đã xác minh chain ID 11155111, ví "+account);
+  setStatus("Kết nối thành công · Sepolia đã xác minh","ok");
+  writeLog("ok","Kết nối ví "+account+" trên Sepolia 11155111");
 }
 async function checkWalletOnSepolia(){
   const expected=assertSafeSepoliaWallet(expectedWallet.value.trim());
@@ -125,8 +162,10 @@ async function checkWalletOnSepolia(){
 }
 async function changeChain(){
   const p=getProvider();
-  await p.request({method:"wallet_switchEthereumChain",params:[{chainId:SEPOLIA}]});
-  writeLog("ok","Đã yêu cầu ví chuyển sang Sepolia");
+  setStatus("Đang yêu cầu ví chuyển/thêm Ethereum Sepolia…","pending");
+  await ensureSepolia(p,{switchNetwork:true});
+  setStatus("Đã chuyển sang Sepolia · nhấn Kết nối ví","ok");
+  writeLog("ok","Ví đã xác nhận chain 11155111");
 }
 function requireReady(){
   if(!compiled)throw Error("Hãy biên dịch trước");
@@ -152,6 +191,7 @@ function linkContract(address){
 }
 async function deploy(){
   requireReady();await assertSepolia();
+  await assertLiveSigner();
   const build=compiled;
   const creation=build.creationBytecode;
   const estimated=await rpc("eth_estimateGas",[{from:account,data:creation}]);
@@ -183,6 +223,7 @@ async function deploy(){
 }
 async function runCall(){
   requireReady();await assertSepolia();
+  await assertLiveSigner();
   const contract=inputAddress(),m=selectedMethod();
   const data=encodeCall(m,inputArg.value);
   const tx={from:account,to:contract,data};
@@ -231,6 +272,7 @@ async function refreshState(){
 }
 async function estimateOnly(){
   requireReady();await assertSepolia();
+  await assertLiveSigner();
   const target=addressInput.value.trim();
   const m=selectedMethod(),tx=target?{from:account,to:inputAddress(),data:encodeCall(m,inputArg.value)}
     :{from:account,data:compiled.creationBytecode};
@@ -277,7 +319,10 @@ async function verifyTransaction(){
   writeLog("ok","Đọc receipt thật; trạng thái "+r.status);
 }
 function guard(action){return async()=>{
-  try{await action();}catch(err){setStatus("Thao tác thất bại","error");writeLog("error",err?.message||String(err));}
+  try{await action();}catch(err){
+    setStatus("Thao tác thất bại · xem Nhật ký ví","error");
+    writeLog("error",describeProviderError(err));
+  }
 };}
 $("compile").addEventListener("click",compile);
 $("reset").addEventListener("click",()=>{source.value=EXAMPLE;compile();});
