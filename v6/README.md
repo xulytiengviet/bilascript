@@ -123,3 +123,19 @@ Verification:
 node --test v6/test/faucet.test.mjs
 node --test v6/test/browser-smoke.mjs
 ```
+
+
+## Native CVNSS4.0 HỢP ĐỒNG research registry (new)
+
+Use [HỢP ĐỒNG on bila.js.org](https://bila.js.org/v6/hop-dong/) for an end-to-end **BilaScript native EVM** demonstration with no Solidity/solc in the code-generation path.
+
+- Real source: [contracts/Bila_CVNSS40_Native.bila](contracts/Bila_CVNSS40_Native.bila)
+- Native bytecode manifest: [contracts/Bila_CVNSS40_Native.build.json](contracts/Bila_CVNSS40_Native.build.json)
+- Reproduction and safety scope: [contracts/README.md](contracts/README.md)
+- Eight persistent uint256 variables, 22 ABI functions (8 setters, 8 getters, 6 incrementers), nine storage slots including owner, checked overflow, CALLER owner guard, nonpayable CALLVALUE guard.
+- Exactly **1058-byte creation**, **1027-byte runtime**, and **521 disassembled opcodes**, generated directly by compiler.mjs from CVNSS4.0 EVM source. All numbers are reproducible locally.
+- Tests: native parser and ABI, MetaMask/gas browser smoke (mock wallet for UI only), and real Foundry Anvil EVM state execution. CI proof is separate from and never claimed to be a signed **public Sepolia** deployment.
+- Deployment signs from the selected user MetaMask Sepolia account 0x879E22703E2E432257334Db400Fbf9115aeD93Cf; no server/background transaction or key import. Only confirmed transactions on chain 11155111 unlock public evidence.
+- BILA reference ERC-20 remains a **different Solidity/OpenZeppelin contract**, not native BilaScript. This native sample is a research registry, not an ERC20.
+
+The CVNSS4.0 EVM vocabulary is **provisional** and the compiler's semantic subset remains limited. Do not claim full CVNSS language coverage, Solidity parity, Etherscan Solidity source verification, or audited safety.
