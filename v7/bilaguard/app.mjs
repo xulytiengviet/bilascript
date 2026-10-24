@@ -184,7 +184,12 @@ async function verifyGas(p,creation){
  return {balanceWei:balance,gasPriceWei:price,gasEstimate:estimate,requiredWei:need.toString()};
 }
 function requireStable(snapshot,revision){
- if(!canDeploy()||epoch!==revision||snapshot!==analysis.build.creationBytecode)
+ // Do not depend on !signing; signing legitimately disables controls.
+ if(!analysis||!fuzz?.passed||!targeted?.passed||!session||
+    epoch!==revision||session.source!==$("source").value||
+    session.sourceHash!==analysis.sourceKeccak256||
+    session.seed!==$("seed").value||session.programs!==$("programs").value||
+    snapshot!==analysis.build.creationBytecode)
   throw Error("Bản nguồn/fuzz/bytecode thay đổi trong khi chờ ví: khóa lại.");
 }
 async function preflight(){
@@ -214,7 +219,7 @@ async function deploy(){
  signing=true;$("deploy-send").disabled=true;$("preflight").disabled=true;
  try{
   await verifyAccount(p);
-  requireStable(creation,revision); // guard is intentionally disabled while signing; override local check
+  requireStable(creation,revision);
  }catch(e){signing=false;refreshGate();throw e;}
  const message="Triển khai HỢP ĐỒNG THỬ NGHIỆM BilaScript v7 lên SEPOLIA?"+
   "\nCompiler: "+analysis.build.compiler+
@@ -227,8 +232,8 @@ async function deploy(){
  let txHash="";
  try{
   const gas=await verifyGas(p,creation);
-  if(revision!==epoch||!analysis||analysis.build.creationBytecode!==creation)
-   throw Error("Nguồn thay đổi trước khi gửi; huỷ giao dịch.");
+  requireStable(creation,revision);
+  if(!gas.requiredWei)throw Error("Gas estimate không hợp lệ.");
   txHash=await p.request({method:"eth_sendTransaction",params:[{
    from:ROOT,data:creation,value:"0x0"
   }]});
