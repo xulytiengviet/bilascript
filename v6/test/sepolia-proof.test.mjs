@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {compileBila,EXAMPLE} from "../compiler.mjs";
-import {PUBLIC_TEST_VECTOR_ADDRESS,SEPOLIA_CHAIN_ID,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "../sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,SELECTED_SEPOLIA_WALLET,SEPOLIA_CHAIN_ID,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "../sepolia-proof.mjs";
 const FRESH_FIXTURE="0x1234567890123456789012345678901234567890";
 
 const compiled=compileBila(EXAMPLE);
@@ -47,4 +47,11 @@ test("proof validator requires chain/from/input/code/owner/receipt",()=>{
    {receipt:{...receipt,contractAddress:null}}
  ];
  for(const x of changes)assert.throws(()=>verifySepoliaDeploy({...evidence,...x}),Error);
+});
+
+test("user-selected Sepolia wallet is accepted; another signer cannot impersonate it",()=>{
+ assert.equal(SELECTED_SEPOLIA_WALLET.toLowerCase(),"0xf4eed1f0589e2cd7cf29cce5f6f45e1ed65594ab");
+ assert.equal(matchWallet(SELECTED_SEPOLIA_WALLET,SELECTED_SEPOLIA_WALLET),SELECTED_SEPOLIA_WALLET);
+ assert.throws(()=>matchWallet(FRESH_FIXTURE,SELECTED_SEPOLIA_WALLET),/khác địa chỉ/);
+ assert.throws(()=>verifySepoliaDeploy({...evidence,expectedWallet:SELECTED_SEPOLIA_WALLET}),/không được ký/);
 });
