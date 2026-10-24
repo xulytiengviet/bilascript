@@ -1,5 +1,5 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
-import {STUDY_WALLET,validWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -8,7 +8,10 @@ const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument"
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
 const SEPOLIA="0xaa36a7";
 const expectedWallet=$("expected-wallet");
-expectedWallet.value=new URLSearchParams(location.search).get("deployer")||STUDY_WALLET;
+expectedWallet.value=new URLSearchParams(location.search).get("deployer")||"";
+if(expectedWallet.value.toLowerCase()===PUBLIC_TEST_VECTOR_ADDRESS.toLowerCase()){
+  setTimeout(()=>writeLog("error","Địa chỉ từ URL là test vector công khai — bị chặn triển khai Sepolia"),0);
+}
 function assertSigner(){return matchWallet(account,expectedWallet.value.trim());}
 function saveJSON(filename,value){
   const blob=new Blob([pretty(value)],{type:"application/json"});
