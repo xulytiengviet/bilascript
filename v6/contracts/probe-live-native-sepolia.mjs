@@ -30,6 +30,12 @@ console.log("NATIVE_SEPOLIA_PUBLIC_AUDIT "+JSON.stringify({
  expectedRuntimeBytes:report.expectedRuntimeBytes,
  deployedRuntimeBytes:report.deployedRuntimeBytes,
  transactionMatchesCreation:report.transactionMatchesCreation,
+ transactionChecks:report.transactionChecks,
+ transactionFrom:report.transactionFrom,
+ transactionTo:report.transactionTo,
+ receiptContractAddress:report.receiptContractAddress,
+ transactionInputBytes:report.transactionInputBytes,
+ expectedCreationBytes:report.expectedCreationBytes,
  error:report.error
 }));
 if(!passed)process.exitCode=1;
