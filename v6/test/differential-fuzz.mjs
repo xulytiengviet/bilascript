@@ -189,6 +189,30 @@ try{
    e.storage=await sameStorage();
    record.steps.push(e);report.counts.operations++;
   }
+  // Explicit overflow oracle: set MAX, then increment must revert on BOTH EVMs.
+  // This ensures every seed checks the boundary, not just probability of random operations.
+  const target=p.functions.find(f=>f.op==="set"&&f.field===p.fields[0]);
+  const incr=p.functions.find(f=>f.op==="inc"&&f.field===p.fields[0]);
+  const setMax=encodeCall(bila.methods[target.name],MAX);
+  const incrMax=encodeCall(bila.methods[incr.name]);
+  const setA=await transact({from:owner,to:A,data:setMax});
+  const setB=await transact({from:owner,to:B,data:setMax});
+  assert.equal(asInt(setA.status),1n);assert.equal(asInt(setB.status),1n);
+  assert.deepEqual(await sameStorage(),await storage(B,p.fields.length+1));
+  const overflowCallA=await call({from:owner,to:A,data:incrMax});
+  const overflowCallB=await call({from:owner,to:B,data:incrMax});
+  assert.equal(overflowCallA.ok,false,"Bila must REVERT on uint256 MAX + 1");
+  assert.equal(overflowCallB.ok,false,"Solc must REVERT on uint256 MAX + 1");
+  report.counts.callReverts+=2;
+  const overA=await transact({from:owner,to:A,data:incrMax});
+  const overB=await transact({from:owner,to:B,data:incrMax});
+  assert.equal(asInt(overA.status),0n);assert.equal(asInt(overB.status),0n);
+  report.counts.txReverts+=2;
+  record.steps.push({step:STEPS,action:"boundary_set_max",field:p.fields[0],call:"success",
+    transaction:"both_success",storage:await sameStorage()});
+  record.steps.push({step:STEPS+1,action:"boundary_overflow_checked",field:p.fields[0],
+    call:"both_revert",transaction:"both_revert",storage:await sameStorage()});
+  report.counts.operations+=2;
   // Constructor must revert if ETH is provided, for both compilers.
   const badA=await transact({from:owner,data:bila.creationBytecode,value:"0x1"});
   const badB=await transact({from:owner,data:"0x"+ref.evm.bytecode.object,value:"0x1"});
