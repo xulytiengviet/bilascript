@@ -71,7 +71,7 @@ async function queryPublicRpc(rpcUrl,recipient,fetcher,timeoutMs){
  */
 export async function readFaucetBalance(address,{
  fetcher=globalThis.fetch,
- endpoints=PUBLIC_READ_RPC,timeoutMs=9000
+ endpoints=PUBLIC_READ_RPC,timeoutMs=9000,walletProvider=null
 }={}){
  const recipient=selectedRecipient(address);
  if(typeof fetcher!=="function")throw Error("Trình duyệt không hỗ trợ fetch để đọc RPC");
@@ -81,5 +81,23 @@ export async function readFaucetBalance(address,{
   try{return await queryPublicRpc(url,recipient,fetcher,timeoutMs);}
   catch(e){errors.push(e?.message||String(e));}
  }
- throw Error("Không đọc được Sepolia RPC công khai; không suy đoán số dư. "+errors.join(" | "));
+ if(walletProvider&&typeof walletProvider.request==="function"){
+  try{
+    const request=(method,params=[])=>walletProvider.request({method,params});
+    const chain=await request("eth_chainId");
+    if(BigInt(chain)!==11155111n)throw Error("Ví chưa ở Ethereum Sepolia");
+    const [balance,nonce,block]=await Promise.all([
+      request("eth_getBalance",[recipient,"latest"]),
+      request("eth_getTransactionCount",[recipient,"latest"]),
+      request("eth_blockNumber")
+    ]);
+    for(const val of [balance,nonce,block])
+      if(typeof val!=="string"||!/^0x[0-9a-fA-F]+$/.test(val))throw Error("Ví trả dữ liệu RPC không hợp lệ");
+    return Object.freeze({network:"Ethereum Sepolia",chainId:11155111,address:recipient,
+      wei:BigInt(balance).toString(),eth:ethAmount(balance),nonce:BigInt(nonce).toString(),
+      blockNumber:BigInt(block).toString(),rpc:"Ví EIP-1193 / Sepolia",
+      source:"WALLET_RPC_LIVE"});
+  }catch(e){errors.push("Ví: "+(e?.message||String(e)));}
+ }
+ throw Error("Không đọc được Sepolia RPC công khai hoặc RPC ví; không suy đoán số dư. "+errors.join(" | "));
 }
