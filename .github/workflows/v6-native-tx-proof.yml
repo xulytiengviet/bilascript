@@ -1,4 +1,4 @@
-name: BilaScript Native Sepolia Creation Proof
+name: BilaScript Native Sepolia Creation Proof (d4fc)
 on:
   push:
     paths:
@@ -21,7 +21,7 @@ jobs:
           node-version: '22'
       - name: Prove sender, exact creation input, receipt, runtime, and owner on Sepolia
         env:
-          NATIVE_SEPOLIA_ADDRESS: '0x305eb44bb1ccd78618a79479270d113742dcb072'
+          NATIVE_SEPOLIA_ADDRESS: '0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6'
           NATIVE_DEPLOY_TX_HASH: '0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d'
         run: node v6/contracts/probe-live-native-sepolia.mjs
       - name: Archive independent receipt/creation-bytecode verification report
