@@ -1,5 +1,5 @@
 import {compileBila,encodeCall,EXAMPLE} from "./compiler.mjs";
-import {PUBLIC_TEST_VECTOR_ADDRESS,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
+import {PUBLIC_TEST_VECTOR_ADDRESS,assertSafeSepoliaWallet,matchWallet,verifySepoliaDeploy} from "./sepolia-proof.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -95,6 +95,7 @@ async function assertSepolia(){
   return actual;
 }
 async function connect(){
+  assertSafeSepoliaWallet(expectedWallet.value.trim());
   provider=getProvider();
   await assertSepolia();
   const accounts=await rpc("eth_requestAccounts");
@@ -133,7 +134,8 @@ function linkContract(address){
 }
 async function deploy(){
   requireReady();await assertSepolia();
-  const creation=compiled.creationBytecode;
+  const build=compiled;
+  const creation=build.creationBytecode;
   const estimated=await rpc("eth_estimateGas",[{from:account,data:creation}]);
   $("gas-estimate").textContent=toBig(estimated).toLocaleString("vi-VN")+" gas · eth_estimateGas";
   if(!window.confirm("Triển khai BYTECODE THẬT trên Sepolia bằng ví "+account+"?\nGas thanh toán bằng Sepolia ETH thử nghiệm, không dùng mainnet."))return;
@@ -152,7 +154,7 @@ async function deploy(){
   ]);
   deployEvidence=verifySepoliaDeploy({
     expectedWallet:assertSigner(),chainId,receipt:r,transaction,
-    code:chainCode,ownerSlot,compiled
+    code:chainCode,ownerSlot,compiled:build
   });
   $("gas-used").textContent=toBig(r.gasUsed).toLocaleString("vi-VN")+" gas · receipt";
   report.textContent=pretty(deployEvidence);
