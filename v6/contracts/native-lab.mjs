@@ -15,7 +15,7 @@ const wallets=new BrowserWallets(window);
 let wallet=null,account="",compiled=null,compiledSource="",lastProof=null;
 let watcher=null,manualProvider=false,busy=false;
 const j=v=>JSON.stringify(v,(_,x)=>typeof x==="bigint"?x.toString():x,2);
-const same=(a,b)=>String(a||"").toLowerCase()===String(b||"");
+const same=(a,b)=>String(a||"").toLowerCase()===String(b||"").toLowerCase();
 function status(message,tone="neutral"){$("state").textContent=message;$("state").dataset.state=tone;}
 function log(message,kind="ok"){
  const item=document.createElement("div");item.className="log "+kind;
