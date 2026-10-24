@@ -25,10 +25,11 @@ function refreshGate(){
  $("deploy-send").disabled=!ok||!quote;
  text("gate-pill",ok?"GATE: SECURITY CHECK PASS":"GATE: LOCKED");
  text("deploy-badge",ok?"ĐỦ ĐIỀU KIỆN":"ĐÃ KHÓA");
- mark("deploy-state",ok?
-  "Đạt phân tích và fuzz nguồn hiện tại. Chỉ được triển khai Sepolia sau khi kiểm tra gas và ký xác nhận MetaMask.":
-  "ĐÃ KHÓA: phải rà soát CVNSS/AST/storage và chạy fuzz cho đúng nguồn, seed và số ca hiện tại.",
-  ok?"pass":"pending");
+ if(!ok)mark("deploy-state",
+  "ĐÃ KHÓA: phải rà soát CVNSS/AST/storage và chạy fuzz cho đúng nguồn, seed và số ca hiện tại.","pending");
+ else if($("deploy-state").dataset.kind!=="fail")
+  mark("deploy-state",
+   "Đạt phân tích/fuzz; cần kiểm tra gas Sepolia và ký xác nhận MetaMask.", "pass");
 }
 function invalidate({clearAudit=true}={}){
  epoch++;quote=null;session=null;fuzz=null;targeted=null;
@@ -200,6 +201,7 @@ async function preflight(){
  const gas=await verifyGas(p,creation);
  requireStable(creation,revision);
  quote={revision,creation,gas};
+ mark("deploy-state","Đã xác nhận ví và gas Sepolia qua RPC thật. Có thể yêu cầu MetaMask ký.", "pass");
  text("funding","Sepolia RPC thật · gas estimate "+BigInt(gas.gasEstimate)+
   " · price "+BigInt(gas.gasPriceWei)+" wei · balance "+BigInt(gas.balanceWei)+" wei.");
  text("receipt","Chưa gửi giao dịch. Cần bạn chủ động nhấn ký, sau đó xác nhận trong MetaMask.");
