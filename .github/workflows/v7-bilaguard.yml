@@ -1,0 +1,47 @@
+name: BilaGuard v0.1 · CVNSS Security-First EVM
+on:
+  push:
+    paths:
+      - 'v7/**'
+      - 'v6/compiler.mjs'
+      - 'v6/vocabulary-evm.mjs'
+      - 'v6/contracts/Bila_CVNSS40_Native.bila'
+      - '.github/workflows/v7-bilaguard.yml'
+  pull_request:
+    paths:
+      - 'v7/**'
+      - '.github/workflows/v7-bilaguard.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bilaguard-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check independent BilaGuard v7 modules
+        run: |
+          node --check v7/bilaguard/guard.mjs
+          node --check v7/bilaguard/fuzz.mjs
+          node --check v7/bilaguard/app.mjs
+      - name: Native compiler, source security, AST/storage/ABI and deterministic fuzz tests
+        run: node --test v7/test/bilaguard.test.mjs
+      - name: Browser click flow — gate remains locked until full suite passes
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts jsdom@26.1.0
+          node --test v7/test/browser.test.mjs
+      - name: Write deterministic evidence JSON
+        run: node v7/bilaguard/ci-report.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bilaguard-v0.1-security-evidence
+          path: v7/test-results/bilaguard-report.json
+          if-no-files-found: warn
+          retention-days: 30
