@@ -4,6 +4,7 @@ import {BrowserWallets,ensureSepolia,describeProviderError} from "./wallet-adapt
 import {selectedRecipient,readFaucetBalance} from "./faucet.mjs";
 import {checkDeploymentReady} from "./deployment-ready.mjs";
 import {loadBilaArtifact,verifyBilaToken} from "./token/token-lab.mjs";
+import {classifyBytecode,probeSepoliaContract} from "./provenance.mjs";
 
 const $=id=>document.getElementById(id);
 const source=$("source"), output=$("output"), opcodes=$("opcodes"), abi=$("abi"), ast=$("ast");
@@ -11,6 +12,7 @@ const logBox=$("events"), report=$("evidence"), status=$("status");
 const addressInput=$("address"), methodSelect=$("method"), inputArg=$("argument");
 let compiled=null,account="",provider=null,lastTx="",lastReceipt=null,deployEvidence=null;
 let bilaBuild=null,bilaTokenProof=null;
+let compilerIdentityEvidence=null;
 const walletCatalog=new BrowserWallets(window);
 let providerSubscription=null;
 function resetDeploymentChecks(){
@@ -250,6 +252,94 @@ function linkContract(address){
   const a=$("explorer-contract");a.href="https://sepolia.etherscan.io/address/"+address;
   a.textContent=address.slice(0,12)+"…"+address.slice(-8);a.hidden=false;
 }
+const defaultInspectionAddress="0x2e12b7e0c0c0d937065679c033cbfdc3b0fd9758";
+function inspectAddress(){
+  const addr=$("inspect-address").value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(addr))throw Error("Địa chỉ hợp đồng Sepolia phải có đúng 40 ký tự hex");
+  return addr;
+}
+function sourceVerifierLink(){
+  const addr=$("inspect-address").value.trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(addr))return;
+  $("inspect-etherscan").href="https://sepolia.etherscan.io/verifyContract?a="+encodeURIComponent(addr);
+}
+async function identityReferenceBuild(){
+  if(!bilaBuild){
+    bilaBuild=await loadBilaArtifact();
+    $("bila-backend").textContent="Solc 0.8.30 · OZ 5.6.1";
+  }
+  return bilaBuild;
+}
+function setIdentityOutcome(result,chainContext=null){
+  compilerIdentityEvidence={
+    schema:"bilascript.compiler-provenance-inspector.v1",
+    examinedAt:new Date().toISOString(),networkContext:chainContext,
+    provenance:result,
+    inferenceLimit:"Bytecode identity does not imply a proof of account ownership or an Etherscan source-verified badge."
+  };
+  $("inspect-evidence").textContent=pretty(compilerIdentityEvidence);
+  $("inspect-identity").textContent=result.classification==="solidity-reference"?
+    "Solidity · Solc 0.8.30":
+    result.classification==="native-bilascript"?"BilaScript native":"Không xác định";
+  $("inspect-match").textContent=result.exactMatch?
+    "TRÙNG TOÀN BỘ "+result.bytecodeKind.toUpperCase():"KHÔNG TRÙNG";
+  $("inspect-note").textContent=result.message+
+    (chainContext?" Đã đọc contract qua RPC tại block "+chainContext.blockNumber+".":"");
+  writeLog(result.exactMatch?"ok":"error",
+    "Compiler Identity: "+result.status+" · "+result.classification+
+    (chainContext?" · "+chainContext.address:""));
+}
+async function inspectCompilerIdentity(){
+  const referenceBuild=await identityReferenceBuild();
+  const mode=$("inspect-type").value;
+  let candidate=$("inspect-bytecode").value.trim(),chainContext=null;
+  if(mode==="chain"){
+    const addr=inspectAddress();
+    let p=null;
+    try{p=walletCatalog.current();}catch{}
+    const result=await probeSepoliaContract({address:addr,provider:p});
+    if(result.status!=="ONCHAIN_CODE_READ")
+      throw Error("Địa chỉ "+addr+" chưa có runtime EVM bytecode trên Sepolia. Đây có thể là ví hoặc một hợp đồng chưa được triển khai.");
+    candidate=result.code;
+    chainContext={chainId:result.chainId,address:result.address,blockNumber:result.blockNumber,
+      rpcSource:result.rpcSource,status:"REAL_RPC_SEPOLIA"};
+    $("inspect-bytecode").value=candidate;
+  }
+  const native=compileBila(source.value);
+  const matched=classifyBytecode({
+    candidate,referenceBuild,nativeBuild:native,nativeSource:source.value
+  });
+  setIdentityOutcome(matched,chainContext);
+}
+async function inspectNativeCompiler(){
+  const native=compileBila(source.value);
+  const referenceBuild=await identityReferenceBuild();
+  const raw=$("inspect-bytecode").value.trim();
+  if(!raw)throw Error("Chưa có bytecode. Hãy bấm Đối chiếu Bytecode + Compiler từ RPC hoặc dán mã.");
+  // Candidate is only native if it reproduces exactly from the current CVNSS source.
+  const compared=classifyBytecode({
+    candidate:raw,referenceBuild,nativeBuild:native,nativeSource:source.value
+  });
+  setIdentityOutcome(compared);
+}
+async function downloadStandardJSON(){
+  const url="./token/BilaBitlang.standard-json.json?v=0.8.30-5.6.1";
+  const response=await fetch(url,{cache:"no-store"});
+  if(!response.ok)throw Error("Chưa có Standard JSON tự chứa từ bản build đã kiểm chứng: HTTP "+response.status+
+   ". Xem workflow BILA token để lấy artifact xác minh.");
+  const input=await response.json();
+  if(input.language!=="Solidity"||
+     !input.sources?.["v6/token/BilaBitlang.sol"]||
+     input.settings?.optimizer?.runs!==200||
+     input.settings?.evmVersion!=="cancun"||
+     input.settings?.metadata?.bytecodeHash!=="none"||
+     Object.keys(input.sources).length<2)
+    throw Error("Standard JSON source package không đầy đủ hoặc sai cấu hình. Không thể gửi Etherscan.");
+  saveJSON("BilaBitlang-Etherscan-Solc-0.8.30-standard-input.json",input);
+  writeLog("ok","Đã tải Solidity Standard JSON gồm "+Object.keys(input.sources).length+
+    " nguồn để xác minh Etherscan/Sourcify.");
+}
+
 async function checkNativeDeployment(){
   requireReady();
   await assertSepolia();
@@ -479,6 +569,22 @@ $("bila-load").addEventListener("click",guard(loadTokenBuild));
 $("bila-check").addEventListener("click",guard(checkTokenDeployment));
 $("bila-deploy").addEventListener("click",guard(deployBilaToken));
 $("bila-verify").addEventListener("click",guard(verifyBilaFromInput));
+$("inspect-run").addEventListener("click",guard(inspectCompilerIdentity));
+$("inspect-native").addEventListener("click",guard(inspectNativeCompiler));
+$("inspect-address").addEventListener("input",sourceVerifierLink);
+$("inspect-proof").addEventListener("click",()=>{
+ if(compilerIdentityEvidence)saveJSON("BilaScript-Compiler-Identity-proof.json",compilerIdentityEvidence);
+ else writeLog("error","Chưa có kiểm chứng compiler và bytecode để xuất.");
+});
+$("inspect-source").addEventListener("click",()=>{
+ window.open("./token/BilaBitlang.sol","_blank","noopener,noreferrer");
+});
+$("inspect-build").addEventListener("click",guard(async()=>{
+ const build=await identityReferenceBuild();
+ saveJSON("BilaBitlang.reference-build.json",build);
+}));
+$("inspect-standard").addEventListener("click",guard(downloadStandardJSON));
+sourceVerifierLink();
 $("bila-proof").addEventListener("click",()=>{
   if(bilaTokenProof)saveJSON("bila-bitlang-sepolia-proof-"+bilaTokenProof.transactionHash+".json",bilaTokenProof);
 });
