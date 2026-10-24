@@ -87,6 +87,9 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
      <div class="field"><label id="argument-label" for="argument">Giá trị đầu vào uint256</label><input id="argument" class="input code" value="42" inputmode="numeric" placeholder="uint256"></div>
      <div class="controls"><button id="run" class="primary">Gọi / gửi giao dịch thật</button><button id="refresh">Đọc trạng thái on-chain</button><button id="verify">Đọc lại receipt</button></div>
      <div class="field"><label for="return-data">Dữ liệu trả về từ eth_call</label><pre id="return-data">Chưa gọi hàm đọc</pre></div>
+     <div class="field"><label for="public-tx">Kiểm chứng triển khai công khai theo transaction hash (có thể dán lại sau khi tải trang)</label>
+     <input id="public-tx" class="input code" autocomplete="off" spellcheck="false" placeholder="0x... (64 hex)">
+     </div><div class="controls"><button id="verify-public">Đối chiếu transaction, bytecode và chủ sở hữu trên Sepolia</button></div>
      <div class="controls"><button id="download-proof" class="safe" disabled>Tải chứng cứ triển khai Sepolia JSON</button></div>
      <p class="sub">Chỉ mở khóa tải chứng cứ khi RPC xác nhận đủ: chain 11155111, transaction.from đúng ví, receipt thành công, creation/runtime bytecode khớp và owner slot 0 đúng người triển khai.</p>
      <div class="fields"><div class="metric"><strong id="gas-estimate" style="font-size:14px">—</strong><small>Ước lượng trước ký, từ RPC</small></div><div class="metric"><strong id="gas-used" style="font-size:14px">—</strong><small>Gas thực tế sau xác nhận</small></div></div>
