@@ -74,10 +74,10 @@ pre{background:var(--deep);border:1px solid var(--line);padding:13px;border-radi
     <div class="inner">
      <p>Chỉ dùng ví EIP-1193 có mạng Sepolia. Hệ thống không nhận seed phrase hoặc private key, không tự ký. Cần có Sepolia ETH từ faucet để gửi giao dịch.</p>
      <div class="field"><label for="expected-wallet">Ví dùng để ký triển khai và tạo bằng chứng công khai</label>
-     <input id="expected-wallet" class="input code" value="0x9858EfFD232B4033E47d90003D41EC34EcaEda94" spellcheck="false" autocomplete="off">
-     <p class="sub">Địa chỉ bạn cung cấp. Trình duyệt phải kết nối đúng ví này và đúng mạng Sepolia. Không nhập seed phrase hoặc private key.</p></div>
+     <input id="expected-wallet" class="input code" placeholder="0x... (ví thử nghiệm riêng có khóa bí mật, không phải ví mẫu công khai)" spellcheck="false" autocomplete="off">
+     <p class="sub">Hãy nhập địa chỉ ví thử nghiệm riêng và kết nối đúng ví đó trên Sepolia. Không nhập seed phrase hoặc private key. Địa chỉ mẫu công khai BIP-39 đã bị chặn triển khai.</p></div>
      <div class="controls"><button id="connect" class="primary">Kết nối ví Sepolia</button><button id="switch">Chuyển ví sang Sepolia</button></div>
-     <p class="sub"><a href="https://sepolia.etherscan.io/address/0x9858EfFD232B4033E47d90003D41EC34EcaEda94" target="_blank" rel="noopener">Xem địa chỉ ví trên Sepolia Etherscan ↗</a> · <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">Faucet Sepolia ETH ↗</a></p>
+     <p class="sub"><strong style="color:var(--red)">Cảnh báo:</strong> 0x9858EfFD232B4033E47d90003D41EC34EcaEda94 là địa chỉ của test vector BIP-39 công khai, không thể dùng làm bằng chứng quyền sở hữu riêng và không an toàn để triển khai. <a href="https://www.alchemy.com/faucets/ethereum-sepolia" target="_blank" rel="noopener">Faucet Sepolia cho ví thử nghiệm mới ↗</a></p>
      <div class="field"><label for="address">Địa chỉ hợp đồng Sepolia (tự nhập hoặc sau deploy)</label><input id="address" class="input code" placeholder="0x... (40 ký tự hex)" autocomplete="off" spellcheck="false"></div>
      <div class="controls"><button id="estimate">Ước tính gas từ RPC</button><button id="deploy" class="safe">Triển khai creation bytecode lên Sepolia</button></div>
      <div class="field"><label for="method">Chọn hàm ABI để gọi</label><select id="method"></select></div>
