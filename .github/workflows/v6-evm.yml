@@ -31,16 +31,26 @@ jobs:
           node --check v6/sepolia-proof.mjs
           node --check v6/wallet-adapter.mjs
           node --check v6/faucet.mjs
+          node --check v6/deployment-ready.mjs
+          node --check v6/token/token-lab.mjs
       - name: EIP-6963/EIP-1193 wallet adapter unit tests
         run: node --test v6/test/wallet-adapter.test.mjs
       - name: Sepolia faucet registry and fail-closed RPC tests
         run: node --test v6/test/faucet.test.mjs
+      - name: Real ETH and gas readiness regression
+        run: node --test v6/test/deployment-ready.test.mjs
+      - name: ERC20 reference artifact and Sepolia proof validator tests
+        run: node --test v6/token/token-lab.test.mjs
       - name: Verify Sepolia evidence security checks (fixtures, not public deployment)
         run: node --test v6/test/sepolia-proof.test.mjs
       - name: Install pinned solc-js differential oracle (not used for BilaScript codegen)
-        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30 jsdom@26.1.0
+        run: npm install --no-save --no-package-lock --ignore-scripts solc@0.8.30 jsdom@26.1.0 @openzeppelin/contracts@5.6.1
       - name: Compare selectors, ABI and storage layout against Argot solc-js
         run: node --test v6/test/solc-oracle.test.mjs
+      - name: Verify committed BILA token build against deterministic Solc/OpenZeppelin compiler
+        env:
+          VERIFY_COMMITTED_TOKEN_BUILD: '1'
+        run: node v6/token/build-token.mjs
       - name: Browser smoke — real app DOM and injected-wallet click flow
         run: node --test v6/test/browser-smoke.mjs
       - name: Install real Foundry EVM toolchain
