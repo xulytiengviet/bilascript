@@ -82,6 +82,9 @@ if(process.env.WRITE_TOKEN_BUILD==="1"){
  fs.writeFileSync(BUILD,JSON.stringify(artifact,null,2)+"\n");
  fs.writeFileSync(STANDARD_INPUT,JSON.stringify(completeInput,null,2)+"\n");
 }
+if(process.env.EMIT_STANDARD_JSON==="1"){
+ console.log("BILA_STANDARD_JSON_SOURCE="+JSON.stringify(completeInput));
+}
 if(process.env.EMIT_TOKEN_BUILD_JSON==="1"){
  // Tooling can fetch the GitHub Actions text logs and commit this exact verified build.
  console.log("BILA_TOKEN_BUILD_JSON_BEGIN");
