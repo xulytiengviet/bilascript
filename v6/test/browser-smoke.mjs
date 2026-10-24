@@ -35,6 +35,9 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
     if(method==="eth_accounts")return state.accounts;
     if(method==="eth_chainId")return state.chain;
     if(method==="wallet_switchEthereumChain"){state.chain=params[0].chainId;return null;}
+    if(method==="eth_getBalance")return "0x16345785d8a0000";
+    if(method==="eth_gasPrice")return "0x3b9aca00";
+    if(method==="eth_estimateGas")return "0x30000";
     if(method==="wallet_addEthereumChain"){throw Error("Not needed");}
     throw Error("Unexpected stub RPC "+method);
   }
@@ -52,6 +55,10 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
   const recipients=[...window.document.querySelectorAll('#faucet a[href^="https://"]')];
   assert.ok(recipients.length>=4);
   globalThis.fetch=async(url,request)=>{
+    if(String(url).includes("BilaBitlang.build.json")){
+      return {ok:true,json:async()=>JSON.parse(readFileSync(
+        fileURLToPath(new URL("../token/BilaBitlang.build.json",import.meta.url)),"utf8"))};
+    }
     const {method}=JSON.parse(request.body);
     const data={
       eth_chainId:"0xaa36a7",eth_getBalance:"0x16345785d8a0000",
@@ -74,6 +81,14 @@ test("v6 browser: discover wallet, connect first, switch Sepolia, reject account
     "permission request must happen BEFORE chain check");
   assert.ok(state.calls.includes("wallet_switchEthereumChain"));
   assert.equal(state.chain,"0xaa36a7");
+  window.document.getElementById("deploy-check").click();
+  await waitFor(()=>window.document.getElementById("deploy").disabled===false);
+  assert.match(window.document.getElementById("deploy-readiness").textContent,/Đã đủ Sepolia ETH/);
+  window.document.getElementById("bila-load").click();
+  await waitFor(()=>window.document.getElementById("bila-backend").textContent.includes("Solc"));
+  window.document.getElementById("bila-check").click();
+  await waitFor(()=>window.document.getElementById("bila-deploy").disabled===false);
+  assert.match(window.document.getElementById("bila-stage").textContent,/Đã đủ Sepolia ETH/);
   const select=window.document.getElementById("expected-wallet");
   select.value="0x1234567890123456789012345678901234567890";
   select.dispatchEvent(new window.Event("input"));
