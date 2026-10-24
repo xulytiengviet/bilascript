@@ -88,6 +88,24 @@ function newProofState(){
  lastProof=null;$("download-proof").disabled=true;
  $("proof").textContent="CHƯA XÁC MINH · Cần receipt Sepolia và bytecode khớp nguồn native hiện tại.";
 }
+const DEPLOYMENT_PRESETS=Object.freeze({
+ latest:Object.freeze({address:"0xd4fc8f289c37a343b11617abee8fa7a2ad6b59a6",
+  tx:"0x0070f826e0e3a56e54360176e233332b0229c75662dcd5eb6852162e51b72a6d"}),
+ earlier:Object.freeze({address:"0x305eb44bb1ccd78618a79479270d113742dcb072",tx:""})
+});
+function useDeploymentPreset(){
+ const entry=DEPLOYMENT_PRESETS[$("deployment-preset").value];
+ if(!entry)return;
+ $("contract-address").value=entry.address;
+ $("tx-hash").value=entry.tx;
+ newProofState();
+ $("tx-link").hidden=true;$("contract-link").hidden=true;
+ $("verify-build-state").textContent=entry.tx?
+  "Đã ghép đúng hợp đồng 0xd4fc8f28… và transaction hash 0x0070f826…; bấm XÁC THỰC HỢP ĐỒNG để đối chiếu cả creation/receipt/runtime/owner.":
+  "Đã chọn hợp đồng 0x305eb44b…; không áp dụng nhầm hash của bản 2. Có thể xác minh runtime/owner độc lập.";
+ log("Chọn cặp triển khai "+entry.address+" · tx "+(entry.tx||"chưa biết"));
+}
+
 function compileSource(){
  const source=$("native-source").value;
  let result;
@@ -471,6 +489,11 @@ function startup(){
  $("load-canonical-build").addEventListener("click",guarded(loadCanonicalBuild));
  $("local-build").addEventListener("change",guarded(loadLocalBuild));
  $("verify-address").addEventListener("click",guarded(verifyAddressOnly));
+ $("deployment-preset").addEventListener("change",useDeploymentPreset);
+ $("contract-address").addEventListener("input",()=>{
+  $("deployment-preset").value="custom";newProofState();
+ });
+ $("tx-hash").addEventListener("input",()=>{newProofState();});
  $("verify-native").addEventListener("click",guarded(verifyDeploy));
  $("download-proof").addEventListener("click",guarded(()=>{
   if(!lastProof)throw Error("Chưa có bằng chứng Sepolia đã xác minh.");
