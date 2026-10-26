@@ -1,0 +1,227 @@
+{
+  "schema": "bilascript.cvnss40.audit-safe-display.v1",
+  "revision": "CVNSS4.0 Converter v5.0.0-audit-safe",
+  "direction": "CQN -> CVSS",
+  "source": "v6/contracts/Bila_CVNSS40_Native.cvss40.bila",
+  "baseline": "v6/contracts/Bila_CVNSS40_Native.bila",
+  "warning": "Hồ sơ ánh xạ từ v5 converter; không phải build ABI/bytecode đã xác minh hoặc chứng nhận Sepolia.",
+  "counts": {
+    "state": 8,
+    "functions": 22,
+    "ownerOnly": 14,
+    "setters": 8,
+    "getters": 8,
+    "increments": 6,
+    "mappings": 39
+  },
+  "provenance": "Định danh được đối chiếu với CVNSS4.0 Converter v5.0.0-audit-safe đính kèm trong yêu cầu; không thay thế trình biên dịch.",
+  "mappings": {
+    "state": [
+      {
+        "legacy": "phien_ban",
+        "vi": "phiên bản",
+        "cvss": "fily_banz"
+      },
+      {
+        "legacy": "ma_bo_du_lieu",
+        "vi": "mã bộ dữ liệu",
+        "cvss": "mas_bof_zuw_liwf"
+      },
+      {
+        "legacy": "so_mau",
+        "vi": "số mẫu",
+        "cvss": "sob_maug"
+      },
+      {
+        "legacy": "so_kiem_dinh",
+        "vi": "số kiểm định",
+        "cvss": "sob_civq_dihr"
+      },
+      {
+        "legacy": "so_xac_nhan",
+        "vi": "số xác nhận",
+        "cvss": "sob_xac_nhanf"
+      },
+      {
+        "legacy": "diem_chat_luong",
+        "vi": "điểm chất lượng",
+        "cvss": "divq_chatb_luzh"
+      },
+      {
+        "legacy": "phien_thu",
+        "vi": "phiên thử",
+        "cvss": "fily_thuv"
+      },
+      {
+        "legacy": "ma_bang_chung",
+        "vi": "mã bằng chứng",
+        "cvss": "mas_bagk_chugx"
+      }
+    ],
+    "setters": [
+      {
+        "legacy": "dat_phien_ban",
+        "vi": "đặt phiên bản",
+        "cvss": "dath_fily_banz"
+      },
+      {
+        "legacy": "dat_bo_du_lieu",
+        "vi": "đặt bộ dữ liệu",
+        "cvss": "dath_bof_zuw_liwf"
+      },
+      {
+        "legacy": "dat_so_mau",
+        "vi": "đặt số mẫu",
+        "cvss": "dath_sob_maug"
+      },
+      {
+        "legacy": "dat_kiem_dinh",
+        "vi": "đặt kiểm định",
+        "cvss": "dath_civq_dihr"
+      },
+      {
+        "legacy": "dat_xac_nhan",
+        "vi": "đặt xác nhận",
+        "cvss": "dath_xac_nhanf"
+      },
+      {
+        "legacy": "dat_chat_luong",
+        "vi": "đặt chất lượng",
+        "cvss": "dath_chatb_luzh"
+      },
+      {
+        "legacy": "dat_phien_thu",
+        "vi": "đặt phiên thử",
+        "cvss": "dath_fily_thuv"
+      },
+      {
+        "legacy": "dat_bang_chung",
+        "vi": "đặt bằng chứng",
+        "cvss": "dath_bagk_chugx"
+      }
+    ],
+    "getters": [
+      {
+        "legacy": "doc_phien_ban",
+        "vi": "đọc phiên bản",
+        "cvss": "docr_fily_banz"
+      },
+      {
+        "legacy": "doc_bo_du_lieu",
+        "vi": "đọc bộ dữ liệu",
+        "cvss": "docr_bof_zuw_liwf"
+      },
+      {
+        "legacy": "doc_so_mau",
+        "vi": "đọc số mẫu",
+        "cvss": "docr_sob_maug"
+      },
+      {
+        "legacy": "doc_kiem_dinh",
+        "vi": "đọc kiểm định",
+        "cvss": "docr_civq_dihr"
+      },
+      {
+        "legacy": "doc_xac_nhan",
+        "vi": "đọc xác nhận",
+        "cvss": "docr_xac_nhanf"
+      },
+      {
+        "legacy": "doc_chat_luong",
+        "vi": "đọc chất lượng",
+        "cvss": "docr_chatb_luzh"
+      },
+      {
+        "legacy": "doc_phien_thu",
+        "vi": "đọc phiên thử",
+        "cvss": "docr_fily_thuv"
+      },
+      {
+        "legacy": "doc_bang_chung",
+        "vi": "đọc bằng chứng",
+        "cvss": "docr_bagk_chugx"
+      }
+    ],
+    "increments": [
+      {
+        "legacy": "tang_phien_ban",
+        "vi": "tăng phiên bản",
+        "cvss": "tago_fily_banz"
+      },
+      {
+        "legacy": "tang_so_mau",
+        "vi": "tăng số mẫu",
+        "cvss": "tago_sob_maug"
+      },
+      {
+        "legacy": "tang_kiem_dinh",
+        "vi": "tăng kiểm định",
+        "cvss": "tago_civq_dihr"
+      },
+      {
+        "legacy": "tang_xac_nhan",
+        "vi": "tăng xác nhận",
+        "cvss": "tago_xac_nhanf"
+      },
+      {
+        "legacy": "tang_phien_thu",
+        "vi": "tăng phiên thử",
+        "cvss": "tago_fily_thuv"
+      },
+      {
+        "legacy": "tang_bang_chung",
+        "vi": "tăng bằng chứng",
+        "cvss": "tago_bagk_chugx"
+      }
+    ],
+    "parameters": [
+      {
+        "legacy": "gia_tri",
+        "vi": "giá trị",
+        "cvss": "jaj_trir"
+      }
+    ],
+    "keywords": [
+      {
+        "legacy": "hoph_dogd",
+        "vi": "hợp đồng",
+        "cvss": "hoph_dogd"
+      },
+      {
+        "legacy": "sob_wyly_kogy_zaub_256",
+        "vi": "số nguyên không dấu 256",
+        "cvss": "sob_wyly_kogy_zaub_256"
+      },
+      {
+        "legacy": "haml_sob",
+        "vi": "hàm số",
+        "cvss": "haml_sob"
+      },
+      {
+        "legacy": "cogy_kai",
+        "vi": "công khai",
+        "cvss": "cogy_kai"
+      },
+      {
+        "legacy": "chi_chu",
+        "vi": "chỉ chủ",
+        "cvss": "chiz_chuz"
+      },
+      {
+        "legacy": "chiz_docr",
+        "vi": "chỉ đọc",
+        "cvss": "chiz_docr"
+      },
+      {
+        "legacy": "traz_ved",
+        "vi": "trả về",
+        "cvss": "traz_ved"
+      },
+      {
+        "legacy": "trov_ved",
+        "vi": "trở về",
+        "cvss": "trov_ved"
+      }
+    ]
+  }
+}

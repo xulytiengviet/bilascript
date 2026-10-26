@@ -139,3 +139,8 @@ Use [HỢP ĐỒNG on bila.js.org](https://bila.js.org/v6/hop-dong/) for an end-
 - BILA reference ERC-20 remains a **different Solidity/OpenZeppelin contract**, not native BilaScript. This native sample is a research registry, not an ERC20.
 
 The CVNSS4.0 EVM vocabulary is **provisional** and the compiler's semantic subset remains limited. Do not claim full CVNSS language coverage, Solidity parity, Etherscan Solidity source verification, or audited safety.
+
+
+## CVNSS4.0 v5.0.0-audit-safe — hợp đồng chuẩn hóa
+
+Truy cập [v6/hop-dong](./hop-dong/) để xem mã CVNSS4.0 được chuyển CQN -> CVSS, đủ 8 biến, 22 hàm, tham số và từ khóa (39 hàng ánh xạ). Mã chuẩn lưu tại [Bila_CVNSS40_Native.cvss40.bila](./contracts/Bila_CVNSS40_Native.cvss40.bila); bản [.bila lịch sử](./contracts/Bila_CVNSS40_Native.bila) vẫn còn nguyên. Từ khóa `chiz_chuz` được compiler chấp nhận như owner_only; `chi_chu` tiếp tục là bí danh cũ. **ABI selectors và runtime thay đổi khi đổi tên hàm**: phải biên dịch, kiểm thử và triển khai lại trước khi coi đó là bản on-chain mới. Các tệp `*.build.json` và chứng cứ Sepolia cũ không bị thay đổi.

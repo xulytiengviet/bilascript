@@ -1,5 +1,5 @@
 /**
- * BilaScript v6.0.1 CVNSS4.0 EVM vocabulary proposal.
+ * BilaScript v6.0.1 CVNSS4.0 EVM vocabulary profile (audit-safe aliases).
  * Semantic IDs are compiler-internal. Only primary CVNSS words should be used
  * in new sources. Older aliases remain readable, never guessed or auto-decoded.
  * PROVISIONAL: not a new frozen CVNSS4.0 standard.
@@ -16,7 +16,7 @@ export const EVM_VOCABULARY=Object.freeze({
     Object.freeze({id:"VIS_PUBLIC",semantic:"public",primary:"cogy_kai",legacy:["public"]}),
     Object.freeze({id:"EFFECT_VIEW",semantic:"view",primary:"chiz_docr",legacy:["view"]}),
     Object.freeze({id:"RETURNS_UINT256",semantic:"returns",primary:"traz_ved",legacy:["returns"]}),
-    Object.freeze({id:"ACCESS_OWNER",semantic:"owner_only",primary:"chi_chu",legacy:[]})
+    Object.freeze({id:"ACCESS_OWNER",semantic:"owner_only",primary:"chiz_chuz",legacy:["chi_chu"]})
   ])
 });
 export function makeVocabularyIndex(){

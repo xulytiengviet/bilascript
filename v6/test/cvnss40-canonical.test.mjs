@@ -1,0 +1,34 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {compileBila,keccak256} from "../compiler.mjs";
+import {EVM_KEYWORDS} from "../vocabulary-evm.mjs";
+const dir=new URL("../contracts/",import.meta.url);
+const source=readFileSync(new URL("Bila_CVNSS40_Native.cvss40.bila",dir),"utf8");
+const old=readFileSync(new URL("Bila_CVNSS40_Native.bila",dir),"utf8");
+const manifest=JSON.parse(readFileSync(new URL("cvnss40-display-manifest.json",dir),"utf8"));
+test("CVNSS4.0 converter provenance, 39 mappings, exact source token counts",()=>{
+ assert.ok(source.includes(" * Chuẩn hóa từ khóa và định danh theo:\n * CVNSS4.0 Converter v5.0.0-audit-safe\n * Chế độ: CQN -> CVSS"));
+ assert.equal(Object.values(manifest.mappings).flat().length,39);
+ assert.equal((source.match(/\bhaml_sob\s+\w+\s*\(/g)||[]).length,22);
+ assert.equal((source.match(/\bchiz_chuz\s*\{/g)||[]).length,14);
+ assert.equal(EVM_KEYWORDS.chiz_chuz,"owner_only");
+ assert.equal(EVM_KEYWORDS.chi_chu,"owner_only");
+});
+test("CVNSS4.0 audit-safe source compiles natively with guarded writes and new selectors",()=>{
+ const newer=compileBila(source),history=compileBila(old);
+ assert.equal(newer.ast.state.length,8);
+ assert.equal(newer.ast.functions.length,22);
+ assert.equal(newer.ast.functions.filter(x=>x.ownerOnly).length,14);
+ assert.equal(newer.ast.functions.filter(x=>x.view).length,8);
+ assert.equal(newer.storageLayout.length,9);
+ assert.deepEqual(newer.storageLayout.map(x=>x.slot),Array.from({length:9},(_,i)=>i));
+ assert.equal(newer.ast.functions[0].param,"jaj_trir");
+ assert.equal(newer.ast.state[0],"fily_banz");
+ assert.notEqual(newer.methods.dath_fily_banz.selector,history.methods.dat_phien_ban.selector);
+ assert.equal(newer.methods.dath_fily_banz.selector,keccak256("dath_fily_banz(uint256)").slice(0,10));
+ assert.notEqual(newer.runtimeBytecode,history.runtimeBytecode);
+ assert.equal(newer.methods.tago_fily_banz.ownerOnly,true);
+ assert.ok(newer.opcodes.some(x=>x.name==="CALLER"));
+ assert.ok(newer.opcodes.some(x=>x.name==="CALLVALUE"));
+});

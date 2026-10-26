@@ -1,6 +1,6 @@
 import {EVM_KEYWORDS,EVM_RESERVED,EVM_VOCABULARY} from "./vocabulary-evm.mjs";
 /* BilaScript v6.0.1 experimental EVM compiler. No Solidity, Solang, fake RPC or simulated receipts.
- * Checked uint256 subset: constructor owner, enforced chi_chu writes and nonpayable. Unsupported syntax is a hard error.
+ * Checked uint256 subset: constructor owner, enforced chiz_chuz / chi_chu writes and nonpayable. Unsupported syntax is a hard error.
  * DO NOT use for assets or production contracts without an independent audit.
  */
 const MASK = (1n << 64n) - 1n;
@@ -96,7 +96,7 @@ function parse(source) {
       if(peek()!==")"){uintType();param=ident();}
       expect(")");expect("public");
       let ownerOnly=false,view=false,returns=false;
-      // CVNSS chi_chu is a compiler-enforced capability, not a Solidity modifier alias.
+      // CVNSS chiz_chuz (legacy: chi_chu) is a compiler-enforced capability, not a Solidity modifier alias.
       if(peek()==="owner_only"){next();ownerOnly=true;}
       if(peek()==="view"){next();view=true;}
       if(peek()==="returns"){next();expect("(");uintType();expect(")");returns=true;}
@@ -153,7 +153,7 @@ function analyze(ast) {
     }else{
       const {target,expr}=f.statement;
       if(!ast.state.includes(target))fail("Chỉ được ghi biến state uint256 đã khai báo");
-      if(f.view||f.returns||!f.ownerOnly)fail("Hàm ghi yêu cầu public chi_chu, không được view/returns");
+      if(f.view||f.returns||!f.ownerOnly)fail("Hàm ghi yêu cầu public chiz_chuz (hoặc chi_chu cũ), không được view/returns");
       if(f.param && expr.kind==="identifier" && expr.name===f.param)f.op="set";
       else if(!f.param&&expr.kind==="add"&&expr.left.kind==="identifier"&&expr.left.name===target&&expr.right.value==="1")f.op="inc";
       else fail("Đã kiểm tra kiểu, nhưng codegen 6.0.1 chỉ hỗ trợ gán tham số hoặc tăng 1");
@@ -282,8 +282,8 @@ export function encodeCall(method,arg) {
 export const EXAMPLE = [
   "hoph_dogd Bof_Demb {",
   "  sob_wyly_kogy_zaub_256 demb;",
-  "  haml_sob ganj(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chi_chu { demb = jaj_trir; }",
-  "  haml_sob tago() cogy_kai chi_chu { demb = demb + 1; }",
+  "  haml_sob ganj(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz { demb = jaj_trir; }",
+  "  haml_sob tago() cogy_kai chiz_chuz { demb = demb + 1; }",
   "  haml_sob docr() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) { trov_ved demb; }",
   "}"
 ].join("\n");

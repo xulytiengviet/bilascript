@@ -16,7 +16,8 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}.field{w
 pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;font:12px/1.54 Consolas,monospace}table{width:100%;border-collapse:collapse;font:12px Consolas,monospace}td,th{padding:8px;border-bottom:1px solid #2d495f;text-align:left}th{position:sticky;top:0;background:#183951;color:var(--gold)}.tablebox{max-height:365px;overflow:auto;border:1px solid var(--line);border-radius:8px}.log{border-bottom:1px solid #335168;padding:7px 0;overflow-wrap:anywhere;font:12px/1.5 Consolas,monospace}.log.error{color:var(--red)}.log.ok{color:var(--mint)}
 .stage{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.stage div{text-align:center;padding:12px 7px;border:1px solid #37596e;border-radius:8px;color:var(--muted)}.stage strong{display:block;font:700 12px Consolas,monospace;color:var(--text)}.instructions{padding-left:20px;color:var(--muted)}.instructions li{margin:7px 0}
 @media(max-width:1050px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:630px){main{padding:18px 11px 60px}.stats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.stage{grid-template-columns:repeat(2,1fr)}.header{padding:12px}.header nav{margin-left:0}button{width:100%}.buttons a{width:100%}}
-</style></head>
+</style><link rel="stylesheet" href="./cvnss40-ui.css?v=5.0.0-audit-safe" data-cvnss40-v5="stylesheet">
+</head>
 <body>
 <header class="header">
 <a href="../" class="brand">BILA<b>SCRIPT</b> / V6</a><span class="tag">HỢP ĐỒNG · NATIVE EVM</span>
@@ -28,7 +29,7 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 <h1>HỢP ĐỒNG <span>CVNSS4.0 Native EVM</span></h1>
 <p>Mã nguồn viết bằng BilaScript/CVNSS4.0, biên dịch trực tiếp ra creation/runtime EVM bằng compiler native — <strong>không transpile sang Solidity, không dùng Solc để sinh bytecode</strong>. Kiểm tra ABI, storage, opcode, gas thực và triển khai Sepolia bằng MetaMask.</p></div>
 <span id="state" data-state="neutral" class="tag" role="status" aria-live="polite">Chưa nạp nguồn</span></section>
-<div class="notice"><strong>Giới hạn:</strong> Compiler native hiện hỗ trợ biến uint256, hàm đọc/ghi/tăng 1, quyền chi_chu, kiểm tra overflow và nonpayable; <strong>chưa hỗ trợ ERC-20, mapping, event, kiểu động hoặc Solidity Verified Source trên Etherscan.</strong> Profile từ khóa EVM CVNSS4.0 còn ở trạng thái đề xuất. Sepolia là testnet thật; người sở hữu MetaMask phải ký triển khai.</div>
+<div class="notice"><strong>Giới hạn:</strong> Compiler native hiện hỗ trợ biến uint256, hàm đọc/ghi/tăng 1, quyền chiz_chuz (chi_chu tương thích), kiểm tra overflow và nonpayable; <strong>chưa hỗ trợ ERC-20, mapping, event, kiểu động hoặc Solidity Verified Source trên Etherscan.</strong> Bản chuẩn hóa theo Converter v5.0.0-audit-safe có tệp nguồn và bảng định danh riêng; bằng chứng Sepolia phía dưới thuộc ABI lịch sử. Sepolia là testnet thật; người sở hữu MetaMask phải ký triển khai.</div>
 <div class="stage"><div><strong>01 · NGUỒN .BILA</strong>22 hàm CVNSS4.0</div><div><strong>02 · NATIVE EVM</strong>AST · ABI · Opcodes</div><div><strong>03 · META MASK</strong>Gas / ký Sepolia</div><div><strong>04 · CHỨNG CỨ</strong>Receipt · Code · Storage</div></div>
 <div class="stats"><div class="stat"><strong id="metric-source">—</strong><small>Dòng mã CVNSS4.0</small></div><div class="stat"><strong id="metric-func">—</strong><small>Hàm ABI native</small></div><div class="stat"><strong id="metric-storage">—</strong><small>Storage slots (gồm owner)</small></div><div class="stat"><strong id="metric-bytes">—</strong><small>Creation bytes</small></div><div class="stat"><strong id="metric-ops">—</strong><small>EVM opcodes</small></div></div>
 <div class="layout"><div>
@@ -94,4 +95,5 @@ pre{background:#051520;border:1px solid #2a475c;padding:12px;border-radius:8px;o
 </div></div>
 <footer class="sub" style="padding-top:22px;border-top:1px solid var(--line);margin-top:20px">BilaScript Native EVM · CVNSS4.0 EVM profile thử nghiệm · Anvil và Sepolia phân biệt rõ · Không dùng mainnet / tài sản thật.</footer>
 </main><script type="module" src="../contracts/native-lab.mjs?v=6.0.8-two-contracts"></script>
+<script defer src="./cvnss40-ui.js?v=5.0.0-audit-safe" data-cvnss40-v5="script"></script>
 </body></html>

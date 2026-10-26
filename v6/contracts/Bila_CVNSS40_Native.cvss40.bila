@@ -1,0 +1,96 @@
+/*
+ * BilaScript Native EVM · CVNSS4.0 · Hợp đồng nghiên cứu
+ * Chuẩn hóa từ khóa và định danh theo:
+ * CVNSS4.0 Converter v5.0.0-audit-safe
+ * Chế độ: CQN -> CVSS
+ *
+ * Tất cả định danh biến, hàm và tham số được ánh xạ từ CQN sang CVSS.
+ * chiz_chuz = chỉ chủ (bí danh tương thích: chi_chu).
+ * Hợp đồng này là NGUỒN MỚI, ABI selector sẽ khác bản Sepolia lịch sử.
+ * Không sử dụng bytecode hay bằng chứng triển khai của hợp đồng cũ
+ * để chứng nhận mã nguồn này. Chỉ phục vụ mục đích nghiên cứu.
+ * Giá trị do chủ hợp đồng ghi không phải chứng cứ độc lập về dữ liệu.
+ */
+hoph_dogd Bila_CVNSS40_Native {
+    // Version label and reference for compiler/research datasets
+    sob_wyly_kogy_zaub_256 fily_banz;
+    sob_wyly_kogy_zaub_256 mas_bof_zuw_liwf;
+    sob_wyly_kogy_zaub_256 sob_maug;
+    sob_wyly_kogy_zaub_256 sob_civq_dihr;
+    sob_wyly_kogy_zaub_256 sob_xac_nhanf;
+    sob_wyly_kogy_zaub_256 divq_chatb_luzh;
+    sob_wyly_kogy_zaub_256 fily_thuv;
+    sob_wyly_kogy_zaub_256 mas_bagk_chugx;
+
+    // Each state write is guarded by a native CALLER == slot0 owner check.
+    haml_sob dath_fily_banz(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        fily_banz = jaj_trir;
+    }
+    haml_sob dath_bof_zuw_liwf(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        mas_bof_zuw_liwf = jaj_trir;
+    }
+    haml_sob dath_sob_maug(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        sob_maug = jaj_trir;
+    }
+    haml_sob dath_civq_dihr(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        sob_civq_dihr = jaj_trir;
+    }
+    haml_sob dath_xac_nhanf(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        sob_xac_nhanf = jaj_trir;
+    }
+    haml_sob dath_chatb_luzh(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        divq_chatb_luzh = jaj_trir;
+    }
+    haml_sob dath_fily_thuv(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        fily_thuv = jaj_trir;
+    }
+    haml_sob dath_bagk_chugx(sob_wyly_kogy_zaub_256 jaj_trir) cogy_kai chiz_chuz {
+        mas_bagk_chugx = jaj_trir;
+    }
+
+    // View calls read real storage. They cannot change chain state.
+    haml_sob docr_fily_banz() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved fily_banz;
+    }
+    haml_sob docr_bof_zuw_liwf() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved mas_bof_zuw_liwf;
+    }
+    haml_sob docr_sob_maug() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved sob_maug;
+    }
+    haml_sob docr_civq_dihr() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved sob_civq_dihr;
+    }
+    haml_sob docr_xac_nhanf() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved sob_xac_nhanf;
+    }
+    haml_sob docr_chatb_luzh() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved divq_chatb_luzh;
+    }
+    haml_sob docr_fily_thuv() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved fily_thuv;
+    }
+    haml_sob docr_bagk_chugx() cogy_kai chiz_docr traz_ved(sob_wyly_kogy_zaub_256) {
+        trov_ved mas_bagk_chugx;
+    }
+
+    // Six separate increment paths; each reverts on uint256 overflow.
+    haml_sob tago_fily_banz() cogy_kai chiz_chuz {
+        fily_banz = fily_banz + 1;
+    }
+    haml_sob tago_sob_maug() cogy_kai chiz_chuz {
+        sob_maug = sob_maug + 1;
+    }
+    haml_sob tago_civq_dihr() cogy_kai chiz_chuz {
+        sob_civq_dihr = sob_civq_dihr + 1;
+    }
+    haml_sob tago_xac_nhanf() cogy_kai chiz_chuz {
+        sob_xac_nhanf = sob_xac_nhanf + 1;
+    }
+    haml_sob tago_fily_thuv() cogy_kai chiz_chuz {
+        fily_thuv = fily_thuv + 1;
+    }
+    haml_sob tago_bagk_chugx() cogy_kai chiz_chuz {
+        mas_bagk_chugx = mas_bagk_chugx + 1;
+    }
+}
