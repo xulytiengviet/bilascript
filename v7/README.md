@@ -1,7 +1,8 @@
-# BilaScript v7 — BilaGuard v0.1
+# BilaScript v7 — BilaGuard v0.1 + BilaIR Core/Trit Lab
 
 Live entry: https://bila.js.org/v7/
 Security dashboard: https://bila.js.org/v7/bilaguard/
+BilaIR/Ternary laboratory: https://bila.js.org/v7/core/
 
 **BilaScript = CVNSS4.0 + Security-First EVM + Non-Financial Smart Contracts**
 
@@ -9,6 +10,36 @@ BilaGuard v0.1 is a fail-closed pre-deployment security layer for the **existing
 experimental BilaScript v6.0.1 native EVM compiler. It creates a new v7/
 directory and leaves the established v6 contract compiler, ERC-20 reference,
 and Sepolia verification flows untouched.
+
+## New: isolated JavaScript BilaIR and balanced ternary experimental port
+
+All additions are confined to v7/. The v5/ and v6/ files, their public APIs and
+existing deployed contracts remain unchanged.
+
+- core/ir.mjs: frontend adapter accepting the *existing* restricted CVNSS4.0
+  source grammar, lowering typed AST to compact ordered operation nodes (SSA-like
+  value references and explicit storage effects), with a fail-closed verifier.
+- core/ternary.mjs: balanced trits (Int8Array), Base27 symbol roundtrip
+  (a..z plus space; 3 trits/symbol), full Unicode text via UTF-8 bytes (6
+  trits/byte), and software uint256 +1 arithmetic using 163 balanced trits.
+- core/app.mjs / core/index.html: standalone Vietnamese browser lab,
+  IR/verification views, ternary gateway, differential IR interpreter.
+- test/core-ir.test.mjs: test vectors for fail-closed verification, UTF-8,
+  Base27 and 256-bit arithmetic.
+
+**Important:** This is not a ternary physical CPU, hardware prototype, proof
+of binary compression, nor a ternary EVM replacement. The EVM backend shown
+in the lab is the unmodified v6 reference compiler used from v7 for bytecode
+parity; the new IR verifier gates the v7 lab pipeline. This alone does not
+prove IR-to-EVM semantic correctness. No wallet/deployment is exposed in
+the new core lab. BilaGuard continues to enforce its own independent v7
+deployment gate. RUL inspires SSA/topological graph, metadata and pre-execution
+verification; no claim of direct binary-IR compatibility with RUL is made.
+
+Reproduce on Node 22+:
+
+    node --test v7/test/core-ir.test.mjs
+    node --test v7/test/bilaguard.test.mjs
 
 ## Modules and threat model
 
